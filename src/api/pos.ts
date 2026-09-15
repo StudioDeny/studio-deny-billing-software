@@ -96,10 +96,10 @@ export async function fetchProducts(): Promise<Product[]> {
     supabase.from('product_categories').select('*'),
     supabase.from('categories').select('*'),
   ]);
-  if (pErr) throw pErr;
-  if (vErr) throw vErr;
-  if (pcErr) throw pcErr;
-  if (catErr) throw catErr;
+  if (pErr) throw new Error(pErr.message);
+  if (vErr) throw new Error(vErr.message);
+  if (pcErr) throw new Error(pcErr.message);
+  if (catErr) throw new Error(catErr.message);
 
   const categoryNameById = new Map(((categories || []) as DbCategory[]).map((c) => [c.id, c.name]));
   const categoryNameBySlug = new Map<string, string>();
@@ -127,7 +127,7 @@ export async function updateProduct(
   Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
   const { error } = await supabase.from('products').update(payload).eq('slug', slug);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function fetchCategories(): Promise<{ id: string; name: string; slug: string; parentId: string | null }[]> {
@@ -136,7 +136,7 @@ export async function fetchCategories(): Promise<{ id: string; name: string; slu
     .select('*')
     .eq('is_active', true)
     .order('name', { ascending: true });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return ((data || []) as DbCategory[]).map((c) => ({ id: c.id, name: c.name, slug: c.slug, parentId: c.parent_id }));
 }
 
@@ -164,7 +164,7 @@ export async function createProduct(input: {
     })
     .select('*')
     .single();
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return mapProduct(data as DbProduct, [], undefined);
 }
 
@@ -187,7 +187,7 @@ function mapCustomer(c: DbPosCustomer): Customer {
 
 export async function fetchCustomers(): Promise<Customer[]> {
   const { data, error } = await supabase.from('pos_customers').select('*').order('created_at', { ascending: false });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return ((data || []) as DbPosCustomer[]).map(mapCustomer);
 }
 
@@ -209,7 +209,7 @@ export async function createCustomer(input: {
     })
     .select('*')
     .single();
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return mapCustomer(data as DbPosCustomer);
 }
 
@@ -227,7 +227,7 @@ export async function updateCustomer(
   Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
   const { error } = await supabase.from('pos_customers').update(payload).eq('id', id);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 function mapStaff(s: DbPosStaff): StaffMember {
@@ -243,7 +243,7 @@ function mapStaff(s: DbPosStaff): StaffMember {
 
 export async function fetchStaff(): Promise<StaffMember[]> {
   const { data, error } = await supabase.from('pos_staff').select('*').order('created_at', { ascending: true });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return ((data || []) as DbPosStaff[]).map(mapStaff);
 }
 
@@ -269,7 +269,7 @@ export async function createStaffAccount(input: {
     email: input.email,
     password: input.password,
   });
-  if (signUpError) throw signUpError;
+  if (signUpError) throw new Error(signUpError.message);
   if (!signUpData.user) throw new Error('Account creation did not return a user.');
 
   const newUserId = signUpData.user.id;
@@ -277,7 +277,7 @@ export async function createStaffAccount(input: {
   const { error: roleError } = await supabase
     .from('user_roles')
     .insert({ user_id: newUserId, role: input.dbRole });
-  if (roleError) throw roleError;
+  if (roleError) throw new Error(roleError.message);
 
   const { data: staffRow, error: staffError } = await supabase
     .from('pos_staff')
@@ -290,7 +290,7 @@ export async function createStaffAccount(input: {
     })
     .select('*')
     .single();
-  if (staffError) throw staffError;
+  if (staffError) throw new Error(staffError.message);
 
   return mapStaff(staffRow as DbPosStaff);
 }
@@ -307,7 +307,7 @@ export async function updateStaffPermissions(
   Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
   const { error } = await supabase.from('pos_staff').update(payload).eq('id', staffId);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 function mapBillToOrder(bill: DbPosBill, items: DbPosBillItem[], customer: DbPosCustomer | undefined): Order {
@@ -368,9 +368,9 @@ export async function fetchBills(): Promise<Order[]> {
       supabase.from('pos_bill_items').select('*'),
       supabase.from('pos_customers').select('*'),
     ]);
-  if (bErr) throw bErr;
-  if (iErr) throw iErr;
-  if (cErr) throw cErr;
+  if (bErr) throw new Error(bErr.message);
+  if (iErr) throw new Error(iErr.message);
+  if (cErr) throw new Error(cErr.message);
 
   const customerById = new Map(((customers || []) as DbPosCustomer[]).map((c) => [c.id, c]));
   return ((bills || []) as DbPosBill[]).map((b) =>
@@ -432,11 +432,11 @@ export async function checkout(input: {
     })),
     p_notes: input.notes,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 
   const bill = data as DbPosBill;
   const { data: items, error: iErr } = await supabase.from('pos_bill_items').select('*').eq('bill_id', bill.id);
-  if (iErr) throw iErr;
+  if (iErr) throw new Error(iErr.message);
 
   let customer: DbPosCustomer | undefined;
   if (bill.pos_customer_id) {
@@ -452,8 +452,8 @@ async function fetchOrderByBillId(billId: string): Promise<Order> {
     supabase.from('pos_bills').select('*').eq('id', billId).single(),
     supabase.from('pos_bill_items').select('*').eq('bill_id', billId),
   ]);
-  if (bErr) throw bErr;
-  if (iErr) throw iErr;
+  if (bErr) throw new Error(bErr.message);
+  if (iErr) throw new Error(iErr.message);
 
   let customer: DbPosCustomer | undefined;
   if (bill.pos_customer_id) {
@@ -470,7 +470,7 @@ export async function voidBill(billId: string, staffId: string | null, reason: s
     p_staff_id: staffId,
     p_reason: reason,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return fetchOrderByBillId(billId);
 }
 
@@ -503,7 +503,7 @@ export async function editBill(input: {
     p_notes: input.notes,
     p_editor_staff_id: input.editorStaffId,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return fetchOrderByBillId(input.billId);
 }
 
@@ -522,7 +522,7 @@ export async function adjustStock(
     p_staff_id: staffId,
     p_note: null,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function fetchInventoryLogs(): Promise<InventoryLog[]> {
@@ -531,7 +531,7 @@ export async function fetchInventoryLogs(): Promise<InventoryLog[]> {
     .select('*')
     .order('created_at', { ascending: false })
     .limit(500);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return ((data || []) as DbPosInventoryLog[]).map((l) => ({
     id: l.id,
     date: l.created_at.replace('T', ' ').substring(0, 19),
@@ -606,10 +606,10 @@ export async function saveSettings(updates: {
 
   if (existing) {
     const { error } = await supabase.from('pos_settings').update(payload).eq('id', existing.id);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
   } else {
     const { error } = await supabase.from('pos_settings').insert(payload);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
   }
 }
 
@@ -679,9 +679,9 @@ export async function fetchPaymentTransactions(): Promise<PaymentTransaction[]> 
       supabase.from('pos_bills').select('*'),
       supabase.from('pos_customers').select('*'),
     ]);
-  if (payErr) throw payErr;
-  if (billErr) throw billErr;
-  if (custErr) throw custErr;
+  if (payErr) throw new Error(payErr.message);
+  if (billErr) throw new Error(billErr.message);
+  if (custErr) throw new Error(custErr.message);
 
   const billById = new Map(((bills || []) as DbPosBill[]).map((b) => [b.id, b]));
   const customerById = new Map(((customers || []) as DbPosCustomer[]).map((c) => [c.id, c]));
@@ -728,10 +728,10 @@ export async function fetchReturns(): Promise<ReturnRequest[]> {
       supabase.from('pos_bill_items').select('*'),
       supabase.from('pos_customers').select('*'),
     ]);
-  if (retErr) throw retErr;
-  if (billErr) throw billErr;
-  if (itemErr) throw itemErr;
-  if (custErr) throw custErr;
+  if (retErr) throw new Error(retErr.message);
+  if (billErr) throw new Error(billErr.message);
+  if (itemErr) throw new Error(itemErr.message);
+  if (custErr) throw new Error(custErr.message);
 
   const billById = new Map(((bills || []) as DbPosBill[]).map((b) => [b.id, b]));
   const itemById = new Map(((items || []) as DbPosBillItem[]).map((i) => [i.id, i]));
@@ -766,7 +766,7 @@ export async function createReturn(input: {
     })
     .select('*')
     .single();
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 
   const [{ data: bill }, { data: item }] = await Promise.all([
     supabase.from('pos_bills').select('*').eq('id', input.billId).single(),
@@ -784,7 +784,7 @@ export async function createReturn(input: {
 
 export async function updateReturnStatusDb(returnId: string, status: ReturnStatus): Promise<void> {
   const { error } = await supabase.from('pos_returns').update({ status }).eq('id', returnId);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function recordTestPrint(): Promise<void> {
@@ -794,9 +794,9 @@ export async function recordTestPrint(): Promise<void> {
       .from('pos_settings')
       .update({ last_test_print: new Date().toISOString() })
       .eq('id', existing.id);
-    if (error) throw error;
+    if (error) throw new Error(error.message);
   } else {
     const { error } = await supabase.from('pos_settings').insert({ last_test_print: new Date().toISOString() });
-    if (error) throw error;
+    if (error) throw new Error(error.message);
   }
 }

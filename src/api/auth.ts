@@ -12,7 +12,7 @@ export async function getCurrentStaff(): Promise<DbPosStaff | null> {
     .eq('is_active', true)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return data as DbPosStaff | null;
 }
 
