@@ -12,19 +12,16 @@ import {
   ToastMessage,
   FulfillmentStatus,
   ReturnStatus,
-  PaymentMethod,
 } from '../types';
-import {
-  initialProducts,
-  initialCollections,
-  initialOrders,
-  initialCustomers,
-  initialReturns,
-  initialPayments,
-  initialInventoryLogs,
-  initialStaff,
-  initialCommerceSettings,
-} from '../data/mockData';
+import * as posApi from '../api/pos';
+import { getCurrentStaff } from '../api/auth';
+
+interface PaymentSplitLike {
+  method: string;
+  amount: number;
+  tendered?: number;
+  change?: number;
+}
 
 export interface CommerceState {
   products: Product[];
@@ -37,56 +34,81 @@ export interface CommerceState {
   staff: StaffMember[];
   settings: CommerceSettings;
   toasts: ToastMessage[];
+  ready: boolean;
 }
 
-const STORAGE_KEY = 'STUDIO_DENY_COMMERCE_OS_v1';
-
-function loadInitialState(): CommerceState {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Ensure orders have channel assigned
-      const migratedOrders = (parsed.orders || []).map((o: Order) => ({
-        ...o,
-        channel: o.channel || (o.notes?.toLowerCase().includes('in-store') || o.notes?.toLowerCase().includes('pos') || o.notes?.toLowerCase().includes('counter') ? 'OFFLINE' : 'ONLINE'),
-      }));
-      return {
-        ...parsed,
-        orders: migratedOrders.length > 0 ? migratedOrders : initialOrders,
-        toasts: [],
-      };
-    }
-  } catch (e) {
-    console.error('Error loading commerce state from localStorage:', e);
-  }
-
-  return {
-    products: initialProducts,
-    collections: initialCollections,
-    orders: initialOrders,
-    customers: initialCustomers,
-    returns: initialReturns,
-    payments: initialPayments,
-    inventoryLogs: initialInventoryLogs,
-    staff: initialStaff,
-    settings: initialCommerceSettings,
-    toasts: [],
-  };
-}
-
-let currentState: CommerceState = loadInitialState();
+let currentState: CommerceState = {
+  products: [],
+  collections: [],
+  orders: [],
+  customers: [],
+  returns: [],
+  payments: [],
+  inventoryLogs: [],
+  staff: [],
+  settings: {
+    storeName: 'STUDIO DENY',
+    brand: 'STUDIO DENY',
+    tagline: '',
+    address: '',
+    cityState: '',
+    country: 'India',
+    phone: '',
+    email: '',
+    website: 'studiodeny.com',
+    gstin: '',
+    pan: '',
+    invoicePrefix: 'SD',
+    startingInvoiceNumber: 1000250,
+    currency: 'INR',
+    taxRate: 0,
+    shippingFlatRate: 0,
+    freeShippingThreshold: 0,
+    printer: { name: 'Thermal POS-80', status: 'OFFLINE', connection: 'USB' },
+  },
+  toasts: [],
+  ready: false,
+};
 const listeners = new Set<(state: CommerceState) => void>();
 
 function saveState(state: CommerceState) {
   currentState = state;
-  try {
-    const { toasts: _, ...persistable } = state;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(persistable));
-  } catch (e) {
-    console.error('Error saving commerce state:', e);
-  }
   listeners.forEach((listener) => listener(currentState));
+}
+
+let currentStaffId: string | null = null;
+
+export async function initStore(): Promise<void> {
+  const [products, customers, staff, settings] = await Promise.all([
+    posApi.fetchProducts(),
+    posApi.fetchCustomers(),
+    posApi.fetchStaff(),
+    posApi.fetchSettings(),
+  ]);
+  const [orders, inventoryLogs, payments, returns] = await Promise.all([
+    posApi.fetchBills(),
+    posApi.fetchInventoryLogs(),
+    posApi.fetchPaymentTransactions(),
+    posApi.fetchReturns(),
+  ]);
+  const collections = posApi.deriveCollections(products, orders);
+
+  const staffRecord = await getCurrentStaff();
+  currentStaffId = staffRecord?.id || null;
+
+  saveState({
+    ...currentState,
+    products,
+    customers,
+    staff,
+    settings,
+    orders,
+    inventoryLogs,
+    payments,
+    returns,
+    collections,
+    ready: true,
+  });
 }
 
 export const store = {
@@ -120,129 +142,70 @@ export const store = {
     });
   },
 
-  resetToDefaults: () => {
-    const resetState: CommerceState = {
-      products: initialProducts,
-      collections: initialCollections,
-      orders: initialOrders,
-      customers: initialCustomers,
-      returns: initialReturns,
-      payments: initialPayments,
-      inventoryLogs: initialInventoryLogs,
-      staff: initialStaff,
-      settings: initialCommerceSettings,
-      toasts: [],
-    };
-    saveState(resetState);
-    store.addToast('System Reset', 'All commerce records restored to default Studio Deny catalog.', 'info');
-  },
-
   // ORDERS & COMMERCE ENGINE
-  createOrder: (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'timeline'>): Order => {
-    const nextNum = currentState.orders.length + 1000249;
-    const orderNumber = `SD-${nextNum}`;
-    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
-
-    const newOrder: Order = {
-      ...orderData,
-      id: `ord-${nextNum}`,
-      orderNumber,
-      createdAt: now,
-      timeline: [
-        { status: 'ORDER PLACED', time: now, note: 'Order registered in Deny OS' },
-        { status: 'PAYMENT CONFIRMED', time: now, note: `Tendered via ${orderData.paymentMethod}` },
-      ],
-    };
-
-    // Decrement stock for each item & create inventory logs
-    const newLogs: InventoryLog[] = [];
-    const updatedProducts = currentState.products.map((prod) => {
-      const orderItemsForProd = orderData.items.filter((item) => item.productId === prod.id);
-      if (orderItemsForProd.length === 0) return prod;
-
-      let productTotalChange = 0;
-      const updatedVariants = prod.variants.map((v) => {
-        const item = orderItemsForProd.find((oi) => oi.variantId === v.id);
-        if (!item) return v;
-
-        const newStock = Math.max(0, v.stock - item.quantity);
-        productTotalChange += item.quantity;
-
-        newLogs.push({
-          id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
-          date: now,
-          productId: prod.id,
-          productName: prod.name,
-          variantSku: v.sku,
-          changeQty: -item.quantity,
-          newStock,
-          reason: 'SALE',
-          user: 'Deny OS Commerce Engine',
-        });
-
-        return { ...v, stock: newStock };
-      });
-
+  createOrder: async (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'timeline'>): Promise<Order> => {
+    const items = orderData.items.map((item) => {
+      const product = currentState.products.find((p) => p.id === item.productId);
+      const hasRealVariant = !!product?.variants.find((v) => v.id === item.variantId && v.id !== product.id);
       return {
-        ...prod,
-        variants: updatedVariants,
-        totalStock: Math.max(0, prod.totalStock - productTotalChange),
+        variantId: hasRealVariant ? item.variantId : null,
+        productSlug: item.productId,
+        productName: item.name,
+        size: item.size || null,
+        color: item.color || null,
+        qty: item.quantity,
+        unitPrice: item.unitPrice,
+        itemDiscount: item.itemDiscount || 0,
       };
     });
 
-    // Create payment transaction(s)
-    const newPayments: PaymentTransaction[] = (newOrder.paymentSplits && newOrder.paymentSplits.length > 0)
-      ? newOrder.paymentSplits.map((split, idx) => ({
-          id: `pay-${Date.now()}-${idx}`,
-          transactionRef: `TXN-${orderNumber.replace('SD-', '')}-${split.method}`,
-          orderId: newOrder.id,
-          orderNumber: newOrder.orderNumber,
-          customerName: newOrder.customerName,
-          amount: split.amount,
-          method: split.method as PaymentMethod,
-          status: 'SUCCESS',
-          date: now,
-        }))
-      : [
-          {
-            id: `pay-${Date.now()}`,
-            transactionRef: `TXN-${orderNumber.replace('SD-', '')}`,
-            orderId: newOrder.id,
-            orderNumber: newOrder.orderNumber,
-            customerName: newOrder.customerName,
-            amount: newOrder.grandTotal,
-            method: newOrder.paymentMethod,
-            status: 'SUCCESS',
-            date: now,
-          },
-        ];
+    const rawPayments: PaymentSplitLike[] =
+      orderData.paymentSplits && orderData.paymentSplits.length > 0
+        ? orderData.paymentSplits
+        : [
+            {
+              method: orderData.paymentMethod,
+              amount: orderData.grandTotal,
+              tendered: orderData.tenderedAmount,
+              change: orderData.changeAmount,
+            },
+          ];
 
-    // Update customer spend & order count if matching
-    const updatedCustomers = currentState.customers.map((c) => {
-      if (c.id === orderData.customerId || c.email.toLowerCase() === orderData.customerEmail.toLowerCase()) {
-        const totalSpend = c.totalSpend + newOrder.grandTotal;
-        const ordersCount = c.ordersCount + 1;
-        const averageOrderValue = Math.round(totalSpend / ordersCount);
-        return {
-          ...c,
-          totalSpend,
-          ordersCount,
-          averageOrderValue,
-          lastOrderNumber: newOrder.orderNumber,
-          lastOrderDate: now.substring(0, 10),
-          segment: totalSpend > 40000 ? ('VIP' as const) : ('ACTIVE' as const),
-        };
-      }
-      return c;
+    const payments = rawPayments.map((p) => ({
+      method: (p.method === 'COD' || p.method === 'BANK' || p.method === 'SPLIT' ? 'OTHER' : p.method) as
+        | 'CASH'
+        | 'UPI'
+        | 'CARD'
+        | 'OTHER',
+      amount: p.amount,
+      tendered: p.tendered ?? null,
+      changeAmount: p.change ?? null,
+    }));
+
+    const newOrder = await posApi.checkout({
+      items,
+      customerId: orderData.customerId === 'guest' ? null : orderData.customerId,
+      staffId: currentStaffId,
+      discount: orderData.discount,
+      discountReason: orderData.discountReason || null,
+      taxAmount: orderData.taxAmount,
+      shippingFee: orderData.shippingFee,
+      payments,
+      notes: orderData.notes || null,
     });
+
+    const [products, customers, inventoryLogs] = await Promise.all([
+      posApi.fetchProducts(),
+      posApi.fetchCustomers(),
+      posApi.fetchInventoryLogs(),
+    ]);
 
     saveState({
       ...currentState,
       orders: [newOrder, ...currentState.orders],
-      products: updatedProducts,
-      inventoryLogs: [...newLogs, ...currentState.inventoryLogs],
-      payments: [...newPayments, ...currentState.payments],
-      customers: updatedCustomers,
+      products,
+      customers,
+      inventoryLogs,
     });
 
     store.addToast('Bill Settled', `Invoice ${newOrder.orderNumber} settled for ₹${newOrder.grandTotal.toLocaleString('en-IN')}.`, 'success');
@@ -287,7 +250,7 @@ export const store = {
   },
 
   // INVENTORY
-  adjustStock: (
+  adjustStock: async (
     productId: string,
     variantId: string,
     changeQty: number,
@@ -297,57 +260,35 @@ export const store = {
     if (!product) return;
 
     const variant = product.variants.find((v) => v.id === variantId);
-    if (!variant) return;
+    const isRealVariant = !!variant && variant.id !== product.id;
 
-    const newStock = Math.max(0, variant.stock + changeQty);
-    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    await posApi.adjustStock(isRealVariant ? variantId : null, productId, changeQty, reason, currentStaffId);
 
-    const newLog: InventoryLog = {
-      id: `log-${Date.now()}`,
-      date: now,
-      productId: product.id,
-      productName: product.name,
-      variantSku: variant.sku,
-      changeQty,
-      newStock,
-      reason,
-      user: 'Studio Inventory Staff',
-    };
-
-    const updatedProducts = currentState.products.map((p) => {
-      if (p.id === productId) {
-        const variants = p.variants.map((v) => (v.id === variantId ? { ...v, stock: newStock } : v));
-        const totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
-        return { ...p, variants, totalStock };
-      }
-      return p;
-    });
-
-    saveState({
-      ...currentState,
-      products: updatedProducts,
-      inventoryLogs: [newLog, ...currentState.inventoryLogs],
-    });
-
-    store.addToast('Stock Adjusted', `${variant.sku}: ${newStock} units available.`, 'info');
+    const [products, inventoryLogs] = await Promise.all([posApi.fetchProducts(), posApi.fetchInventoryLogs()]);
+    saveState({ ...currentState, products, inventoryLogs });
+    store.addToast('Stock Adjusted', `${variant?.sku || productId}: updated.`, 'info');
   },
 
   // PRODUCTS
-  addProduct: (productData: Omit<Product, 'id' | 'totalStock'>): Product => {
-    const id = `prod-${Date.now()}`;
-    const totalStock = productData.variants.reduce((sum, v) => sum + v.stock, 0);
+  addProduct: async (productData: Omit<Product, 'id' | 'totalStock'>): Promise<Product> => {
+    const slug = productData.sku
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
 
-    const newProduct: Product = {
-      ...productData,
-      id,
-      totalStock,
-    };
-
-    saveState({
-      ...currentState,
-      products: [newProduct, ...currentState.products],
+    const newProduct = await posApi.createProduct({
+      slug,
+      name: productData.name,
+      category: productData.category,
+      price: productData.price,
+      image: productData.image,
+      description: productData.description,
+      sizes: productData.sizes,
+      stock: productData.variants.reduce((sum, v) => sum + v.stock, 0),
     });
 
+    const products = await posApi.fetchProducts();
+    saveState({ ...currentState, products });
     store.addToast('Product Created', `${newProduct.name} (${newProduct.sku}) added to catalog.`, 'success');
     return newProduct;
   },
@@ -362,54 +303,32 @@ export const store = {
   },
 
   // CUSTOMERS
-  addCustomer: (cust: Omit<Customer, 'id' | 'ordersCount' | 'totalSpend' | 'averageOrderValue' | 'createdAt'>): Customer => {
-    const newCustomer: Customer = {
-      ...cust,
-      id: `cust-${Date.now()}`,
-      ordersCount: 0,
-      totalSpend: 0,
-      averageOrderValue: 0,
-      createdAt: new Date().toISOString().substring(0, 10),
-    };
-
-    saveState({
-      ...currentState,
-      customers: [newCustomer, ...currentState.customers],
+  addCustomer: async (
+    cust: Omit<Customer, 'id' | 'ordersCount' | 'totalSpend' | 'averageOrderValue' | 'createdAt'>
+  ): Promise<Customer> => {
+    const newCustomer = await posApi.createCustomer({
+      name: cust.name,
+      phone: cust.phone,
+      email: cust.email,
+      address: cust.address,
+      city: cust.city,
     });
 
+    const customers = await posApi.fetchCustomers();
+    saveState({ ...currentState, customers });
     store.addToast('Customer Created', `${newCustomer.name} added to CRM.`, 'success');
     return newCustomer;
   },
 
   // RETURNS
-  updateReturnStatus: (returnId: string, status: ReturnStatus) => {
+  updateReturnStatus: async (returnId: string, status: ReturnStatus) => {
     const ret = currentState.returns.find((r) => r.id === returnId);
     if (!ret) return;
 
-    const updatedReturns = currentState.returns.map((r) => (r.id === returnId ? { ...r, status } : r));
+    await posApi.updateReturnStatusDb(returnId, status);
 
-    // If marked REFUNDED, log refund payment transaction
-    let updatedPayments = currentState.payments;
-    if (status === 'REFUNDED') {
-      const refundPayment: PaymentTransaction = {
-        id: `ref-${Date.now()}`,
-        transactionRef: `RFND-${ret.returnNumber}`,
-        orderId: ret.orderId,
-        orderNumber: ret.orderNumber,
-        customerName: ret.customerName,
-        amount: ret.refundAmount,
-        method: 'UPI',
-        status: 'REFUNDED',
-        date: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      };
-      updatedPayments = [refundPayment, ...currentState.payments];
-    }
-
-    saveState({
-      ...currentState,
-      returns: updatedReturns,
-      payments: updatedPayments,
-    });
+    const [returns, payments] = await Promise.all([posApi.fetchReturns(), posApi.fetchPaymentTransactions()]);
+    saveState({ ...currentState, returns, payments });
 
     store.addToast('Return Updated', `${ret.returnNumber} marked as [${status}].`, 'info');
   },
@@ -434,30 +353,33 @@ export const store = {
   },
 
   // SETTINGS
-  updateSettings: (updates: Partial<CommerceSettings>) => {
+  updateSettings: async (updates: Partial<CommerceSettings>) => {
+    await posApi.saveSettings({
+      taxRate: updates.taxRate,
+      shippingFlatRate: updates.shippingFlatRate,
+      freeShippingThreshold: updates.freeShippingThreshold,
+      currency: updates.currency,
+      invoicePrefix: updates.invoicePrefix,
+      printerName: updates.printer?.name,
+      printerConnection: updates.printer?.connection,
+    });
+    const settings = await posApi.fetchSettings();
     saveState({
       ...currentState,
-      settings: {
-        ...currentState.settings,
-        ...updates,
-      },
+      settings,
     });
     store.addToast('Settings Saved', 'Commerce operating system configuration updated.', 'success');
   },
 
-  testPrint: () => {
-    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    saveState({
-      ...currentState,
-      settings: {
-        ...currentState.settings,
-        printer: {
-          ...currentState.settings.printer,
-          status: 'ONLINE',
-          lastTestPrint: now,
-        },
-      },
-    });
+  reloadFromDatabase: async () => {
+    await initStore();
+    store.addToast('Data Reloaded', 'Catalog, orders, customers, and inventory refreshed from the live database.', 'info');
+  },
+
+  testPrint: async () => {
+    await posApi.recordTestPrint();
+    const settings = await posApi.fetchSettings();
+    saveState({ ...currentState, settings });
     store.addToast('Printer Test Successful', 'Receipt printed on Thermal POS-80 & Brother Laser.', 'success');
   },
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore, store } from '../../services/store';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -33,14 +33,30 @@ export const SettingsPage: React.FC = () => {
   const [pan, setPan] = useState(settings.pan);
 
   // Billing Configuration Form
-  const [invoicePrefix, setInvoicePrefix] = useState(settings.invoicePrefix || 'SD-INV-');
-  const [taxRate, setTaxRate] = useState(String(settings.taxRate || 12));
+  const [invoicePrefix, setInvoicePrefix] = useState(settings.invoicePrefix || 'SD');
+  const [taxRate, setTaxRate] = useState(String(settings.taxRate ?? 0));
   const [defaultDiscount, setDefaultDiscount] = useState('0');
 
   // Printer Configuration Form
-  const [printerName, setPrinterName] = useState(settings.printer?.name || 'POS-80 Thermal Register');
+  const [printerName, setPrinterName] = useState(settings.printer?.name || '');
   const [paperWidth, setPaperWidth] = useState<'80MM' | '58MM'>('80MM');
   const [autoPrint, setAutoPrint] = useState(true);
+
+  // These forms mount before the live Supabase settings finish loading (settings
+  // starts as an empty placeholder), so re-sync every field once the real row arrives.
+  useEffect(() => {
+    setBrand(settings.brand);
+    setTagline(settings.tagline);
+    setAddress(settings.address);
+    setCityState(settings.cityState);
+    setEmail(settings.email);
+    setPhone(settings.phone);
+    setGstin(settings.gstin);
+    setPan(settings.pan);
+    setInvoicePrefix(settings.invoicePrefix || 'SD');
+    setTaxRate(String(settings.taxRate ?? 0));
+    setPrinterName(settings.printer?.name || '');
+  }, [settings]);
 
   // Staff Modal
   const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
@@ -48,9 +64,9 @@ export const SettingsPage: React.FC = () => {
   const [newStaffEmail, setNewStaffEmail] = useState('');
   const [newStaffRole, setNewStaffRole] = useState<StaffRole>('BILLING');
 
-  const handleSaveAll = (e: React.FormEvent) => {
+  const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
-    store.updateSettings({
+    await store.updateSettings({
       brand,
       tagline,
       address,
@@ -60,7 +76,7 @@ export const SettingsPage: React.FC = () => {
       gstin,
       pan,
       invoicePrefix,
-      taxRate: Number(taxRate) || 12,
+      taxRate: Number.isFinite(Number(taxRate)) ? Number(taxRate) : 0,
       printer: {
         ...settings.printer,
         name: printerName,
@@ -68,13 +84,13 @@ export const SettingsPage: React.FC = () => {
     });
   };
 
-  const handleTestPrint = () => {
-    store.testPrint();
+  const handleTestPrint = async () => {
+    await store.testPrint();
   };
 
   const handleResetData = () => {
-    if (window.confirm('Reset all streetwear catalog, orders, and inventory to default Studio Deny state?')) {
-      store.resetToDefaults();
+    if (window.confirm('Reload catalog, orders, customers, and inventory from the live database? Any unsaved local changes will be discarded.')) {
+      store.reloadFromDatabase();
     }
   };
 
@@ -133,7 +149,7 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <Button variant="secondary" onClick={handleResetData}>
-          <RotateCcw size={14} className="mr-2" /> RESET DEMO DATA
+          <RotateCcw size={14} className="mr-2" /> RELOAD FROM DATABASE
         </Button>
       </div>
 

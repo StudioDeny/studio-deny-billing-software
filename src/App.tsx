@@ -4,6 +4,7 @@ import { AppLayout } from './components/layout/AppLayout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { supabase } from './lib/supabaseClient';
+import { initStore } from './services/store';
 
 // POS BILLING
 import { PosBillingPage } from './pages/billing/PosBillingPage';
@@ -43,6 +44,12 @@ const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (status === 'authed') {
+      initStore();
+    }
+  }, [status]);
 
   if (status === 'checking') return null;
   if (status === 'anon') return <Navigate to="/login" replace />;

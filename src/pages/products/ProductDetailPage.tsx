@@ -68,7 +68,7 @@ export const ProductDetailPage: React.FC = () => {
     setIsEditing(false);
   };
 
-  const handleAdjustSubmit = (e: React.FormEvent) => {
+  const handleAdjustSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!adjustingVariantId) return;
 
@@ -76,7 +76,7 @@ export const ProductDetailPage: React.FC = () => {
     if (qty === 0) return;
 
     const finalQty = adjustReason === 'DAMAGED' ? -Math.abs(qty) : qty;
-    store.adjustStock(product.id, adjustingVariantId, finalQty, adjustReason);
+    await store.adjustStock(product.id, adjustingVariantId, finalQty, adjustReason);
     setAdjustingVariantId(null);
     setAdjustQty('10');
   };
@@ -352,14 +352,14 @@ export const ProductDetailPage: React.FC = () => {
                           <button
                             title="Decrement 1 unit"
                             disabled={v.stock <= 0}
-                            onClick={() => store.adjustStock(product.id, v.id, -1, 'ADJUSTMENT')}
+                            onClick={() => { void store.adjustStock(product.id, v.id, -1, 'ADJUSTMENT'); }}
                             className="w-7 h-7 border border-[#CFCFD2] hover:bg-[#F1F1F3] disabled:opacity-30 flex items-center justify-center text-[#0A0A0A] transition-colors"
                           >
                             <Minus size={12} />
                           </button>
                           <button
                             title="Increment 1 unit"
-                            onClick={() => store.adjustStock(product.id, v.id, 1, 'RESTOCK')}
+                            onClick={() => { void store.adjustStock(product.id, v.id, 1, 'RESTOCK'); }}
                             className="w-7 h-7 border border-[#CFCFD2] hover:bg-[#F1F1F3] flex items-center justify-center text-[#0A0A0A] transition-colors"
                           >
                             <Plus size={12} />

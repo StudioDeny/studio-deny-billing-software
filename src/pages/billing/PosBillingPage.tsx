@@ -147,7 +147,7 @@ export const PosBillingPage: React.FC = () => {
 
   const totalDiscountAmount = itemDiscountsTotal + billDiscountAmount;
   const taxableAmount = Math.max(0, grossSubtotal - totalDiscountAmount);
-  const taxRate = settings.taxRate || 12;
+  const taxRate = settings.taxRate ?? 0;
   const taxAmount = Math.round((taxableAmount * taxRate) / 100);
   const grandTotal = taxableAmount + taxAmount;
   const totalItemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
@@ -290,14 +290,14 @@ export const PosBillingPage: React.FC = () => {
   };
 
   // Quick Customer Creation
-  const handleQuickAddCustomer = (e: React.FormEvent) => {
+  const handleQuickAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCustName.trim() || !newCustPhone.trim()) {
       store.addToast('Validation', 'Customer Name and Phone are required.', 'error');
       return;
     }
 
-    const created = store.addCustomer({
+    const created = await store.addCustomer({
       name: newCustName.trim(),
       email: `${newCustName.toLowerCase().replace(/\s+/g, '')}@patron.studiodeny.com`,
       phone: newCustPhone.trim(),
@@ -387,61 +387,70 @@ export const PosBillingPage: React.FC = () => {
         ? 'SPLIT'
         : (paymentSplits[0]?.method as any) || 'UPI';
 
-    setTimeout(() => {
-      // 1. TRANSACTION SAVED BEFORE ATTEMPTING PRINT (Critical Requirement)
-      const savedBill = store.createOrder({
-        customerId: isGuest ? 'guest' : selectedCustomerId,
-        customerName,
-        customerEmail,
-        customerPhone,
-        channel: 'OFFLINE',
-        shippingAddress: {
-          street: 'Studio Deny Flagship Store POS Register #01',
-          city: customerCity,
-          state: 'Maharashtra',
-          pincode: '400050',
-          country: 'India',
-        },
-        items: orderItems,
-        subtotal: grossSubtotal,
-        discount: totalDiscountAmount,
-        discountType,
-        discountPercent:
-          discountType === 'PERCENT'
-            ? discountValue
-            : grossSubtotal > 0
-            ? Math.round((totalDiscountAmount / grossSubtotal) * 100)
-            : 0,
-        discountReason: effectiveDiscountReason,
-        shippingFee: 0,
-        taxAmount,
-        grandTotal,
-        paymentStatus: 'PAID',
-        fulfillmentStatus: 'DELIVERED', // Handed over in-store
-        paymentMethod: primaryMethod,
-        paymentSplits,
-        tenderedAmount: numCashTendered > 0 ? numCashTendered : grandTotal,
-        changeAmount: changeToReturn,
-        notes: `In-store POS bill. Channel: OFFLINE. ${
-          effectiveDiscountReason ? `Discount: [${effectiveDiscountReason}]. ` : ''
-        }Tender: ${paymentSplits.map((s) => `${s.method}: ₹${s.amount}`).join(', ')}`,
-      });
+    setTimeout(async () => {
+      try {
+        // 1. TRANSACTION SAVED BEFORE ATTEMPTING PRINT (Critical Requirement)
+        const savedBill = await store.createOrder({
+          customerId: isGuest ? 'guest' : selectedCustomerId,
+          customerName,
+          customerEmail,
+          customerPhone,
+          channel: 'OFFLINE',
+          shippingAddress: {
+            street: 'Studio Deny Flagship Store POS Register #01',
+            city: customerCity,
+            state: 'Maharashtra',
+            pincode: '400050',
+            country: 'India',
+          },
+          items: orderItems,
+          subtotal: grossSubtotal,
+          discount: totalDiscountAmount,
+          discountType,
+          discountPercent:
+            discountType === 'PERCENT'
+              ? discountValue
+              : grossSubtotal > 0
+              ? Math.round((totalDiscountAmount / grossSubtotal) * 100)
+              : 0,
+          discountReason: effectiveDiscountReason,
+          shippingFee: 0,
+          taxAmount,
+          grandTotal,
+          paymentStatus: 'PAID',
+          fulfillmentStatus: 'DELIVERED', // Handed over in-store
+          paymentMethod: primaryMethod,
+          paymentSplits,
+          tenderedAmount: numCashTendered > 0 ? numCashTendered : grandTotal,
+          changeAmount: changeToReturn,
+          notes: `In-store POS bill. Channel: OFFLINE. ${
+            effectiveDiscountReason ? `Discount: [${effectiveDiscountReason}]. ` : ''
+          }Tender: ${paymentSplits.map((s) => `${s.method}: ₹${s.amount}`).join(', ')}`,
+        });
 
-      setIsProcessingPayment(false);
-      setReceiptOrder(savedBill);
+        setIsProcessingPayment(false);
+        setReceiptOrder(savedBill);
 
-      // Clear register state for next transaction
-      setCart([]);
-      setDiscountValue(0);
-      setDiscountReason('NONE');
-      setCustomDiscountReason('');
-      setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
-      setCashTendered('');
-      setMobileCartOpen(false);
+        // Clear register state for next transaction
+        setCart([]);
+        setDiscountValue(0);
+        setDiscountReason('NONE');
+        setCustomDiscountReason('');
+        setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
+        setCashTendered('');
+        setMobileCartOpen(false);
 
-      // 2. TRIGGER PRINT IF REQUESTED
-      if (shouldPrint) {
-        triggerThermalPrint(savedBill);
+        // 2. TRIGGER PRINT IF REQUESTED
+        if (shouldPrint) {
+          triggerThermalPrint(savedBill);
+        }
+      } catch (err) {
+        setIsProcessingPayment(false);
+        store.addToast(
+          'Checkout Failed',
+          err instanceof Error ? err.message : 'Could not save this bill. Stock or connection issue — nothing was charged.',
+          'error'
+        );
       }
     }, 450);
   };
@@ -1416,7 +1425,7 @@ export const PosBillingPage: React.FC = () => {
                   </div>
                 )}
                 <div className="flex justify-between text-[#666666]">
-                  <span>GST ({settings.taxRate || 12}%):</span>
+                  <span>GST ({settings.taxRate ?? 0}%):</span>
                   <span>{formatINR(receiptOrder.taxAmount)}</span>
                 </div>
                 <div className="flex justify-between font-black text-base border-t border-[#0A0A0A] pt-1 text-[#0A0A0A]">

@@ -49,14 +49,14 @@ export const ProductsPage: React.FC = () => {
     return matchesSearch && matchesColl;
   });
 
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !sku) return;
 
     const numPrice = Number(price) || 2490;
     const numStock = Number(stock) || 20;
 
-    const newProd = store.addProduct({
+    const newProd = await store.addProduct({
       name,
       sku: sku.toUpperCase(),
       collection,

@@ -71,11 +71,11 @@ export const CustomersPage: React.FC = () => {
     return matchesSearch && matchesTab;
   });
 
-  const handleCreateCustomer = (e: React.FormEvent) => {
+  const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email) return;
 
-    const newCust = store.addCustomer({
+    const newCust = await store.addCustomer({
       name,
       email,
       phone: phone || '+91 98000 00000',

@@ -157,12 +157,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <button
-            onClick={() => store.resetToDefaults()}
-            title="Reset to default Studio Deny catalog"
+            onClick={() => store.reloadFromDatabase()}
+            title="Reload live catalog, orders, and inventory from the database"
             className="p-1 text-[#888888] hover:text-[#0A0A0A] flex items-center gap-1"
           >
             <RotateCcw size={12} />
-            <span className="text-[10px]">RESET</span>
+            <span className="text-[10px]">SYNC</span>
           </button>
         </div>
       </aside>
