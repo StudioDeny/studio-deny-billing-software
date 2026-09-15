@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { store } from '../services/store';
 import { signIn } from '../api/auth';
-import { Lock, ArrowRight } from 'lucide-react';
+import { Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -71,6 +71,7 @@ export const Login: React.FC = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
             required
           />
 
@@ -79,6 +80,7 @@ export const Login: React.FC = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
             required
           />
 
@@ -88,9 +90,9 @@ export const Login: React.FC = () => {
               variant="primary"
               size="lg"
               fullWidth
-              icon={<ArrowRight size={16} />}
-              iconPosition="right"
               disabled={loading}
+              icon={loading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+              iconPosition="right"
             >
               {loading ? '[ SIGNING IN... ]' : '[ ENTER WORKSPACE ]'}
             </Button>
