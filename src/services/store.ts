@@ -340,12 +340,14 @@ export const store = {
     return newProduct;
   },
 
-  updateProduct: (id: string, updates: Partial<Product>) => {
-    const updatedProducts = currentState.products.map((p) => (p.id === id ? { ...p, ...updates } : p));
-    saveState({
-      ...currentState,
-      products: updatedProducts,
+  updateProduct: async (id: string, updates: Partial<Product>) => {
+    await posApi.updateProduct(id, {
+      name: updates.name,
+      price: updates.price,
+      description: updates.description,
     });
+    const products = await posApi.fetchProducts();
+    saveState({ ...currentState, products });
     store.addToast('Product Saved', 'Catalog changes updated.', 'info');
   },
 

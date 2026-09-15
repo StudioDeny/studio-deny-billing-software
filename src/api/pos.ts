@@ -115,6 +115,21 @@ export async function fetchProducts(): Promise<Product[]> {
   );
 }
 
+export async function updateProduct(
+  slug: string,
+  updates: { name?: string; price?: number; description?: string }
+): Promise<void> {
+  const payload: Record<string, unknown> = {
+    name: updates.name,
+    price: updates.price,
+    description: updates.description,
+  };
+  Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
+  const { error } = await supabase.from('products').update(payload).eq('slug', slug);
+  if (error) throw error;
+}
+
 export async function fetchCategories(): Promise<{ id: string; name: string; slug: string; parentId: string | null }[]> {
   const { data, error } = await supabase
     .from('categories')

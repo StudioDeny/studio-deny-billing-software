@@ -58,9 +58,9 @@ export const ProductDetailPage: React.FC = () => {
   const activeVariant = product.variants.find((v) => v.id === adjustingVariantId);
   const productLogs = inventoryLogs.filter((l) => l.productId === product.id);
 
-  const handleSaveProduct = (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    store.updateProduct(product.id, {
+    await store.updateProduct(product.id, {
       name,
       price: Number(price) || product.price,
       description,
