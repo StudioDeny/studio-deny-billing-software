@@ -41,6 +41,7 @@ export interface DbPosStaff {
   display_name: string;
   role: 'OWNER' | 'MANAGER' | 'BILLING' | 'FULFILLMENT';
   is_active: boolean;
+  permissions: string[];
   created_at: string;
 }
 

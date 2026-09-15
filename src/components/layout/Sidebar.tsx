@@ -13,7 +13,8 @@ import {
   Tag,
   FileCheck,
 } from 'lucide-react';
-import { store } from '../../services/store';
+import { store, useStore } from '../../services/store';
+import { PermissionKey } from '../../constants/permissions';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -28,18 +29,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSearch,
 }) => {
   const location = useLocation();
+  const { currentStaff } = useStore();
 
   // Core navigation items including Price Tag Generator & Channel Audit
-  const navItems = [
-    { label: 'DASHBOARD', path: '/dashboard', icon: <LayoutDashboard size={16} /> },
-    { label: 'NEW BILL', path: '/billing/new', icon: <PlusCircle size={16} />, highlight: true },
-    { label: 'BILLS', path: '/bills', icon: <Receipt size={16} /> },
-    { label: 'PRICE TAGS', path: '/tags', icon: <Tag size={16} /> },
-    { label: 'SALES AUDIT', path: '/audit', icon: <FileCheck size={16} /> },
-    { label: 'PRODUCTS', path: '/products', icon: <Shirt size={16} /> },
-    { label: 'CUSTOMERS', path: '/customers', icon: <Users size={16} /> },
-    { label: 'SETTINGS', path: '/settings', icon: <Settings size={16} /> },
+  const allNavItems: Array<{ label: string; path: string; icon: React.ReactNode; highlight?: boolean; permission: PermissionKey }> = [
+    { label: 'DASHBOARD', path: '/dashboard', icon: <LayoutDashboard size={16} />, permission: 'DASHBOARD' },
+    { label: 'NEW BILL', path: '/billing/new', icon: <PlusCircle size={16} />, highlight: true, permission: 'BILLING' },
+    { label: 'BILLS', path: '/bills', icon: <Receipt size={16} />, permission: 'BILLS' },
+    { label: 'PRICE TAGS', path: '/tags', icon: <Tag size={16} />, permission: 'TAGS' },
+    { label: 'SALES AUDIT', path: '/audit', icon: <FileCheck size={16} />, permission: 'AUDIT' },
+    { label: 'PRODUCTS', path: '/products', icon: <Shirt size={16} />, permission: 'PRODUCTS' },
+    { label: 'CUSTOMERS', path: '/customers', icon: <Users size={16} />, permission: 'CUSTOMERS' },
+    { label: 'SETTINGS', path: '/settings', icon: <Settings size={16} />, permission: 'SETTINGS' },
   ];
+
+  // Nothing loaded yet (still fetching currentStaff) -> show everything rather
+  // than flashing an empty sidebar; once currentStaff arrives, filter for real.
+  const navItems = currentStaff
+    ? allNavItems.filter((item) => currentStaff.permissions.includes(item.permission))
+    : allNavItems;
 
   return (
     <>

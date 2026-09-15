@@ -15,6 +15,7 @@ import {
 } from '../types';
 import * as posApi from '../api/pos';
 import { getCurrentStaff } from '../api/auth';
+import { dbRoleForStaffRole } from '../constants/permissions';
 
 interface PaymentSplitLike {
   method: string;
@@ -32,6 +33,7 @@ export interface CommerceState {
   payments: PaymentTransaction[];
   inventoryLogs: InventoryLog[];
   staff: StaffMember[];
+  currentStaff: StaffMember | null;
   settings: CommerceSettings;
   toasts: ToastMessage[];
   ready: boolean;
@@ -46,6 +48,7 @@ let currentState: CommerceState = {
   payments: [],
   inventoryLogs: [],
   staff: [],
+  currentStaff: null,
   settings: {
     storeName: 'STUDIO DENY',
     brand: 'STUDIO DENY',
@@ -95,12 +98,14 @@ export async function initStore(): Promise<void> {
 
   const staffRecord = await getCurrentStaff();
   currentStaffId = staffRecord?.id || null;
+  const currentStaff = staff.find((s) => s.id === currentStaffId) || null;
 
   saveState({
     ...currentState,
     products,
     customers,
     staff,
+    currentStaff,
     settings,
     orders,
     inventoryLogs,
@@ -318,6 +323,35 @@ export const store = {
     saveState({ ...currentState, customers });
     store.addToast('Customer Created', `${newCustomer.name} added to CRM.`, 'success');
     return newCustomer;
+  },
+
+  // STAFF
+  createStaffMember: async (input: {
+    displayName: string;
+    email: string;
+    password: string;
+    role: 'OWNER' | 'MANAGER' | 'BILLING' | 'FULFILLMENT';
+    permissions: string[];
+  }): Promise<StaffMember> => {
+    const newStaff = await posApi.createStaffAccount({
+      ...input,
+      dbRole: dbRoleForStaffRole(input.role),
+    });
+
+    const staff = await posApi.fetchStaff();
+    saveState({ ...currentState, staff });
+    store.addToast('Staff Account Created', `${newStaff.name} can now sign in as ${newStaff.role}.`, 'success');
+    return newStaff;
+  },
+
+  updateStaffPermissions: async (
+    staffId: string,
+    updates: { role?: 'OWNER' | 'MANAGER' | 'BILLING' | 'FULFILLMENT'; permissions?: string[]; isActive?: boolean }
+  ) => {
+    await posApi.updateStaffPermissions(staffId, updates);
+    const staff = await posApi.fetchStaff();
+    saveState({ ...currentState, staff });
+    store.addToast('Staff Updated', 'Access permissions saved.', 'info');
   },
 
   // RETURNS

@@ -4,7 +4,8 @@ import { AppLayout } from './components/layout/AppLayout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { supabase } from './lib/supabaseClient';
-import { initStore } from './services/store';
+import { initStore, useStore } from './services/store';
+import { PermissionKey } from './constants/permissions';
 
 // POS BILLING
 import { PosBillingPage } from './pages/billing/PosBillingPage';
@@ -56,6 +57,18 @@ const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+const RequirePermission: React.FC<{ permission: PermissionKey; children: React.ReactNode }> = ({
+  permission,
+  children,
+}) => {
+  const { currentStaff, ready } = useStore();
+  // Staff record not loaded yet - render rather than bounce, avoids a false
+  // redirect while initStore() is still fetching.
+  if (!ready || !currentStaff) return <>{children}</>;
+  if (!currentStaff.permissions.includes(permission)) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+};
+
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -66,30 +79,30 @@ export const App: React.FC = () => {
         {/* Primary Authenticated Layout */}
         <Route path="/" element={<RequireAuth><AppLayout /></RequireAuth>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={<RequirePermission permission="DASHBOARD"><Dashboard /></RequirePermission>} />
 
           {/* POS BILLING */}
-          <Route path="billing/new" element={<PosBillingPage />} />
+          <Route path="billing/new" element={<RequirePermission permission="BILLING"><PosBillingPage /></RequirePermission>} />
           <Route path="billing" element={<Navigate to="/billing/new" replace />} />
 
           {/* BILLS & TRANSACTIONS */}
-          <Route path="bills" element={<BillsPage />} />
-          <Route path="bills/:id" element={<BillDetailPage />} />
+          <Route path="bills" element={<RequirePermission permission="BILLS"><BillsPage /></RequirePermission>} />
+          <Route path="bills/:id" element={<RequirePermission permission="BILLS"><BillDetailPage /></RequirePermission>} />
 
           {/* PRODUCTS & INVENTORY */}
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="products/:id" element={<ProductDetailPage />} />
+          <Route path="products" element={<RequirePermission permission="PRODUCTS"><ProductsPage /></RequirePermission>} />
+          <Route path="products/:id" element={<RequirePermission permission="PRODUCTS"><ProductDetailPage /></RequirePermission>} />
 
           {/* CUSTOMERS */}
-          <Route path="customers" element={<CustomersPage />} />
-          <Route path="customers/:id" element={<CustomerDetailPage />} />
+          <Route path="customers" element={<RequirePermission permission="CUSTOMERS"><CustomersPage /></RequirePermission>} />
+          <Route path="customers/:id" element={<RequirePermission permission="CUSTOMERS"><CustomerDetailPage /></RequirePermission>} />
 
           {/* PRICE TAGS & SALES AUDIT */}
-          <Route path="tags" element={<PriceTagGeneratorPage />} />
-          <Route path="audit" element={<SalesAuditPage />} />
+          <Route path="tags" element={<RequirePermission permission="TAGS"><PriceTagGeneratorPage /></RequirePermission>} />
+          <Route path="audit" element={<RequirePermission permission="AUDIT"><SalesAuditPage /></RequirePermission>} />
 
           {/* SETTINGS (BUSINESS, BILLING, PRINTER, STAFF) */}
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings" element={<RequirePermission permission="SETTINGS"><SettingsPage /></RequirePermission>} />
 
           {/* LEGACY URL BACKWARDS COMPATIBILITY REDIRECTS */}
           <Route path="invoices" element={<Navigate to="/bills" replace />} />

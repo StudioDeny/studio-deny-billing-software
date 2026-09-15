@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import {
   Product,
@@ -165,7 +166,7 @@ function mapStaff(s: DbPosStaff): StaffMember {
     email: '',
     role: s.role,
     status: s.is_active ? 'ACTIVE' : 'OFFLINE',
-    permissions: [],
+    permissions: s.permissions || [],
   };
 }
 
@@ -173,6 +174,69 @@ export async function fetchStaff(): Promise<StaffMember[]> {
   const { data, error } = await supabase.from('pos_staff').select('*').order('created_at', { ascending: true });
   if (error) throw error;
   return ((data || []) as DbPosStaff[]).map(mapStaff);
+}
+
+export async function createStaffAccount(input: {
+  displayName: string;
+  email: string;
+  password: string;
+  role: 'OWNER' | 'MANAGER' | 'BILLING' | 'FULFILLMENT';
+  permissions: string[];
+  dbRole: 'admin' | 'staff';
+}): Promise<StaffMember> {
+  // A brand-new login must never be created on the app's main client — that
+  // would replace the admin's own active session with the new user's session.
+  // A throwaway client (same project, publishable key only) creates the auth
+  // account in isolation; the admin's session (on `supabase`) is untouched.
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  const provisioning = createClient(supabaseUrl, supabaseKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data: signUpData, error: signUpError } = await provisioning.auth.signUp({
+    email: input.email,
+    password: input.password,
+  });
+  if (signUpError) throw signUpError;
+  if (!signUpData.user) throw new Error('Account creation did not return a user.');
+
+  const newUserId = signUpData.user.id;
+
+  const { error: roleError } = await supabase
+    .from('user_roles')
+    .insert({ user_id: newUserId, role: input.dbRole });
+  if (roleError) throw roleError;
+
+  const { data: staffRow, error: staffError } = await supabase
+    .from('pos_staff')
+    .insert({
+      user_id: newUserId,
+      display_name: input.displayName,
+      role: input.role,
+      permissions: input.permissions,
+      is_active: true,
+    })
+    .select('*')
+    .single();
+  if (staffError) throw staffError;
+
+  return mapStaff(staffRow as DbPosStaff);
+}
+
+export async function updateStaffPermissions(
+  staffId: string,
+  updates: { role?: 'OWNER' | 'MANAGER' | 'BILLING' | 'FULFILLMENT'; permissions?: string[]; isActive?: boolean }
+): Promise<void> {
+  const payload: Record<string, unknown> = {
+    role: updates.role,
+    permissions: updates.permissions,
+    is_active: updates.isActive,
+  };
+  Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
+  const { error } = await supabase.from('pos_staff').update(payload).eq('id', staffId);
+  if (error) throw error;
 }
 
 function mapBillToOrder(bill: DbPosBill, items: DbPosBillItem[], customer: DbPosCustomer | undefined): Order {
