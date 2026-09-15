@@ -74,10 +74,14 @@ export const OrderDetailPage: React.FC = () => {
     store.updateFulfillmentStatus(order.id, 'CANCELLED');
   };
 
-  const handleCreateReturn = (e: React.FormEvent) => {
+  const handleCreateReturn = async (e: React.FormEvent) => {
     e.preventDefault();
     const item = order.items[returnItemIndex] || order.items[0];
-    store.createReturnRequest({
+    if (!item.id) {
+      store.addToast('Cannot Start Return', 'This line item has no record id to return against.', 'error');
+      return;
+    }
+    await store.createReturnRequest({
       orderId: order.id,
       orderNumber: order.orderNumber,
       customerId: order.customerId,
@@ -87,6 +91,8 @@ export const OrderDetailPage: React.FC = () => {
       reason: returnReason,
       condition: returnCondition,
       refundAmount: item.total,
+      billItemId: item.id,
+      qty: item.quantity,
     });
     setIsReturnModalOpen(false);
     navigate('/returns');

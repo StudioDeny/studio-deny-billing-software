@@ -51,7 +51,7 @@ export const PosBillingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialCustId = searchParams.get('customerId') || '';
 
-  const { products, customers, settings } = useStore();
+  const { products, customers, settings, categories: dbCategories } = useStore();
 
   // Search & Filter
   const [search, setSearch] = useState('');
@@ -101,11 +101,15 @@ export const PosBillingPage: React.FC = () => {
   // Mobile/iPad portrait cart drawer toggle
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
-  // Categories extracted from products
+  // Real category taxonomy from the database (what the website admin
+  // manages), unioned with whatever's actually on a product so nothing
+  // assigned to an inactive/legacy category silently disappears.
   const categories = useMemo(() => {
-    const cats = new Set(products.map((p) => p.category.toUpperCase()));
-    return ['ALL', ...Array.from(cats)];
-  }, [products]);
+    const cats = new Set<string>();
+    dbCategories.forEach((c) => cats.add(c.name.toUpperCase()));
+    products.forEach((p) => cats.add(p.category.toUpperCase()));
+    return ['ALL', ...Array.from(cats).sort()];
+  }, [products, dbCategories]);
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
@@ -598,21 +602,21 @@ export const PosBillingPage: React.FC = () => {
             LEFT AREA (COL 7): PRODUCT CATALOG & TOUCH SELECTION
         ========================================================================= */}
         <div className="lg:col-span-7 space-y-4">
-          {/* Category Filter Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 font-mono text-xs border-b border-[#CFCFD2]">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-2 uppercase font-bold tracking-wider transition-colors shrink-0 ${
-                  activeCategory === cat
-                    ? 'bg-[#0A0A0A] text-white'
-                    : 'bg-white text-[#666666] border border-[#CFCFD2] hover:text-[#0A0A0A]'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Category Filter - a dropdown since the live catalog has too many
+              categories for a row of tabs to scale */}
+          <div className="flex items-center gap-2 font-mono text-xs pb-1 border-b border-[#CFCFD2]">
+            <span className="text-[10px] uppercase tracking-widest text-[#888888] shrink-0">Category</span>
+            <select
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+              className="flex-1 sm:flex-none sm:min-w-[220px] bg-white border border-[#CFCFD2] px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider focus:outline-none focus:border-[#0A0A0A]"
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Fast Search Input */}

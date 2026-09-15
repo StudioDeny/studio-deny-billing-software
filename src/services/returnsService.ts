@@ -6,6 +6,6 @@ export const returnsService = {
   getById: (id: string): ReturnRequest | undefined =>
     store.getState().returns.find((r) => r.id === id || r.returnNumber === id),
   updateStatus: (id: string, status: ReturnStatus) => store.updateReturnStatus(id, status),
-  create: (data: Omit<ReturnRequest, 'id' | 'returnNumber' | 'createdAt' | 'status'>) =>
+  create: (data: Omit<ReturnRequest, 'id' | 'returnNumber' | 'createdAt' | 'status'> & { billItemId: string; qty: number }) =>
     store.createReturnRequest(data),
 };

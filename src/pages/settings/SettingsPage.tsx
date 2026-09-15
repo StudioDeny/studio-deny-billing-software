@@ -15,8 +15,11 @@ import {
   Users,
   Plus,
   Tag,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { ALL_PERMISSIONS, DEFAULT_PERMISSIONS_BY_ROLE, PERMISSION_LABELS, PermissionKey, DbStaffRole } from '../../constants/permissions';
+import { printThermalReceipt } from '../../utils/receiptPrinter';
 
 export const SettingsPage: React.FC = () => {
   const { settings, staff, currentStaff } = useStore();
@@ -70,6 +73,7 @@ export const SettingsPage: React.FC = () => {
   );
   const [isCreatingStaff, setIsCreatingStaff] = useState(false);
   const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
+  const [showNewStaffPassword, setShowNewStaffPassword] = useState(false);
 
   const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,8 +95,41 @@ export const SettingsPage: React.FC = () => {
     });
   };
 
+  const [isTestPrinting, setIsTestPrinting] = useState(false);
+
   const handleTestPrint = async () => {
-    await store.testPrint();
+    setIsTestPrinting(true);
+    try {
+      // Actually hand a real print job to the browser's print dialog - the
+      // only thing a web app can verify. Whether a physical printer is
+      // plugged in and picks it up is then between the browser and the OS.
+      const sentToPrintDialog = await printThermalReceipt({
+        orderNumber: 'TEST-PRINT',
+        createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        customerName: 'Test Customer',
+        items: [{ name: 'Sample Item', size: 'M', color: 'Black', quantity: 1, unitPrice: 999, total: 999 }],
+        subtotal: 999,
+        discount: 0,
+        taxAmount: 0,
+        grandTotal: 999,
+        paymentMethod: 'CASH',
+        storeSettings: {
+          storeName: settings.storeName,
+          address: settings.address,
+          cityState: settings.cityState,
+          gstin: settings.gstin,
+          taxRate: settings.taxRate,
+        },
+      });
+
+      if (sentToPrintDialog) {
+        await store.testPrint();
+      } else {
+        store.addToast('Test Print Failed', 'The browser could not open the print dialog.', 'error');
+      }
+    } finally {
+      setIsTestPrinting(false);
+    }
   };
 
   const handleResetData = () => {
@@ -337,11 +374,19 @@ export const SettingsPage: React.FC = () => {
                 </h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] text-emerald-700 font-bold uppercase">
-                  READY
+                <span className={`w-2 h-2 rounded-full ${settings.printer?.lastTestPrint ? 'bg-emerald-500' : 'bg-[#CFCFD2]'}`} />
+                <span className={`text-[10px] font-bold uppercase ${settings.printer?.lastTestPrint ? 'text-emerald-700' : 'text-[#888888]'}`}>
+                  {settings.printer?.lastTestPrint ? `TESTED ${settings.printer.lastTestPrint}` : 'NOT TESTED YET'}
                 </span>
               </div>
+            </div>
+
+            <div className="text-[11px] text-[#666666] bg-[#F1F1F3] border border-[#CFCFD2] p-3">
+              A browser can't detect a physical printer on its own. Printing works through your OS: connect the
+              thermal printer to this till's computer (USB, or Bluetooth/WiFi if the printer supports it) and
+              install its printer driver so Windows/macOS lists it as a normal printer - then "Test Thermal
+              Print" and every real sale's "Pay &amp; Print" will open the print dialog where you pick it.
+              "Tested" above only confirms the browser could open that dialog, not that paper actually came out.
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -496,14 +541,20 @@ export const SettingsPage: React.FC = () => {
                     </td>
                     {canManageStaff && (
                       <td className="py-3 px-3 text-right">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditingStaffId(s.id === editingStaffId ? null : s.id)}
-                        >
-                          {editingStaffId === s.id ? 'CLOSE' : 'EDIT ACCESS'}
-                        </Button>
+                        {s.id === currentStaff?.id ? (
+                          <span className="text-[10px] text-[#888888]" title="You can't edit your own access - ask another OWNER, or use the database directly.">
+                            (you)
+                          </span>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingStaffId(s.id === editingStaffId ? null : s.id)}
+                          >
+                            {editingStaffId === s.id ? 'CLOSE' : 'EDIT ACCESS'}
+                          </Button>
+                        )}
                       </td>
                     )}
                   </tr>
@@ -564,13 +615,24 @@ export const SettingsPage: React.FC = () => {
                 <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
                   Temporary Password * (min 6 characters)
                 </label>
-                <Input
-                  required
-                  type="text"
-                  placeholder="e.g. Deny@2026"
-                  value={newStaffPassword}
-                  onChange={(e) => setNewStaffPassword(e.target.value)}
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    required
+                    type={showNewStaffPassword ? 'text' : 'password'}
+                    placeholder="e.g. Deny@2026"
+                    value={newStaffPassword}
+                    onChange={(e) => setNewStaffPassword(e.target.value)}
+                    className="pr-9"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewStaffPassword((v) => !v)}
+                    className="absolute right-3 text-[#888888] hover:text-[#0A0A0A]"
+                    title={showNewStaffPassword ? 'Hide password' : 'Show password to relay it to the new hire'}
+                  >
+                    {showNewStaffPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">

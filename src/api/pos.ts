@@ -17,11 +17,14 @@ import {
 import {
   DbProduct,
   DbProductVariant,
+  DbCategory,
+  DbProductCategory,
   DbPosCustomer,
   DbPosStaff,
   DbPosBill,
   DbPosBillItem,
   DbPosInventoryLog,
+  DbPosReturn,
   DbPosSettings,
   DbInvoiceSettings,
   DbBrandSettings,
@@ -40,7 +43,7 @@ function mapVariant(v: DbProductVariant): ProductVariant {
   };
 }
 
-function mapProduct(p: DbProduct, variants: DbProductVariant[]): Product {
+function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: string | undefined): Product {
   const ownVariants = variants.filter((v) => v.product_id === p.slug);
   const hasRealVariants = ownVariants.length > 0;
   const mappedVariants: ProductVariant[] = hasRealVariants
@@ -57,12 +60,17 @@ function mapProduct(p: DbProduct, variants: DbProductVariant[]): Product {
         },
       ];
 
+  // The real category taxonomy lives in categories/product_categories (what
+  // the website admin manages); products.category is a legacy flat field
+  // that can drift out of sync or be missing entirely - prefer the real one.
+  const realCategory = categoryName || p.category;
+
   return {
     id: p.slug,
     name: p.name,
     sku: p.slug,
-    collection: p.category,
-    category: p.category,
+    collection: realCategory,
+    category: realCategory,
     price: p.price,
     compareAtPrice: p.compare_at ?? undefined,
     sizes: p.sizes || [],
@@ -77,13 +85,44 @@ function mapProduct(p: DbProduct, variants: DbProductVariant[]): Product {
 }
 
 export async function fetchProducts(): Promise<Product[]> {
-  const [{ data: products, error: pErr }, { data: variants, error: vErr }] = await Promise.all([
+  const [
+    { data: products, error: pErr },
+    { data: variants, error: vErr },
+    { data: productCategories, error: pcErr },
+    { data: categories, error: catErr },
+  ] = await Promise.all([
     supabase.from('products').select('*').order('created_at', { ascending: false }),
     supabase.from('product_variants').select('*'),
+    supabase.from('product_categories').select('*'),
+    supabase.from('categories').select('*'),
   ]);
   if (pErr) throw pErr;
   if (vErr) throw vErr;
-  return ((products || []) as DbProduct[]).map((p) => mapProduct(p, (variants || []) as DbProductVariant[]));
+  if (pcErr) throw pcErr;
+  if (catErr) throw catErr;
+
+  const categoryNameById = new Map(((categories || []) as DbCategory[]).map((c) => [c.id, c.name]));
+  const categoryNameBySlug = new Map<string, string>();
+  ((productCategories || []) as DbProductCategory[]).forEach((pc) => {
+    const name = categoryNameById.get(pc.category_id);
+    if (name && !categoryNameBySlug.has(pc.product_slug)) {
+      categoryNameBySlug.set(pc.product_slug, name);
+    }
+  });
+
+  return ((products || []) as DbProduct[]).map((p) =>
+    mapProduct(p, (variants || []) as DbProductVariant[], categoryNameBySlug.get(p.slug))
+  );
+}
+
+export async function fetchCategories(): Promise<{ id: string; name: string; slug: string; parentId: string | null }[]> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('is_active', true)
+    .order('name', { ascending: true });
+  if (error) throw error;
+  return ((data || []) as DbCategory[]).map((c) => ({ id: c.id, name: c.name, slug: c.slug, parentId: c.parent_id }));
 }
 
 export async function createProduct(input: {
@@ -111,7 +150,7 @@ export async function createProduct(input: {
     .select('*')
     .single();
   if (error) throw error;
-  return mapProduct(data as DbProduct, []);
+  return mapProduct(data as DbProduct, [], undefined);
 }
 
 function mapCustomer(c: DbPosCustomer): Customer {
@@ -243,6 +282,7 @@ function mapBillToOrder(bill: DbPosBill, items: DbPosBillItem[], customer: DbPos
   const orderItems: OrderItem[] = items
     .filter((i) => i.bill_id === bill.id)
     .map((i) => ({
+      id: i.id,
       productId: i.product_slug,
       variantId: i.variant_id || i.product_slug,
       name: i.product_name,
@@ -561,17 +601,7 @@ export async function fetchPaymentTransactions(): Promise<PaymentTransaction[]> 
 }
 
 function mapReturn(
-  r: {
-    id: string;
-    return_number: string;
-    bill_id: string;
-    bill_item_id: string;
-    reason: string;
-    condition: string | null;
-    refund_amount: number;
-    status: string;
-    created_at: string;
-  },
+  r: DbPosReturn,
   bill: DbPosBill | undefined,
   item: DbPosBillItem | undefined,
   customerName: string
@@ -590,6 +620,10 @@ function mapReturn(
     refundAmount: r.refund_amount,
     status: r.status as ReturnStatus,
     createdAt: r.created_at.replace('T', ' ').substring(0, 19),
+    billItemId: r.bill_item_id,
+    variantId: item?.variant_id || undefined,
+    productSlug: item?.product_slug,
+    qty: r.qty,
   };
 }
 
@@ -610,7 +644,7 @@ export async function fetchReturns(): Promise<ReturnRequest[]> {
   const itemById = new Map(((items || []) as DbPosBillItem[]).map((i) => [i.id, i]));
   const customerById = new Map(((customers || []) as DbPosCustomer[]).map((c) => [c.id, c]));
 
-  return (returns || []).map((r: any) => {
+  return ((returns || []) as DbPosReturn[]).map((r) => {
     const bill = billById.get(r.bill_id);
     const customerName = bill?.pos_customer_id ? customerById.get(bill.pos_customer_id)?.name || 'Walk-in Customer' : 'Walk-in Customer';
     return mapReturn(r, bill, itemById.get(r.bill_item_id), customerName);

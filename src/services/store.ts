@@ -25,9 +25,17 @@ interface PaymentSplitLike {
   change?: number;
 }
 
+export interface StoreCategory {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+}
+
 export interface CommerceState {
   products: Product[];
   collections: Collection[];
+  categories: StoreCategory[];
   orders: Order[];
   customers: Customer[];
   returns: ReturnRequest[];
@@ -43,6 +51,7 @@ export interface CommerceState {
 let currentState: CommerceState = {
   products: [],
   collections: [],
+  categories: [],
   orders: [],
   customers: [],
   returns: [],
@@ -83,11 +92,12 @@ function saveState(state: CommerceState) {
 let currentStaffId: string | null = null;
 
 export async function initStore(): Promise<void> {
-  const [products, customers, staff, settings] = await Promise.all([
+  const [products, customers, staff, settings, categories] = await Promise.all([
     posApi.fetchProducts(),
     posApi.fetchCustomers(),
     posApi.fetchStaff(),
     posApi.fetchSettings(),
+    posApi.fetchCategories(),
   ]);
   const [orders, inventoryLogs, payments, returns] = await Promise.all([
     posApi.fetchBills(),
@@ -113,6 +123,7 @@ export async function initStore(): Promise<void> {
     payments,
     returns,
     collections,
+    categories,
     ready: true,
   });
 
@@ -392,28 +403,40 @@ export const store = {
 
     await posApi.updateReturnStatusDb(returnId, status);
 
-    const [returns, payments] = await Promise.all([posApi.fetchReturns(), posApi.fetchPaymentTransactions()]);
-    saveState({ ...currentState, returns, payments });
+    // Approving a refund puts the returned units back into sellable stock -
+    // without this, inventory would drift every time a return is processed.
+    if (status === 'REFUNDED' && ret.productSlug && ret.qty) {
+      await posApi.adjustStock(ret.variantId || null, ret.productSlug, ret.qty, 'RETURN_RESTOCK', currentStaffId);
+    }
+
+    const [returns, payments, products, inventoryLogs] = await Promise.all([
+      posApi.fetchReturns(),
+      posApi.fetchPaymentTransactions(),
+      posApi.fetchProducts(),
+      posApi.fetchInventoryLogs(),
+    ]);
+    saveState({ ...currentState, returns, payments, products, inventoryLogs });
 
     store.addToast('Return Updated', `${ret.returnNumber} marked as [${status}].`, 'info');
   },
 
-  createReturnRequest: (data: Omit<ReturnRequest, 'id' | 'returnNumber' | 'createdAt' | 'status'>): ReturnRequest => {
-    const returnNumber = `SD-RET-${currentState.returns.length + 404}`;
-    const newReturn: ReturnRequest = {
-      ...data,
-      id: `ret-${Date.now()}`,
-      returnNumber,
-      status: 'REQUESTED',
-      createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    };
-
-    saveState({
-      ...currentState,
-      returns: [newReturn, ...currentState.returns],
+  createReturnRequest: async (
+    data: Omit<ReturnRequest, 'id' | 'returnNumber' | 'createdAt' | 'status'> & { billItemId: string; qty: number }
+  ): Promise<ReturnRequest> => {
+    const newReturn = await posApi.createReturn({
+      billId: data.orderId,
+      billItemId: data.billItemId,
+      qty: data.qty,
+      reason: data.reason,
+      condition: data.condition,
+      refundAmount: data.refundAmount,
+      staffId: currentStaffId,
     });
 
-    store.addToast('Return Request Initiated', `${returnNumber} created for ${data.customerName}.`, 'info');
+    const returns = await posApi.fetchReturns();
+    saveState({ ...currentState, returns });
+
+    store.addToast('Return Request Initiated', `${newReturn.returnNumber} created for ${data.customerName}.`, 'info');
     return newReturn;
   },
 

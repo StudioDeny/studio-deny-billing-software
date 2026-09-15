@@ -22,6 +22,19 @@ export interface DbProduct {
   updated_at: string;
 }
 
+export interface DbCategory {
+  id: string;
+  name: string;
+  slug: string;
+  parent_id: string | null;
+  is_active: boolean;
+}
+
+export interface DbProductCategory {
+  product_slug: string;
+  category_id: string;
+}
+
 export interface DbProductVariant {
   id: string;
   product_id: string;
