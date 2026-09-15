@@ -1,3 +1,4 @@
+import JsBarcode from 'jsbarcode';
 import { formatINR } from './formatters';
 
 export interface PrintableReceiptData {
@@ -45,29 +46,30 @@ export interface PrintableReceiptData {
 }
 
 /**
- * Generates pure black vector SVG barcode bars (eliminates rainbow subpixel fringing)
+ * Generates a real, scannable CODE128 barcode as inline SVG markup for the
+ * given code (encodes the actual order number - not a decorative pattern).
  */
 function getVectorBarcodeSvg(code: string): string {
-  const bars = [
-    { x: 0, w: 3 }, { x: 5, w: 2 }, { x: 9, w: 4 }, { x: 15, w: 2 }, { x: 19, w: 5 },
-    { x: 26, w: 2 }, { x: 30, w: 4 }, { x: 36, w: 2 }, { x: 40, w: 6 }, { x: 48, w: 3 },
-    { x: 53, w: 2 }, { x: 57, w: 5 }, { x: 64, w: 2 }, { x: 68, w: 4 }, { x: 74, w: 3 },
-    { x: 79, w: 5 }, { x: 86, w: 2 }, { x: 90, w: 4 }, { x: 96, w: 2 }, { x: 100, w: 5 },
-    { x: 107, w: 3 }, { x: 112, w: 2 }, { x: 116, w: 6 }, { x: 124, w: 2 }, { x: 128, w: 4 },
-    { x: 134, w: 3 }, { x: 139, w: 5 }, { x: 146, w: 2 }, { x: 150, w: 4 }, { x: 156, w: 2 },
-    { x: 160, w: 5 }, { x: 167, w: 3 }, { x: 172, w: 5 }, { x: 179, w: 2 }, { x: 183, w: 4 },
-    { x: 189, w: 2 }, { x: 193, w: 4 },
-  ];
+  const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  try {
+    JsBarcode(svgEl, code, {
+      format: 'CODE128',
+      width: 2,
+      height: 32,
+      displayValue: false,
+      margin: 0,
+    });
+  } catch {
+    return `
+      <div style="font-family: monospace; font-size: 10px; letter-spacing: 3px; font-weight: 700; color: #000000; margin-top: 3px; text-align: center;">${code}</div>
+    `;
+  }
 
-  const rects = bars
-    .map((b) => `<rect x="${b.x}" y="0" width="${b.w}" height="32" fill="#000000"/>`)
-    .join('');
+  const barcodeMarkup = new XMLSerializer().serializeToString(svgEl);
 
   return `
     <div style="text-align: center; margin: 8px 0 4px;">
-      <svg viewBox="0 0 200 32" width="180" height="28" style="display: block; margin: 0 auto; shape-rendering: crispEdges;">
-        ${rects}
-      </svg>
+      <div style="display: inline-block; width: 180px;">${barcodeMarkup}</div>
       <div style="font-family: monospace; font-size: 10px; letter-spacing: 3px; font-weight: 700; color: #000000; margin-top: 3px;">${code}</div>
     </div>
   `;
