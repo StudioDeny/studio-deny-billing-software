@@ -304,10 +304,10 @@ export function printThermalReceipt(data: PrintableReceiptData): Promise<boolean
           <div class="receipt">
             <!-- Brand Header -->
             <div class="text-center">
-              <div class="brand-title">STUDIO DENY</div>
+              <div class="brand-title">${data.storeSettings?.storeName || 'STUDIO DENY'}</div>
               <div class="brand-subtitle">HIGH-CLASS STREETWEAR FLAGSHIP</div>
-              <div class="store-address">${data.storeSettings?.address || 'Flagship Store, Bandra West, Mumbai'}</div>
-              <div class="store-address">GSTIN: ${data.storeSettings?.gstin || '27AAACS1429B1ZX'}</div>
+              ${data.storeSettings?.address ? `<div class="store-address">${data.storeSettings.address}</div>` : ''}
+              ${data.storeSettings?.gstin ? `<div class="store-address">GSTIN: ${data.storeSettings.gstin}</div>` : ''}
             </div>
 
             <div class="divider"></div>
@@ -362,7 +362,7 @@ export function printThermalReceipt(data: PrintableReceiptData): Promise<boolean
                   : ''
               }
               <div class="meta-line flex justify-between">
-                <span class="label">GST (${data.storeSettings?.taxRate || 12}%):</span>
+                <span class="label">GST (${data.storeSettings?.taxRate ?? 0}%):</span>
                 <span>${formatINR(data.taxAmount)}</span>
               </div>
               <div class="grand-total flex justify-between">
@@ -636,12 +636,18 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
             <!-- Header -->
             <div class="header-flex">
               <div>
-                <div class="brand-name">STUDIO DENY</div>
+                <div class="brand-name">${data.storeSettings?.storeName || 'STUDIO DENY'}</div>
                 <div class="brand-sub">HIGH-CLASS STREETWEAR FLAGSHIP</div>
                 <div class="store-info">
-                  <div>${data.storeSettings?.address || 'Studio 4B, The Mill Compound, Lower Parel'}</div>
-                  <div>${data.storeSettings?.cityState || 'Mumbai, Maharashtra 400013'}</div>
-                  <div>GSTIN: ${data.storeSettings?.gstin || '27AAACS1429B1ZX'} · PAN: ${data.storeSettings?.pan || 'AAACS1429B'}</div>
+                  ${data.storeSettings?.address ? `<div>${data.storeSettings.address}</div>` : ''}
+                  ${data.storeSettings?.cityState ? `<div>${data.storeSettings.cityState}</div>` : ''}
+                  ${
+                    data.storeSettings?.gstin || data.storeSettings?.pan
+                      ? `<div>${data.storeSettings?.gstin ? `GSTIN: ${data.storeSettings.gstin}` : ''}${
+                          data.storeSettings?.gstin && data.storeSettings?.pan ? ' · ' : ''
+                        }${data.storeSettings?.pan ? `PAN: ${data.storeSettings.pan}` : ''}</div>`
+                      : ''
+                  }
                 </div>
               </div>
 
@@ -715,11 +721,11 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
                     : ''
                 }
                 <div class="ledger-row">
-                  <span>CGST (${(data.storeSettings?.taxRate || 12) / 2}%):</span>
+                  <span>CGST (${(data.storeSettings?.taxRate ?? 0) / 2}%):</span>
                   <span>${formatINR(data.taxAmount / 2)}</span>
                 </div>
                 <div class="ledger-row">
-                  <span>SGST (${(data.storeSettings?.taxRate || 12) / 2}%):</span>
+                  <span>SGST (${(data.storeSettings?.taxRate ?? 0) / 2}%):</span>
                   <span>${formatINR(data.taxAmount / 2)}</span>
                 </div>
                 <div class="ledger-row total">

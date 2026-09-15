@@ -72,6 +72,10 @@ export const SalesAuditPage: React.FC = () => {
   const offlineTax = offlineOrders.reduce((sum, o) => sum + o.taxAmount, 0);
   const offlineNetTotal = offlineOrders.reduce((sum, o) => sum + o.grandTotal, 0);
   const offlineAov = offlineOrders.length > 0 ? Math.round(offlineNetTotal / offlineOrders.length) : 0;
+  const offlineOrderIds = useMemo(() => new Set(offlineOrders.map((o) => o.id)), [offlineOrders]);
+  const offlineUnsettledReturns = returns.filter(
+    (r) => offlineOrderIds.has(r.orderId) && r.status !== 'REFUNDED' && r.status !== 'REJECTED'
+  ).length;
 
   const onlineGross = onlineOrders.reduce((sum, o) => sum + o.subtotal, 0);
   const onlineDiscounts = onlineOrders.reduce((sum, o) => sum + (o.discount || 0), 0);
@@ -335,7 +339,7 @@ export const SalesAuditPage: React.FC = () => {
 
           <div className="text-[10px] font-mono text-[#666666] flex items-center justify-between pt-1">
             <span>Average Bill Size: <strong>{formatINR(offlineAov)}</strong></span>
-            <span>Returns At Counter: <strong>0 Unsettled</strong></span>
+            <span>Returns At Counter: <strong>{offlineUnsettledReturns} Unsettled</strong></span>
           </div>
         </div>
 
@@ -595,7 +599,7 @@ export const SalesAuditPage: React.FC = () => {
               AUDITOR FINANCIAL RECONCILIATION STATEMENT
             </div>
             <div className="text-xs text-neutral-600 mt-1">
-              GSTIN: {settings.gstin || '27AAACS1429B1ZX'} · PAN: {settings.pan || 'AAACS1429B'}
+              GSTIN: {settings.gstin || '—'} · PAN: {settings.pan || '—'}
             </div>
           </div>
 

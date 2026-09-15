@@ -129,17 +129,17 @@ export const BillDetailPage: React.FC = () => {
         <div className="thermal-receipt-print max-w-md mx-auto bg-white border border-dashed border-[#0A0A0A] p-6 sm:p-8 font-mono text-xs shadow-md space-y-4 print:border-none print:shadow-none print:p-0">
           <div className="border-b border-[#CFCFD2] pb-3 text-center">
             <div className="font-display font-black text-2xl tracking-tighter">
-              STUDIO DENY
+              {settings.storeName || 'STUDIO DENY'}
             </div>
             <div className="text-[10px] tracking-widest text-[#666666] uppercase mt-0.5">
               HIGH-CLASS STREETWEAR FLAGSHIP
             </div>
-            <div className="text-[9px] text-[#888888] mt-1">
-              {settings.address || 'Studio 4B, The Mill Compound, Lower Parel'}
-            </div>
-            <div className="text-[9px] text-[#888888]">
-              GSTIN: {settings.gstin || '27AAACS1429B1ZX'}
-            </div>
+            {settings.address && (
+              <div className="text-[9px] text-[#888888] mt-1">{settings.address}</div>
+            )}
+            {settings.gstin && (
+              <div className="text-[9px] text-[#888888]">GSTIN: {settings.gstin}</div>
+            )}
           </div>
 
           <div className="text-left text-[11px] space-y-1">
@@ -189,7 +189,7 @@ export const BillDetailPage: React.FC = () => {
               </div>
             )}
             <div className="flex justify-between text-[#666666]">
-              <span>GST ({settings.taxRate || 12}%):</span>
+              <span>GST ({settings.taxRate ?? 0}%):</span>
               <span>{formatINR(bill.taxAmount)}</span>
             </div>
             <div className="flex justify-between font-black text-base border-t border-[#0A0A0A] pt-1 text-[#0A0A0A]">
@@ -239,15 +239,21 @@ export const BillDetailPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start border-b border-[#0A0A0A] pb-6 gap-6">
             <div>
               <div className="font-display font-black text-3xl tracking-tighter text-[#0A0A0A]">
-                STUDIO DENY
+                {settings.storeName || 'STUDIO DENY'}
               </div>
               <div className="text-[11px] text-[#666666] uppercase tracking-widest mt-0.5">
                 HIGH-CLASS STREETWEAR COMMERCE
               </div>
               <div className="text-xs text-[#444444] mt-2 space-y-0.5">
-                <div>{settings.address || 'Studio 4B, The Mill Compound, Lower Parel'}</div>
-                <div>{settings.cityState || 'Mumbai, MH 400013'}</div>
-                <div>GSTIN: {settings.gstin || '27AAACS1429B1ZX'} · PAN: {settings.pan || 'AAACS1429B'}</div>
+                {settings.address && <div>{settings.address}</div>}
+                {settings.cityState && <div>{settings.cityState}</div>}
+                {(settings.gstin || settings.pan) && (
+                  <div>
+                    {settings.gstin && `GSTIN: ${settings.gstin}`}
+                    {settings.gstin && settings.pan && ' · '}
+                    {settings.pan && `PAN: ${settings.pan}`}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -310,7 +316,7 @@ export const BillDetailPage: React.FC = () => {
                 </div>
               )}
               <div className="flex justify-between text-[#666666]">
-                <span>GST ({settings.taxRate || 12}%):</span>
+                <span>GST ({settings.taxRate ?? 0}%):</span>
                 <span>{formatINR(bill.taxAmount)}</span>
               </div>
               <div className="flex justify-between font-black text-base border-t border-[#0A0A0A] pt-2 text-[#0A0A0A]">

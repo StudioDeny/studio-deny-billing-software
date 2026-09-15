@@ -2,12 +2,16 @@ import { supabase } from '../lib/supabaseClient';
 import {
   Product,
   ProductVariant,
+  Collection,
   Customer,
   StaffMember,
   Order,
   OrderItem,
   CommerceSettings,
   InventoryLog,
+  PaymentTransaction,
+  ReturnRequest,
+  ReturnStatus,
 } from '../types';
 import {
   DbProduct,
@@ -410,6 +414,186 @@ export async function saveSettings(updates: {
     const { error } = await supabase.from('pos_settings').insert(payload);
     if (error) throw error;
   }
+}
+
+export function deriveCollections(products: Product[], orders: Order[]): Collection[] {
+  const byCategory = new Map<string, Product[]>();
+  for (const p of products) {
+    const list = byCategory.get(p.category) || [];
+    list.push(p);
+    byCategory.set(p.category, list);
+  }
+
+  return Array.from(byCategory.entries()).map(([category, categoryProducts]) => {
+    const productIds = new Set(categoryProducts.map((p) => p.id));
+    let revenue = 0;
+    let unitsSold = 0;
+    for (const order of orders) {
+      for (const item of order.items) {
+        if (productIds.has(item.productId)) {
+          revenue += item.total;
+          unitsSold += item.quantity;
+        }
+      }
+    }
+
+    return {
+      id: category,
+      name: category,
+      code: category.replace(/[^A-Za-z0-9]/g, '').substring(0, 4).toUpperCase() || 'GEN',
+      description: `${category} collection`,
+      productCount: categoryProducts.length,
+      revenue,
+      unitsSold,
+      status: categoryProducts.some((p) => p.status === 'ACTIVE') ? 'ACTIVE' : 'ARCHIVED',
+    };
+  });
+}
+
+function mapPaymentTransaction(
+  t: {
+    id: string;
+    bill_id: string;
+    method: string;
+    amount: number;
+    status: string;
+    created_at: string;
+  },
+  bill: DbPosBill | undefined,
+  customerName: string
+): PaymentTransaction {
+  return {
+    id: t.id,
+    transactionRef: `TXN-${(bill?.bill_number || t.bill_id).replace('SD-', '')}-${t.method}`,
+    orderId: t.bill_id,
+    orderNumber: bill?.bill_number || t.bill_id,
+    customerName,
+    amount: t.amount,
+    method: t.method as PaymentTransaction['method'],
+    status: t.status as PaymentTransaction['status'],
+    date: t.created_at.replace('T', ' ').substring(0, 19),
+  };
+}
+
+export async function fetchPaymentTransactions(): Promise<PaymentTransaction[]> {
+  const [{ data: payments, error: payErr }, { data: bills, error: billErr }, { data: customers, error: custErr }] =
+    await Promise.all([
+      supabase.from('pos_payment_transactions').select('*').order('created_at', { ascending: false }).limit(500),
+      supabase.from('pos_bills').select('*'),
+      supabase.from('pos_customers').select('*'),
+    ]);
+  if (payErr) throw payErr;
+  if (billErr) throw billErr;
+  if (custErr) throw custErr;
+
+  const billById = new Map(((bills || []) as DbPosBill[]).map((b) => [b.id, b]));
+  const customerById = new Map(((customers || []) as DbPosCustomer[]).map((c) => [c.id, c]));
+
+  return (payments || []).map((t: any) => {
+    const bill = billById.get(t.bill_id);
+    const customerName = bill?.pos_customer_id ? customerById.get(bill.pos_customer_id)?.name || 'Walk-in Customer' : 'Walk-in Customer';
+    return mapPaymentTransaction(t, bill, customerName);
+  });
+}
+
+function mapReturn(
+  r: {
+    id: string;
+    return_number: string;
+    bill_id: string;
+    bill_item_id: string;
+    reason: string;
+    condition: string | null;
+    refund_amount: number;
+    status: string;
+    created_at: string;
+  },
+  bill: DbPosBill | undefined,
+  item: DbPosBillItem | undefined,
+  customerName: string
+): ReturnRequest {
+  return {
+    id: r.id,
+    returnNumber: r.return_number,
+    orderId: r.bill_id,
+    orderNumber: bill?.bill_number || r.bill_id,
+    customerId: bill?.pos_customer_id || 'guest',
+    customerName,
+    productTitle: item?.product_name || '',
+    variantName: item ? [item.color, item.size].filter(Boolean).join(' / ') : '',
+    reason: r.reason,
+    condition: r.condition || '',
+    refundAmount: r.refund_amount,
+    status: r.status as ReturnStatus,
+    createdAt: r.created_at.replace('T', ' ').substring(0, 19),
+  };
+}
+
+export async function fetchReturns(): Promise<ReturnRequest[]> {
+  const [{ data: returns, error: retErr }, { data: bills, error: billErr }, { data: items, error: itemErr }, { data: customers, error: custErr }] =
+    await Promise.all([
+      supabase.from('pos_returns').select('*').order('created_at', { ascending: false }),
+      supabase.from('pos_bills').select('*'),
+      supabase.from('pos_bill_items').select('*'),
+      supabase.from('pos_customers').select('*'),
+    ]);
+  if (retErr) throw retErr;
+  if (billErr) throw billErr;
+  if (itemErr) throw itemErr;
+  if (custErr) throw custErr;
+
+  const billById = new Map(((bills || []) as DbPosBill[]).map((b) => [b.id, b]));
+  const itemById = new Map(((items || []) as DbPosBillItem[]).map((i) => [i.id, i]));
+  const customerById = new Map(((customers || []) as DbPosCustomer[]).map((c) => [c.id, c]));
+
+  return (returns || []).map((r: any) => {
+    const bill = billById.get(r.bill_id);
+    const customerName = bill?.pos_customer_id ? customerById.get(bill.pos_customer_id)?.name || 'Walk-in Customer' : 'Walk-in Customer';
+    return mapReturn(r, bill, itemById.get(r.bill_item_id), customerName);
+  });
+}
+
+export async function createReturn(input: {
+  billId: string;
+  billItemId: string;
+  qty: number;
+  reason: string;
+  condition?: string;
+  refundAmount: number;
+  staffId: string | null;
+}): Promise<ReturnRequest> {
+  const { data, error } = await supabase
+    .from('pos_returns')
+    .insert({
+      bill_id: input.billId,
+      bill_item_id: input.billItemId,
+      qty: input.qty,
+      reason: input.reason,
+      condition: input.condition || null,
+      refund_amount: input.refundAmount,
+      staff_id: input.staffId,
+    })
+    .select('*')
+    .single();
+  if (error) throw error;
+
+  const [{ data: bill }, { data: item }] = await Promise.all([
+    supabase.from('pos_bills').select('*').eq('id', input.billId).single(),
+    supabase.from('pos_bill_items').select('*').eq('id', input.billItemId).single(),
+  ]);
+
+  let customerName = 'Walk-in Customer';
+  if (bill?.pos_customer_id) {
+    const { data: c } = await supabase.from('pos_customers').select('*').eq('id', bill.pos_customer_id).single();
+    customerName = (c as DbPosCustomer | null)?.name || customerName;
+  }
+
+  return mapReturn(data, bill as DbPosBill, item as DbPosBillItem, customerName);
+}
+
+export async function updateReturnStatusDb(returnId: string, status: ReturnStatus): Promise<void> {
+  const { error } = await supabase.from('pos_returns').update({ status }).eq('id', returnId);
+  if (error) throw error;
 }
 
 export async function recordTestPrint(): Promise<void> {
