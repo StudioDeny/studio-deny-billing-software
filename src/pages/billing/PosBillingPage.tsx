@@ -355,6 +355,15 @@ export const PosBillingPage: React.FC = () => {
       return;
     }
 
+    if (!isGuest && !selectedCustomerId) {
+      store.addToast(
+        'Select a Patron',
+        'Choose a registered customer, or tap "WALK-IN GUEST" to bill without one.',
+        'warning'
+      );
+      return;
+    }
+
     setIsProcessingPayment(true);
     setPrintError(null);
 
