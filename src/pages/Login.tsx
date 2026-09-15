@@ -3,17 +3,29 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { store } from '../services/store';
+import { signIn } from '../api/auth';
 import { Lock, ArrowRight } from 'lucide-react';
 
 export const Login: React.FC = () => {
-  const [email, setEmail] = useState('lead@studiodeny.com');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    store.addToast('Welcome Back', 'Logged into STUDIO DENY Operating System.', 'success');
-    navigate('/dashboard');
+    setError(null);
+    setLoading(true);
+    try {
+      const { staff } = await signIn(email, password);
+      store.addToast('Welcome Back', `Signed in as ${staff.display_name}.`, 'success');
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sign in failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,6 +60,12 @@ export const Login: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="text-xs font-mono text-red-600 border border-red-300 bg-red-50 px-3 py-2">
+              {error}
+            </div>
+          )}
+
           <Input
             label="OPERATOR IDENTIFIER (EMAIL)"
             type="email"
@@ -72,8 +90,9 @@ export const Login: React.FC = () => {
               fullWidth
               icon={<ArrowRight size={16} />}
               iconPosition="right"
+              disabled={loading}
             >
-              [ ENTER WORKSPACE ]
+              {loading ? '[ SIGNING IN... ]' : '[ ENTER WORKSPACE ]'}
             </Button>
           </div>
         </form>

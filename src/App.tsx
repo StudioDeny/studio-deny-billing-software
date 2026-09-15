@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import { supabase } from './lib/supabaseClient';
 
 // POS BILLING
 import { PosBillingPage } from './pages/billing/PosBillingPage';
@@ -30,6 +31,24 @@ const RedirectBillId: React.FC = () => {
   return <Navigate to={`/bills/${id}`} replace />;
 };
 
+const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [status, setStatus] = useState<'checking' | 'authed' | 'anon'>('checking');
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setStatus(data.session ? 'authed' : 'anon');
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setStatus(session ? 'authed' : 'anon');
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  if (status === 'checking') return null;
+  if (status === 'anon') return <Navigate to="/login" replace />;
+  return <>{children}</>;
+};
+
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -38,7 +57,7 @@ export const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
 
         {/* Primary Authenticated Layout */}
-        <Route path="/" element={<AppLayout />}>
+        <Route path="/" element={<RequireAuth><AppLayout /></RequireAuth>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
 
