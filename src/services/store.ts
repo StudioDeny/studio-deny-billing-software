@@ -232,7 +232,8 @@ export const store = {
 
     const newOrder = await posApi.checkout({
       items,
-      customerId: orderData.customerId === 'guest' ? null : orderData.customerId,
+      customerId:
+        orderData.customerId && orderData.customerId !== 'guest' ? orderData.customerId : null,
       staffId: currentStaffId,
       discount: orderData.discount,
       discountReason: orderData.discountReason || null,
