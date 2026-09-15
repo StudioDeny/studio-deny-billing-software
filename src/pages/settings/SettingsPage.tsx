@@ -17,7 +17,6 @@ import {
   Tag,
   Eye,
   EyeOff,
-  AlertTriangle,
 } from 'lucide-react';
 import { ALL_PERMISSIONS, DEFAULT_PERMISSIONS_BY_ROLE, PERMISSION_LABELS, PermissionKey, DbStaffRole } from '../../constants/permissions';
 import { printThermalReceipt } from '../../utils/receiptPrinter';
@@ -26,7 +25,8 @@ import { EditInvoicePanel } from './EditInvoicePanel';
 export const SettingsPage: React.FC = () => {
   const { settings, staff, currentStaff } = useStore();
   const canManageStaff = currentStaff?.role === 'OWNER';
-  const [activeTab, setActiveTab] = useState<'BUSINESS' | 'BILLING' | 'PRINTER' | 'STAFF' | 'INVOICES'>('BUSINESS');
+  const [activeTab, setActiveTab] = useState<'BUSINESS' | 'BILLING' | 'PRINTER' | 'STAFF'>('BUSINESS');
+  const [isInvoiceEditorOpen, setIsInvoiceEditorOpen] = useState(false);
 
   // Business Profile Form
   const [brand, setBrand] = useState(settings.brand);
@@ -194,9 +194,6 @@ export const SettingsPage: React.FC = () => {
     { id: 'BILLING' as const, label: 'BILLING & TAX', icon: <Receipt size={14} /> },
     { id: 'PRINTER' as const, label: 'PRINTER CONFIG', icon: <Printer size={14} /> },
     { id: 'STAFF' as const, label: 'STAFF & ROLES', icon: <ShieldCheck size={14} /> },
-    // Deliberately not a prominent action anywhere else - only the OWNER
-    // ever sees this tab exists at all.
-    ...(canManageStaff ? [{ id: 'INVOICES' as const, label: 'EDIT INVOICES', icon: <AlertTriangle size={14} /> }] : []),
   ];
 
   return (
@@ -577,18 +574,48 @@ export const SettingsPage: React.FC = () => {
           </div>
         )}
 
-        {/* 5. EDIT INVOICES TAB - OWNER only, not surfaced anywhere else */}
-        {activeTab === 'INVOICES' && <EditInvoicePanel />}
-
         {/* Save Button */}
-        {activeTab !== 'INVOICES' && (
-          <div className="flex justify-end pt-2">
-            <Button type="submit" variant="primary" size="md">
-              <Save size={14} className="mr-2" /> SAVE SETTINGS
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-end pt-2">
+          <Button type="submit" variant="primary" size="md">
+            <Save size={14} className="mr-2" /> SAVE SETTINGS
+          </Button>
+        </div>
       </form>
+
+      {/* Not a button, not a tab, not labeled - the OWNER knows this dot
+          opens the settled-invoice editor. Renders as nothing at all for
+          anyone else. */}
+      {canManageStaff && (
+        <button
+          type="button"
+          onClick={() => setIsInvoiceEditorOpen(true)}
+          title="."
+          aria-label="Edit invoices"
+          className="fixed bottom-3 right-3 w-2 h-2 rounded-full bg-[#E5E5E7] hover:bg-[#0A0A0A] transition-colors z-10"
+        />
+      )}
+
+      {isInvoiceEditorOpen && (
+        <div className="fixed inset-0 z-50 bg-[#0A0A0A]/50 flex items-center justify-center p-4">
+          <div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="p-4 border-b border-[#CFCFD2] flex items-center justify-between sticky top-0 bg-white">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#888888]">
+                Owner-only
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsInvoiceEditorOpen(false)}
+                className="text-[#666666] hover:text-[#0A0A0A] font-mono text-xs"
+              >
+                CLOSE ✕
+              </button>
+            </div>
+            <div className="p-4">
+              <EditInvoicePanel />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Add Staff Modal */}
       {isStaffModalOpen && (
