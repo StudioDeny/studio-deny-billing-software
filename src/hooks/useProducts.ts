@@ -57,7 +57,7 @@ export function useProducts(params?: ProductQueryParams) {
         return created;
       } catch (err: any) {
         if (ENABLE_MOCK_FALLBACK) {
-          const fallback = store.addProduct(data);
+          const fallback = await store.addProduct(data);
           setProducts((prev) => [fallback, ...prev]);
           return fallback;
         }
@@ -77,7 +77,7 @@ export function useProducts(params?: ProductQueryParams) {
         return updated;
       } catch (err: any) {
         if (ENABLE_MOCK_FALLBACK) {
-          store.updateProduct(id, updates);
+          await store.updateProduct(id, updates);
           setProducts(store.getState().products);
           return;
         }
@@ -102,7 +102,7 @@ export function useProducts(params?: ProductQueryParams) {
         store.addToast('Stock Adjusted', `Inventory updated on server.`, 'info');
       } catch (err: any) {
         if (ENABLE_MOCK_FALLBACK) {
-          store.adjustStock(productId, variantId, changeQty, reason);
+          await store.adjustStock(productId, variantId, changeQty, reason);
           setProducts(store.getState().products);
           return;
         }

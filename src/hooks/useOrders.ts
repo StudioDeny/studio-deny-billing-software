@@ -52,7 +52,7 @@ export function useOrders(params?: OrderQueryParams) {
       } catch (err: any) {
         if (ENABLE_MOCK_FALLBACK) {
           console.warn('[useOrders] Server checkout unavailable. Committing to local register.', err);
-          const fallbackOrder = store.createOrder(orderData);
+          const fallbackOrder = await store.createOrder(orderData);
           setOrders((prev) => [fallbackOrder, ...prev]);
           return fallbackOrder;
         }

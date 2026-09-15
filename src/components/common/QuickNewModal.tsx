@@ -59,14 +59,14 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
     onClose();
   };
 
-  const handleProductSubmit = (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productName || !sku) return;
 
     const numPrice = Number(price) || 2490;
     const numStock = Number(stock) || 10;
 
-    const newProd = store.addProduct({
+    const newProd = await store.addProduct({
       name: productName,
       sku: sku.toUpperCase(),
       collection,
@@ -91,11 +91,11 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
     navigate(`/products/${newProd.id}`);
   };
 
-  const handleCustomerSubmit = (e: React.FormEvent) => {
+  const handleCustomerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !customerEmail) return;
 
-    const newCust = store.addCustomer({
+    const newCust = await store.addCustomer({
       name: customerName,
       email: customerEmail,
       phone: customerPhone || '+91 98200 00000',
@@ -108,11 +108,11 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
     navigate(`/customers/${newCust.id}`);
   };
 
-  const handleAdjustSubmit = (e: React.FormEvent) => {
+  const handleAdjustSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProductId || !selectedVariantId) return;
 
-    store.adjustStock(
+    await store.adjustStock(
       selectedProductId,
       selectedVariantId,
       Number(adjustQty) || 0,
@@ -120,7 +120,7 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
     );
 
     handleClose();
-    navigate('/inventory');
+    navigate('/products');
   };
 
   if (!isOpen) return null;

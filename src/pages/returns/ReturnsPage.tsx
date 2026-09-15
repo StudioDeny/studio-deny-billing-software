@@ -57,8 +57,8 @@ export const ReturnsPage: React.FC = () => {
     return matchesSearch && matchesTab;
   });
 
-  const handleUpdateStatus = (returnId: string, status: ReturnStatus) => {
-    store.updateReturnStatus(returnId, status);
+  const handleUpdateStatus = async (returnId: string, status: ReturnStatus) => {
+    await store.updateReturnStatus(returnId, status);
     if (activeReturn && activeReturn.id === returnId) {
       setActiveReturn({ ...activeReturn, status });
     }

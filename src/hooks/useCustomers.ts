@@ -52,7 +52,7 @@ export function useCustomers(params?: CustomerQueryParams) {
         return created;
       } catch (err: any) {
         if (ENABLE_MOCK_FALLBACK) {
-          const fallback = store.addCustomer(data);
+          const fallback = await store.addCustomer(data);
           setCustomers((prev) => [fallback, ...prev]);
           return fallback;
         }

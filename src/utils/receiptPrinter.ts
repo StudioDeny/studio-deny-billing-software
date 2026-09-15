@@ -1,3 +1,4 @@
+import JsBarcode from 'jsbarcode';
 import { formatINR } from './formatters';
 
 export interface PrintableReceiptData {
@@ -45,29 +46,30 @@ export interface PrintableReceiptData {
 }
 
 /**
- * Generates pure black vector SVG barcode bars (eliminates rainbow subpixel fringing)
+ * Generates a real, scannable CODE128 barcode as inline SVG markup for the
+ * given code (encodes the actual order number - not a decorative pattern).
  */
 function getVectorBarcodeSvg(code: string): string {
-  const bars = [
-    { x: 0, w: 3 }, { x: 5, w: 2 }, { x: 9, w: 4 }, { x: 15, w: 2 }, { x: 19, w: 5 },
-    { x: 26, w: 2 }, { x: 30, w: 4 }, { x: 36, w: 2 }, { x: 40, w: 6 }, { x: 48, w: 3 },
-    { x: 53, w: 2 }, { x: 57, w: 5 }, { x: 64, w: 2 }, { x: 68, w: 4 }, { x: 74, w: 3 },
-    { x: 79, w: 5 }, { x: 86, w: 2 }, { x: 90, w: 4 }, { x: 96, w: 2 }, { x: 100, w: 5 },
-    { x: 107, w: 3 }, { x: 112, w: 2 }, { x: 116, w: 6 }, { x: 124, w: 2 }, { x: 128, w: 4 },
-    { x: 134, w: 3 }, { x: 139, w: 5 }, { x: 146, w: 2 }, { x: 150, w: 4 }, { x: 156, w: 2 },
-    { x: 160, w: 5 }, { x: 167, w: 3 }, { x: 172, w: 5 }, { x: 179, w: 2 }, { x: 183, w: 4 },
-    { x: 189, w: 2 }, { x: 193, w: 4 },
-  ];
+  const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  try {
+    JsBarcode(svgEl, code, {
+      format: 'CODE128',
+      width: 2,
+      height: 32,
+      displayValue: false,
+      margin: 0,
+    });
+  } catch {
+    return `
+      <div style="font-family: monospace; font-size: 10px; letter-spacing: 3px; font-weight: 700; color: #000000; margin-top: 3px; text-align: center;">${code}</div>
+    `;
+  }
 
-  const rects = bars
-    .map((b) => `<rect x="${b.x}" y="0" width="${b.w}" height="32" fill="#000000"/>`)
-    .join('');
+  const barcodeMarkup = new XMLSerializer().serializeToString(svgEl);
 
   return `
     <div style="text-align: center; margin: 8px 0 4px;">
-      <svg viewBox="0 0 200 32" width="180" height="28" style="display: block; margin: 0 auto; shape-rendering: crispEdges;">
-        ${rects}
-      </svg>
+      <div style="display: inline-block; width: 180px;">${barcodeMarkup}</div>
       <div style="font-family: monospace; font-size: 10px; letter-spacing: 3px; font-weight: 700; color: #000000; margin-top: 3px;">${code}</div>
     </div>
   `;
@@ -304,10 +306,10 @@ export function printThermalReceipt(data: PrintableReceiptData): Promise<boolean
           <div class="receipt">
             <!-- Brand Header -->
             <div class="text-center">
-              <div class="brand-title">STUDIO DENY</div>
+              <div class="brand-title">${data.storeSettings?.storeName || 'STUDIO DENY'}</div>
               <div class="brand-subtitle">HIGH-CLASS STREETWEAR FLAGSHIP</div>
-              <div class="store-address">${data.storeSettings?.address || 'Flagship Store, Bandra West, Mumbai'}</div>
-              <div class="store-address">GSTIN: ${data.storeSettings?.gstin || '27AAACS1429B1ZX'}</div>
+              ${data.storeSettings?.address ? `<div class="store-address">${data.storeSettings.address}</div>` : ''}
+              ${data.storeSettings?.gstin ? `<div class="store-address">GSTIN: ${data.storeSettings.gstin}</div>` : ''}
             </div>
 
             <div class="divider"></div>
@@ -362,7 +364,7 @@ export function printThermalReceipt(data: PrintableReceiptData): Promise<boolean
                   : ''
               }
               <div class="meta-line flex justify-between">
-                <span class="label">GST (${data.storeSettings?.taxRate || 12}%):</span>
+                <span class="label">GST (${data.storeSettings?.taxRate ?? 0}%):</span>
                 <span>${formatINR(data.taxAmount)}</span>
               </div>
               <div class="grand-total flex justify-between">
@@ -636,12 +638,18 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
             <!-- Header -->
             <div class="header-flex">
               <div>
-                <div class="brand-name">STUDIO DENY</div>
+                <div class="brand-name">${data.storeSettings?.storeName || 'STUDIO DENY'}</div>
                 <div class="brand-sub">HIGH-CLASS STREETWEAR FLAGSHIP</div>
                 <div class="store-info">
-                  <div>${data.storeSettings?.address || 'Studio 4B, The Mill Compound, Lower Parel'}</div>
-                  <div>${data.storeSettings?.cityState || 'Mumbai, Maharashtra 400013'}</div>
-                  <div>GSTIN: ${data.storeSettings?.gstin || '27AAACS1429B1ZX'} · PAN: ${data.storeSettings?.pan || 'AAACS1429B'}</div>
+                  ${data.storeSettings?.address ? `<div>${data.storeSettings.address}</div>` : ''}
+                  ${data.storeSettings?.cityState ? `<div>${data.storeSettings.cityState}</div>` : ''}
+                  ${
+                    data.storeSettings?.gstin || data.storeSettings?.pan
+                      ? `<div>${data.storeSettings?.gstin ? `GSTIN: ${data.storeSettings.gstin}` : ''}${
+                          data.storeSettings?.gstin && data.storeSettings?.pan ? ' · ' : ''
+                        }${data.storeSettings?.pan ? `PAN: ${data.storeSettings.pan}` : ''}</div>`
+                      : ''
+                  }
                 </div>
               </div>
 
@@ -715,11 +723,11 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
                     : ''
                 }
                 <div class="ledger-row">
-                  <span>CGST (${(data.storeSettings?.taxRate || 12) / 2}%):</span>
+                  <span>CGST (${(data.storeSettings?.taxRate ?? 0) / 2}%):</span>
                   <span>${formatINR(data.taxAmount / 2)}</span>
                 </div>
                 <div class="ledger-row">
-                  <span>SGST (${(data.storeSettings?.taxRate || 12) / 2}%):</span>
+                  <span>SGST (${(data.storeSettings?.taxRate ?? 0) / 2}%):</span>
                   <span>${formatINR(data.taxAmount / 2)}</span>
                 </div>
                 <div class="ledger-row total">

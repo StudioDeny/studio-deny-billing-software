@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore, store } from '../../services/store';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -15,12 +15,18 @@ import {
   Users,
   Plus,
   Tag,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
-import { StaffRole, StaffMember } from '../../types';
+import { ALL_PERMISSIONS, DEFAULT_PERMISSIONS_BY_ROLE, PERMISSION_LABELS, PermissionKey, DbStaffRole } from '../../constants/permissions';
+import { printThermalReceipt } from '../../utils/receiptPrinter';
+import { EditInvoicePanel } from './EditInvoicePanel';
 
 export const SettingsPage: React.FC = () => {
-  const { settings, staff } = useStore();
+  const { settings, staff, currentStaff } = useStore();
+  const canManageStaff = currentStaff?.role === 'OWNER';
   const [activeTab, setActiveTab] = useState<'BUSINESS' | 'BILLING' | 'PRINTER' | 'STAFF'>('BUSINESS');
+  const [isInvoiceEditorOpen, setIsInvoiceEditorOpen] = useState(false);
 
   // Business Profile Form
   const [brand, setBrand] = useState(settings.brand);
@@ -33,24 +39,47 @@ export const SettingsPage: React.FC = () => {
   const [pan, setPan] = useState(settings.pan);
 
   // Billing Configuration Form
-  const [invoicePrefix, setInvoicePrefix] = useState(settings.invoicePrefix || 'SD-INV-');
-  const [taxRate, setTaxRate] = useState(String(settings.taxRate || 12));
+  const [invoicePrefix, setInvoicePrefix] = useState(settings.invoicePrefix || 'SD');
+  const [taxRate, setTaxRate] = useState(String(settings.taxRate ?? 0));
   const [defaultDiscount, setDefaultDiscount] = useState('0');
 
   // Printer Configuration Form
-  const [printerName, setPrinterName] = useState(settings.printer?.name || 'POS-80 Thermal Register');
+  const [printerName, setPrinterName] = useState(settings.printer?.name || '');
   const [paperWidth, setPaperWidth] = useState<'80MM' | '58MM'>('80MM');
   const [autoPrint, setAutoPrint] = useState(true);
+
+  // These forms mount before the live Supabase settings finish loading (settings
+  // starts as an empty placeholder), so re-sync every field once the real row arrives.
+  useEffect(() => {
+    setBrand(settings.brand);
+    setTagline(settings.tagline);
+    setAddress(settings.address);
+    setCityState(settings.cityState);
+    setEmail(settings.email);
+    setPhone(settings.phone);
+    setGstin(settings.gstin);
+    setPan(settings.pan);
+    setInvoicePrefix(settings.invoicePrefix || 'SD');
+    setTaxRate(String(settings.taxRate ?? 0));
+    setPrinterName(settings.printer?.name || '');
+  }, [settings]);
 
   // Staff Modal
   const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
   const [newStaffName, setNewStaffName] = useState('');
   const [newStaffEmail, setNewStaffEmail] = useState('');
-  const [newStaffRole, setNewStaffRole] = useState<StaffRole>('BILLING');
+  const [newStaffPassword, setNewStaffPassword] = useState('');
+  const [newDbStaffRole, setNewDbStaffRole] = useState<DbStaffRole>('BILLING');
+  const [newStaffPermissions, setNewStaffPermissions] = useState<PermissionKey[]>(
+    DEFAULT_PERMISSIONS_BY_ROLE.BILLING
+  );
+  const [isCreatingStaff, setIsCreatingStaff] = useState(false);
+  const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
+  const [showNewStaffPassword, setShowNewStaffPassword] = useState(false);
 
-  const handleSaveAll = (e: React.FormEvent) => {
+  const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
-    store.updateSettings({
+    await store.updateSettings({
       brand,
       tagline,
       address,
@@ -60,7 +89,7 @@ export const SettingsPage: React.FC = () => {
       gstin,
       pan,
       invoicePrefix,
-      taxRate: Number(taxRate) || 12,
+      taxRate: Number.isFinite(Number(taxRate)) ? Number(taxRate) : 0,
       printer: {
         ...settings.printer,
         name: printerName,
@@ -68,45 +97,96 @@ export const SettingsPage: React.FC = () => {
     });
   };
 
-  const handleTestPrint = () => {
-    store.testPrint();
-  };
+  const [isTestPrinting, setIsTestPrinting] = useState(false);
 
-  const handleResetData = () => {
-    if (window.confirm('Reset all streetwear catalog, orders, and inventory to default Studio Deny state?')) {
-      store.resetToDefaults();
+  const handleTestPrint = async () => {
+    setIsTestPrinting(true);
+    try {
+      // Actually hand a real print job to the browser's print dialog - the
+      // only thing a web app can verify. Whether a physical printer is
+      // plugged in and picks it up is then between the browser and the OS.
+      const sentToPrintDialog = await printThermalReceipt({
+        orderNumber: 'TEST-PRINT',
+        createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        customerName: 'Test Customer',
+        items: [{ name: 'Sample Item', size: 'M', color: 'Black', quantity: 1, unitPrice: 999, total: 999 }],
+        subtotal: 999,
+        discount: 0,
+        taxAmount: 0,
+        grandTotal: 999,
+        paymentMethod: 'CASH',
+        storeSettings: {
+          storeName: settings.storeName,
+          address: settings.address,
+          cityState: settings.cityState,
+          gstin: settings.gstin,
+          taxRate: settings.taxRate,
+        },
+      });
+
+      if (sentToPrintDialog) {
+        await store.testPrint();
+      } else {
+        store.addToast('Test Print Failed', 'The browser could not open the print dialog.', 'error');
+      }
+    } finally {
+      setIsTestPrinting(false);
     }
   };
 
-  const handleCreateStaff = (e: React.FormEvent) => {
+  const handleResetData = () => {
+    if (window.confirm('Reload catalog, orders, customers, and inventory from the live database? Any unsaved local changes will be discarded.')) {
+      store.reloadFromDatabase();
+    }
+  };
+
+  const handleDbStaffRoleChange = (role: DbStaffRole) => {
+    setNewDbStaffRole(role);
+    setNewStaffPermissions(DEFAULT_PERMISSIONS_BY_ROLE[role]);
+  };
+
+  const toggleNewStaffPermission = (key: PermissionKey) => {
+    setNewStaffPermissions((prev) =>
+      prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
+    );
+  };
+
+  const handleCreateStaff = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newStaffName.trim() || !newStaffEmail.trim()) return;
+    if (!newStaffName.trim() || !newStaffEmail.trim() || newStaffPassword.length < 6) {
+      store.addToast(
+        'Validation',
+        'Name, email, and a password of at least 6 characters are required.',
+        'error'
+      );
+      return;
+    }
 
-    const newMember: StaffMember = {
-      id: `staff-${Date.now()}`,
-      name: newStaffName.trim(),
-      email: newStaffEmail.trim(),
-      role: newStaffRole,
-      status: 'ACTIVE',
-      permissions:
-        newStaffRole === 'OWNER'
-          ? ['Full Terminal Access', 'Business Settings', 'Tax Engine', 'Staff Management']
-          : newStaffRole === 'MANAGER'
-          ? ['Billing', 'Bills History', 'Products Catalog', 'Customers', 'Basic Settings']
-          : ['Dashboard Overview', 'New Bill (POS)', 'Bills History', 'Customer Directory'],
-    };
+    setIsCreatingStaff(true);
+    try {
+      await store.createStaffMember({
+        displayName: newStaffName.trim(),
+        email: newStaffEmail.trim(),
+        password: newStaffPassword,
+        role: newDbStaffRole,
+        permissions: newStaffPermissions,
+      });
 
-    // Save staff in store
-    const state = store.getState();
-    (store as any).saveState?.({
-      ...state,
-      staff: [...state.staff, newMember],
-    });
-    store.addToast('Staff Member Created', `${newMember.name} added as ${newMember.role}.`, 'success');
-
-    setIsStaffModalOpen(false);
-    setNewStaffName('');
-    setNewStaffEmail('');
+      setIsStaffModalOpen(false);
+      setNewStaffName('');
+      setNewStaffEmail('');
+      setNewStaffPassword('');
+      setNewDbStaffRole('BILLING');
+      setNewStaffPermissions(DEFAULT_PERMISSIONS_BY_ROLE.BILLING);
+    } catch (err) {
+      store.addToast(
+        'Could Not Create Account',
+        err instanceof Error ? err.message : 'Something went wrong creating this login.',
+        'error'
+      );
+    } finally {
+      setIsCreatingStaff(false);
+    }
   };
 
   const tabs = [
@@ -133,7 +213,7 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <Button variant="secondary" onClick={handleResetData}>
-          <RotateCcw size={14} className="mr-2" /> RESET DEMO DATA
+          <RotateCcw size={14} className="mr-2" /> RELOAD FROM DATABASE
         </Button>
       </div>
 
@@ -296,11 +376,19 @@ export const SettingsPage: React.FC = () => {
                 </h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] text-emerald-700 font-bold uppercase">
-                  READY
+                <span className={`w-2 h-2 rounded-full ${settings.printer?.lastTestPrint ? 'bg-emerald-500' : 'bg-[#CFCFD2]'}`} />
+                <span className={`text-[10px] font-bold uppercase ${settings.printer?.lastTestPrint ? 'text-emerald-700' : 'text-[#888888]'}`}>
+                  {settings.printer?.lastTestPrint ? `TESTED ${settings.printer.lastTestPrint}` : 'NOT TESTED YET'}
                 </span>
               </div>
+            </div>
+
+            <div className="text-[11px] text-[#666666] bg-[#F1F1F3] border border-[#CFCFD2] p-3">
+              A browser can't detect a physical printer on its own. Printing works through your OS: connect the
+              thermal printer to this till's computer (USB, or Bluetooth/WiFi if the printer supports it) and
+              install its printer driver so Windows/macOS lists it as a normal printer - then "Test Thermal
+              Print" and every real sale's "Pay &amp; Print" will open the print dialog where you pick it.
+              "Tested" above only confirms the browser could open that dialog, not that paper actually came out.
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -378,15 +466,23 @@ export const SettingsPage: React.FC = () => {
                   TERMINAL STAFF & ACCESS ROLES
                 </h3>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsStaffModalOpen(true)}
-              >
-                <Plus size={13} className="mr-1" /> ADD STAFF
-              </Button>
+              {canManageStaff && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsStaffModalOpen(true)}
+                >
+                  <Plus size={13} className="mr-1" /> ADD STAFF
+                </Button>
+              )}
             </div>
+
+            {!canManageStaff && (
+              <div className="text-[11px] text-[#666666] bg-[#F1F1F3] border border-[#CFCFD2] p-3">
+                Only the OWNER account can create or edit staff logins and permissions.
+              </div>
+            )}
 
             {/* Roles Description Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
@@ -409,31 +505,72 @@ export const SettingsPage: React.FC = () => {
               <thead>
                 <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
                   <th className="py-2.5 px-3">STAFF MEMBER</th>
-                  <th className="py-2.5 px-3">EMAIL</th>
                   <th className="py-2.5 px-3">ROLE</th>
+                  <th className="py-2.5 px-3">CAN SEE</th>
                   <th className="py-2.5 px-3">STATUS</th>
+                  {canManageStaff && <th className="py-2.5 px-3 text-right">ACCESS</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5E7]">
                 {staff.map((s) => (
                   <tr key={s.id}>
                     <td className="py-3 px-3 font-bold text-[#0A0A0A]">{s.name}</td>
-                    <td className="py-3 px-3 text-[#666666]">{s.email}</td>
                     <td className="py-3 px-3">
                       <span className="px-2 py-0.5 bg-[#0A0A0A] text-white text-[10px] font-bold">
                         {s.role}
                       </span>
                     </td>
+                    <td className="py-3 px-3 text-[#666666] text-[10px]">
+                      {s.permissions.length === ALL_PERMISSIONS.length
+                        ? 'Everything'
+                        : s.permissions.length === 0
+                        ? 'Nothing yet'
+                        : `${s.permissions.length} of ${ALL_PERMISSIONS.length} sections`}
+                    </td>
                     <td className="py-3 px-3">
-                      <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        ACTIVE
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] font-semibold ${
+                          s.status === 'ACTIVE' ? 'text-emerald-700' : 'text-[#888888]'
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            s.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-[#CFCFD2]'
+                          }`}
+                        />
+                        {s.status}
                       </span>
                     </td>
+                    {canManageStaff && (
+                      <td className="py-3 px-3 text-right">
+                        {s.id === currentStaff?.id ? (
+                          <span className="text-[10px] text-[#888888]" title="You can't edit your own access - ask another OWNER, or use the database directly.">
+                            (you)
+                          </span>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingStaffId(s.id === editingStaffId ? null : s.id)}
+                          >
+                            {editingStaffId === s.id ? 'CLOSE' : 'EDIT ACCESS'}
+                          </Button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {canManageStaff && editingStaffId && (
+              <StaffAccessEditor
+                key={editingStaffId}
+                staffMember={staff.find((s) => s.id === editingStaffId)!}
+                onClose={() => setEditingStaffId(null)}
+              />
+            )}
           </div>
         )}
 
@@ -444,6 +581,41 @@ export const SettingsPage: React.FC = () => {
           </Button>
         </div>
       </form>
+
+      {/* Not a button, not a tab, not labeled - the OWNER knows this dot
+          opens the settled-invoice editor. Renders as nothing at all for
+          anyone else. */}
+      {canManageStaff && (
+        <button
+          type="button"
+          onClick={() => setIsInvoiceEditorOpen(true)}
+          title="."
+          aria-label="Edit invoices"
+          className="fixed bottom-3 right-3 w-2 h-2 rounded-full bg-[#E5E5E7] hover:bg-[#0A0A0A] transition-colors z-10"
+        />
+      )}
+
+      {isInvoiceEditorOpen && (
+        <div className="fixed inset-0 z-50 bg-[#0A0A0A]/50 flex items-center justify-center p-4">
+          <div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="p-4 border-b border-[#CFCFD2] flex items-center justify-between sticky top-0 bg-white">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#888888]">
+                Owner-only
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsInvoiceEditorOpen(false)}
+                className="text-[#666666] hover:text-[#0A0A0A] font-mono text-xs"
+              >
+                CLOSE ✕
+              </button>
+            </div>
+            <div className="p-4">
+              <EditInvoicePanel />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Quick Add Staff Modal */}
       {isStaffModalOpen && (
@@ -478,17 +650,59 @@ export const SettingsPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
+                  Temporary Password * (min 6 characters)
+                </label>
+                <div className="relative flex items-center">
+                  <Input
+                    required
+                    type={showNewStaffPassword ? 'text' : 'password'}
+                    placeholder="e.g. Deny@2026"
+                    value={newStaffPassword}
+                    onChange={(e) => setNewStaffPassword(e.target.value)}
+                    className="pr-9"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewStaffPassword((v) => !v)}
+                    className="absolute right-3 text-[#888888] hover:text-[#0A0A0A]"
+                    title={showNewStaffPassword ? 'Hide password' : 'Show password to relay it to the new hire'}
+                  >
+                    {showNewStaffPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
                   Role Permission
                 </label>
                 <select
-                  value={newStaffRole}
-                  onChange={(e) => setNewStaffRole(e.target.value as any)}
+                  value={newDbStaffRole}
+                  onChange={(e) => handleDbStaffRoleChange(e.target.value as DbStaffRole)}
                   className="w-full bg-white border border-[#CFCFD2] p-2 text-xs font-mono focus:outline-none"
                 >
                   <option value="BILLING">BILLING STAFF (Dashboard, POS, Bills)</option>
+                  <option value="FULFILLMENT">FULFILLMENT (Dashboard, Bills only)</option>
                   <option value="MANAGER">MANAGER (Billing, Products, Customers)</option>
                   <option value="OWNER">OWNER (Full Access)</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
+                  Can See (toggle per section)
+                </label>
+                <div className="grid grid-cols-2 gap-1.5 border border-[#CFCFD2] p-2.5 bg-[#FAFAFA]">
+                  {ALL_PERMISSIONS.map((key) => (
+                    <label key={key} className="flex items-center gap-1.5 text-[10px] text-[#333333] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newStaffPermissions.includes(key)}
+                        onChange={() => toggleNewStaffPermission(key)}
+                        className="accent-[#0A0A0A]"
+                      />
+                      {PERMISSION_LABELS[key]}
+                    </label>
+                  ))}
+                </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <Button
@@ -499,14 +713,91 @@ export const SettingsPage: React.FC = () => {
                 >
                   CANCEL
                 </Button>
-                <Button type="submit" variant="primary" size="sm">
-                  SAVE OPERATOR
+                <Button type="submit" variant="primary" size="sm" disabled={isCreatingStaff}>
+                  {isCreatingStaff ? 'CREATING...' : 'SAVE OPERATOR'}
                 </Button>
               </div>
             </form>
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const StaffAccessEditor: React.FC<{
+  staffMember: { id: string; name: string; role: DbStaffRole | 'ADMIN'; permissions: string[]; status: 'ACTIVE' | 'OFFLINE' };
+  onClose: () => void;
+}> = ({ staffMember, onClose }) => {
+  const [role, setRole] = useState<DbStaffRole>(staffMember.role === 'ADMIN' ? 'OWNER' : staffMember.role);
+  const [permissions, setPermissions] = useState<PermissionKey[]>(staffMember.permissions as PermissionKey[]);
+  const [isActive, setIsActive] = useState(staffMember.status === 'ACTIVE');
+  const [saving, setSaving] = useState(false);
+
+  const togglePermission = (key: PermissionKey) => {
+    setPermissions((prev) => (prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await store.updateStaffPermissions(staffMember.id, { role, permissions, isActive });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="border border-[#0A0A0A] p-4 space-y-3 bg-[#FAFAFA] font-mono text-xs">
+      <div className="font-bold text-[#0A0A0A]">EDIT ACCESS — {staffMember.name}</div>
+
+      <div>
+        <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">Role</label>
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value as DbStaffRole)}
+          className="w-full bg-white border border-[#CFCFD2] p-2 text-xs font-mono focus:outline-none"
+        >
+          <option value="BILLING">BILLING STAFF</option>
+          <option value="FULFILLMENT">FULFILLMENT</option>
+          <option value="MANAGER">MANAGER</option>
+          <option value="OWNER">OWNER</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-1.5 text-[10px] text-[#333333] cursor-pointer w-fit">
+          <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="accent-[#0A0A0A]" />
+          Account Active (unchecking blocks login)
+        </label>
+      </div>
+
+      <div>
+        <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">Can See</label>
+        <div className="grid grid-cols-2 gap-1.5 border border-[#CFCFD2] p-2.5 bg-white">
+          {ALL_PERMISSIONS.map((key) => (
+            <label key={key} className="flex items-center gap-1.5 text-[10px] text-[#333333] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={permissions.includes(key)}
+                onChange={() => togglePermission(key)}
+                className="accent-[#0A0A0A]"
+              />
+              {PERMISSION_LABELS[key]}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2 pt-1">
+        <Button type="button" variant="secondary" size="sm" onClick={onClose}>
+          CANCEL
+        </Button>
+        <Button type="button" variant="primary" size="sm" onClick={handleSave} disabled={saving}>
+          {saving ? 'SAVING...' : 'SAVE ACCESS'}
+        </Button>
+      </div>
     </div>
   );
 };

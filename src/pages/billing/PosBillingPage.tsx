@@ -1,14 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore, store } from '../../services/store';
-import { ordersApi } from '../../api/orders';
-import { customersApi } from '../../api/customers';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { formatINR } from '../../utils/formatters';
 import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter';
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
-import { Product, ProductVariant, PaymentSplit, Order, Customer } from '../../types';
+import { Product, ProductVariant, PaymentSplit } from '../../types';
 import {
   Search,
   Plus,
@@ -53,7 +51,7 @@ export const PosBillingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialCustId = searchParams.get('customerId') || '';
 
-  const { products, customers, settings } = useStore();
+  const { products, customers, settings, categories: dbCategories } = useStore();
 
   // Search & Filter
   const [search, setSearch] = useState('');
@@ -103,11 +101,15 @@ export const PosBillingPage: React.FC = () => {
   // Mobile/iPad portrait cart drawer toggle
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
-  // Categories extracted from products
+  // Real category taxonomy from the database (what the website admin
+  // manages), unioned with whatever's actually on a product so nothing
+  // assigned to an inactive/legacy category silently disappears.
   const categories = useMemo(() => {
-    const cats = new Set(products.map((p) => p.category.toUpperCase()));
-    return ['ALL', ...Array.from(cats)];
-  }, [products]);
+    const cats = new Set<string>();
+    dbCategories.forEach((c) => cats.add(c.name.toUpperCase()));
+    products.forEach((p) => cats.add(p.category.toUpperCase()));
+    return ['ALL', ...Array.from(cats).sort()];
+  }, [products, dbCategories]);
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
 
@@ -149,7 +151,7 @@ export const PosBillingPage: React.FC = () => {
 
   const totalDiscountAmount = itemDiscountsTotal + billDiscountAmount;
   const taxableAmount = Math.max(0, grossSubtotal - totalDiscountAmount);
-  const taxRate = settings.taxRate || 12;
+  const taxRate = settings.taxRate ?? 0;
   const taxAmount = Math.round((taxableAmount * taxRate) / 100);
   const grandTotal = taxableAmount + taxAmount;
   const totalItemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
@@ -299,27 +301,14 @@ export const PosBillingPage: React.FC = () => {
       return;
     }
 
-    const payload = {
+    const created = await store.addCustomer({
       name: newCustName.trim(),
       email: `${newCustName.toLowerCase().replace(/\s+/g, '')}@patron.studiodeny.com`,
       phone: newCustPhone.trim(),
       address: 'Studio Deny In-Store Counter',
       city: 'Mumbai',
-      segment: 'NEW' as const,
-    };
-
-    let created: Customer;
-    try {
-      created = await customersApi.create(payload);
-      store.addCustomer(payload); // Ensure local store sync
-    } catch (err: any) {
-      if (import.meta.env.VITE_ENABLE_MOCK_FALLBACK === 'true') {
-        created = store.addCustomer(payload);
-      } else {
-        store.addToast('Error', err.message || 'Could not register customer on server.', 'error');
-        return;
-      }
-    }
+      segment: 'NEW',
+    });
 
     setSelectedCustomerId(created.id);
     setIsGuest(false);
@@ -355,7 +344,7 @@ export const PosBillingPage: React.FC = () => {
   };
 
   // EXECUTE SETTLEMENT: SAVE FIRST, THEN PRINT
-  const handleCompletePayment = async (shouldPrint: boolean) => {
+  const handleCompletePayment = (shouldPrint: boolean) => {
     if (cart.length === 0) {
       store.addToast('Empty Bill', 'Add at least one product before checking out.', 'warning');
       return;
@@ -402,79 +391,72 @@ export const PosBillingPage: React.FC = () => {
         ? 'SPLIT'
         : (paymentSplits[0]?.method as any) || 'UPI';
 
-    const orderPayload = {
-      customerId: isGuest ? 'guest' : selectedCustomerId,
-      customerName,
-      customerEmail,
-      customerPhone,
-      channel: 'OFFLINE' as const,
-      shippingAddress: {
-        street: 'Studio Deny Flagship Store POS Register #01',
-        city: customerCity,
-        state: 'Maharashtra',
-        pincode: '400050',
-        country: 'India',
-      },
-      items: orderItems,
-      subtotal: grossSubtotal,
-      discount: totalDiscountAmount,
-      discountType,
-      discountPercent:
-        discountType === 'PERCENT'
-          ? discountValue
-          : grossSubtotal > 0
-          ? Math.round((totalDiscountAmount / grossSubtotal) * 100)
-          : 0,
-      discountReason: effectiveDiscountReason,
-      shippingFee: 0,
-      taxAmount,
-      grandTotal,
-      paymentStatus: 'PAID' as const,
-      fulfillmentStatus: 'DELIVERED' as const, // Handed over in-store
-      paymentMethod: primaryMethod,
-      paymentSplits,
-      tenderedAmount: numCashTendered > 0 ? numCashTendered : grandTotal,
-      changeAmount: changeToReturn,
-      notes: `In-store POS bill. Channel: OFFLINE. ${
-        effectiveDiscountReason ? `Discount: [${effectiveDiscountReason}]. ` : ''
-      }Tender: ${paymentSplits.map((s) => `${s.method}: ₹${s.amount}`).join(', ')}`,
-    };
-
-    try {
-      let savedBill: Order;
+    setTimeout(async () => {
       try {
-        savedBill = await ordersApi.create(orderPayload);
-      } catch (apiErr: any) {
-        if (import.meta.env.VITE_ENABLE_MOCK_FALLBACK === 'true') {
-          console.warn('[POS Billing] Backend API unavailable. Committing to local register.', apiErr);
-          savedBill = store.createOrder(orderPayload);
-        } else {
-          store.addToast('Checkout Failed', apiErr.message || 'Error processing bill on backend.', 'error');
-          setIsProcessingPayment(false);
-          return;
+        // 1. TRANSACTION SAVED BEFORE ATTEMPTING PRINT (Critical Requirement)
+        const savedBill = await store.createOrder({
+          customerId: isGuest ? 'guest' : selectedCustomerId,
+          customerName,
+          customerEmail,
+          customerPhone,
+          channel: 'OFFLINE',
+          shippingAddress: {
+            street: 'Studio Deny Flagship Store POS Register #01',
+            city: customerCity,
+            state: 'Maharashtra',
+            pincode: '400050',
+            country: 'India',
+          },
+          items: orderItems,
+          subtotal: grossSubtotal,
+          discount: totalDiscountAmount,
+          discountType,
+          discountPercent:
+            discountType === 'PERCENT'
+              ? discountValue
+              : grossSubtotal > 0
+              ? Math.round((totalDiscountAmount / grossSubtotal) * 100)
+              : 0,
+          discountReason: effectiveDiscountReason,
+          shippingFee: 0,
+          taxAmount,
+          grandTotal,
+          paymentStatus: 'PAID',
+          fulfillmentStatus: 'DELIVERED', // Handed over in-store
+          paymentMethod: primaryMethod,
+          paymentSplits,
+          tenderedAmount: numCashTendered > 0 ? numCashTendered : grandTotal,
+          changeAmount: changeToReturn,
+          notes: `In-store POS bill. Channel: OFFLINE. ${
+            effectiveDiscountReason ? `Discount: [${effectiveDiscountReason}]. ` : ''
+          }Tender: ${paymentSplits.map((s) => `${s.method}: ₹${s.amount}`).join(', ')}`,
+        });
+
+        setIsProcessingPayment(false);
+        setReceiptOrder(savedBill);
+
+        // Clear register state for next transaction
+        setCart([]);
+        setDiscountValue(0);
+        setDiscountReason('NONE');
+        setCustomDiscountReason('');
+        setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
+        setCashTendered('');
+        setMobileCartOpen(false);
+
+        // 2. TRIGGER PRINT IF REQUESTED
+        if (shouldPrint) {
+          triggerThermalPrint(savedBill);
         }
+      } catch (err) {
+        setIsProcessingPayment(false);
+        store.addToast(
+          'Checkout Failed',
+          err instanceof Error ? err.message : 'Could not save this bill. Stock or connection issue — nothing was charged.',
+          'error'
+        );
       }
-
-      setIsProcessingPayment(false);
-      setReceiptOrder(savedBill);
-
-      // Clear register state for next transaction
-      setCart([]);
-      setDiscountValue(0);
-      setDiscountReason('NONE');
-      setCustomDiscountReason('');
-      setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
-      setCashTendered('');
-      setMobileCartOpen(false);
-
-      // 2. TRIGGER PRINT IF REQUESTED
-      if (shouldPrint) {
-        triggerThermalPrint(savedBill);
-      }
-    } catch (err: any) {
-      setIsProcessingPayment(false);
-      store.addToast('Error', err.message || 'Payment processing encountered an issue.', 'error');
-    }
+    }, 450);
   };
 
   // Printing execution with dedicated isolated thermal print engine
@@ -620,21 +602,21 @@ export const PosBillingPage: React.FC = () => {
             LEFT AREA (COL 7): PRODUCT CATALOG & TOUCH SELECTION
         ========================================================================= */}
         <div className="lg:col-span-7 space-y-4">
-          {/* Category Filter Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 font-mono text-xs border-b border-[#CFCFD2]">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-2 uppercase font-bold tracking-wider transition-colors shrink-0 ${
-                  activeCategory === cat
-                    ? 'bg-[#0A0A0A] text-white'
-                    : 'bg-white text-[#666666] border border-[#CFCFD2] hover:text-[#0A0A0A]'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          {/* Category Filter - a dropdown since the live catalog has too many
+              categories for a row of tabs to scale */}
+          <div className="flex items-center gap-2 font-mono text-xs pb-1 border-b border-[#CFCFD2]">
+            <span className="text-[10px] uppercase tracking-widest text-[#888888] shrink-0">Category</span>
+            <select
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+              className="flex-1 sm:flex-none sm:min-w-[220px] bg-white border border-[#CFCFD2] px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider focus:outline-none focus:border-[#0A0A0A]"
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Fast Search Input */}
@@ -1447,7 +1429,7 @@ export const PosBillingPage: React.FC = () => {
                   </div>
                 )}
                 <div className="flex justify-between text-[#666666]">
-                  <span>GST ({settings.taxRate || 12}%):</span>
+                  <span>GST ({settings.taxRate ?? 0}%):</span>
                   <span>{formatINR(receiptOrder.taxAmount)}</span>
                 </div>
                 <div className="flex justify-between font-black text-base border-t border-[#0A0A0A] pt-1 text-[#0A0A0A]">

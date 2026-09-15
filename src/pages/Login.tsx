@@ -3,52 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { store } from '../services/store';
-import { authApi } from '../api/auth';
-import { setAccessToken } from '../api/client';
-import { Lock, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
-
-const ENABLE_MOCK_FALLBACK = import.meta.env.VITE_ENABLE_MOCK_FALLBACK === 'true';
+import { signIn } from '../api/auth';
+import { Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 export const Login: React.FC = () => {
-  const [email, setEmail] = useState('lead@studiodeny.com');
-  const [password, setPassword] = useState('StudioDeny@2026!');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
+    setError(null);
+    setLoading(true);
     try {
-      // Attempt backend authentication
-      const res = await authApi.login(email, password);
-      store.addToast('Welcome Back', `Authenticated as ${res.user.name} (${res.user.role}).`, 'success');
+      const { staff } = await signIn(email, password);
+      store.addToast('Welcome Back', `Signed in as ${staff.display_name}.`, 'success');
       navigate('/dashboard');
-    } catch (err: any) {
-      if (ENABLE_MOCK_FALLBACK) {
-        console.warn('[Login] Backend API unavailable. Logging in with local mock operator session.', err);
-        // Synthesize mock operator session for local continuity
-        setAccessToken('mock_bearer_jwt_token_studio_deny');
-        sessionStorage.setItem(
-          'STUDIO_DENY_USER',
-          JSON.stringify({
-            id: 'staff-lead-01',
-            name: 'Arjun Mehta',
-            email: email,
-            role: 'OWNER',
-            permissions: ['Full Terminal Access', 'Business Settings', 'Tax Engine', 'Staff Management'],
-          })
-        );
-        store.addToast('Offline Session', 'Operating in local offline mode.', 'info');
-        navigate('/dashboard');
-      } else {
-        setErrorMessage(err.message || 'Invalid credentials or authentication server unreachable.');
-        store.addToast('Login Failed', err.message || 'Access denied.', 'error');
-      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sign in failed.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -83,20 +59,19 @@ export const Login: React.FC = () => {
           </p>
         </div>
 
-        {errorMessage && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-mono flex items-center gap-2">
-            <AlertCircle size={14} className="shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="text-xs font-mono text-red-600 border border-red-300 bg-red-50 px-3 py-2">
+              {error}
+            </div>
+          )}
+
           <Input
             label="OPERATOR IDENTIFIER (EMAIL)"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isSubmitting}
+            disabled={loading}
             required
           />
 
@@ -105,7 +80,7 @@ export const Login: React.FC = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            disabled={isSubmitting}
+            disabled={loading}
             required
           />
 
@@ -115,11 +90,11 @@ export const Login: React.FC = () => {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={isSubmitting}
-              icon={isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+              disabled={loading}
+              icon={loading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
               iconPosition="right"
             >
-              {isSubmitting ? '[ AUTHENTICATING... ]' : '[ ENTER WORKSPACE ]'}
+              {loading ? '[ SIGNING IN... ]' : '[ ENTER WORKSPACE ]'}
             </Button>
           </div>
         </form>

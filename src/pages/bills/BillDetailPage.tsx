@@ -17,13 +17,16 @@ import {
   Split,
   Building2,
   CheckCircle2,
+  Ban,
 } from 'lucide-react';
 
 export const BillDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { orders, settings } = useStore();
+  const { orders, settings, currentStaff } = useStore();
   const [activeView, setActiveView] = useState<'SLIP' | 'TAX_INVOICE'>('SLIP');
+  const [isVoiding, setIsVoiding] = useState(false);
+  const canVoid = currentStaff?.permissions.includes('BILLS');
 
   const bill = orders.find(
     (o) =>
@@ -78,6 +81,25 @@ export const BillDetailPage: React.FC = () => {
     }
   };
 
+  const handleVoidBill = async () => {
+    const reason = window.prompt(
+      `Void ${bill.orderNumber}? This restores all ${bill.items.reduce((s, i) => s + i.quantity, 0)} units to stock and cannot be undone.\n\nReason for voiding:`
+    );
+    if (reason === null) return;
+    if (!reason.trim()) {
+      store.addToast('Reason Required', 'A reason is required to void a bill.', 'error');
+      return;
+    }
+    setIsVoiding(true);
+    try {
+      await store.voidBill(bill.id, reason.trim());
+    } catch (err) {
+      store.addToast('Void Failed', err instanceof Error ? err.message : 'Could not void this bill.', 'error');
+    } finally {
+      setIsVoiding(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Action Bar (hidden when printing) */}
@@ -91,6 +113,11 @@ export const BillDetailPage: React.FC = () => {
             {bill.orderNumber}
           </span>
           <StatusBadge status={bill.paymentStatus} />
+          {bill.billStatus === 'VOID' && (
+            <span className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold font-mono uppercase">
+              VOIDED
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -118,6 +145,12 @@ export const BillDetailPage: React.FC = () => {
             </button>
           </div>
 
+          {canVoid && bill.billStatus !== 'VOID' && (
+            <Button variant="secondary" size="sm" onClick={handleVoidBill} disabled={isVoiding}>
+              <Ban size={14} className="mr-1.5" /> {isVoiding ? 'VOIDING...' : 'VOID BILL'}
+            </Button>
+          )}
+
           <Button variant="primary" size="sm" onClick={handlePrint}>
             <Printer size={14} className="mr-1.5" /> REPRINT
           </Button>
@@ -129,17 +162,17 @@ export const BillDetailPage: React.FC = () => {
         <div className="thermal-receipt-print max-w-md mx-auto bg-white border border-dashed border-[#0A0A0A] p-6 sm:p-8 font-mono text-xs shadow-md space-y-4 print:border-none print:shadow-none print:p-0">
           <div className="border-b border-[#CFCFD2] pb-3 text-center">
             <div className="font-display font-black text-2xl tracking-tighter">
-              STUDIO DENY
+              {settings.storeName || 'STUDIO DENY'}
             </div>
             <div className="text-[10px] tracking-widest text-[#666666] uppercase mt-0.5">
               HIGH-CLASS STREETWEAR FLAGSHIP
             </div>
-            <div className="text-[9px] text-[#888888] mt-1">
-              {settings.address || 'Studio 4B, The Mill Compound, Lower Parel'}
-            </div>
-            <div className="text-[9px] text-[#888888]">
-              GSTIN: {settings.gstin || '27AAACS1429B1ZX'}
-            </div>
+            {settings.address && (
+              <div className="text-[9px] text-[#888888] mt-1">{settings.address}</div>
+            )}
+            {settings.gstin && (
+              <div className="text-[9px] text-[#888888]">GSTIN: {settings.gstin}</div>
+            )}
           </div>
 
           <div className="text-left text-[11px] space-y-1">
@@ -189,7 +222,7 @@ export const BillDetailPage: React.FC = () => {
               </div>
             )}
             <div className="flex justify-between text-[#666666]">
-              <span>GST ({settings.taxRate || 12}%):</span>
+              <span>GST ({settings.taxRate ?? 0}%):</span>
               <span>{formatINR(bill.taxAmount)}</span>
             </div>
             <div className="flex justify-between font-black text-base border-t border-[#0A0A0A] pt-1 text-[#0A0A0A]">
@@ -239,15 +272,21 @@ export const BillDetailPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start border-b border-[#0A0A0A] pb-6 gap-6">
             <div>
               <div className="font-display font-black text-3xl tracking-tighter text-[#0A0A0A]">
-                STUDIO DENY
+                {settings.storeName || 'STUDIO DENY'}
               </div>
               <div className="text-[11px] text-[#666666] uppercase tracking-widest mt-0.5">
                 HIGH-CLASS STREETWEAR COMMERCE
               </div>
               <div className="text-xs text-[#444444] mt-2 space-y-0.5">
-                <div>{settings.address || 'Studio 4B, The Mill Compound, Lower Parel'}</div>
-                <div>{settings.cityState || 'Mumbai, MH 400013'}</div>
-                <div>GSTIN: {settings.gstin || '27AAACS1429B1ZX'} · PAN: {settings.pan || 'AAACS1429B'}</div>
+                {settings.address && <div>{settings.address}</div>}
+                {settings.cityState && <div>{settings.cityState}</div>}
+                {(settings.gstin || settings.pan) && (
+                  <div>
+                    {settings.gstin && `GSTIN: ${settings.gstin}`}
+                    {settings.gstin && settings.pan && ' · '}
+                    {settings.pan && `PAN: ${settings.pan}`}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -310,7 +349,7 @@ export const BillDetailPage: React.FC = () => {
                 </div>
               )}
               <div className="flex justify-between text-[#666666]">
-                <span>GST ({settings.taxRate || 12}%):</span>
+                <span>GST ({settings.taxRate ?? 0}%):</span>
                 <span>{formatINR(bill.taxAmount)}</span>
               </div>
               <div className="flex justify-between font-black text-base border-t border-[#0A0A0A] pt-2 text-[#0A0A0A]">

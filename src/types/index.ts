@@ -76,6 +76,7 @@ export interface Collection {
 export type SalesChannel = 'ONLINE' | 'OFFLINE';
 
 export interface OrderItem {
+  id?: string;
   productId: string;
   variantId: string;
   name: string;
@@ -130,6 +131,7 @@ export interface Order {
   createdAt: string;
   timeline: OrderTimelineEvent[];
   notes?: string;
+  billStatus?: 'COMPLETED' | 'VOID' | 'RETURNED';
 }
 
 // Clothing Price Tag Types
@@ -205,6 +207,10 @@ export interface ReturnRequest {
   refundAmount: number;
   status: ReturnStatus;
   createdAt: string;
+  billItemId?: string;
+  variantId?: string;
+  productSlug?: string;
+  qty?: number;
 }
 
 export interface PaymentTransaction {
