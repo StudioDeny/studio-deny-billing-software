@@ -16,6 +16,7 @@ import {
 import * as posApi from '../api/pos';
 import { getCurrentStaff } from '../api/auth';
 import { dbRoleForStaffRole } from '../constants/permissions';
+import { supabase } from '../lib/supabaseClient';
 
 interface PaymentSplitLike {
   method: string;
@@ -114,6 +115,36 @@ export async function initStore(): Promise<void> {
     collections,
     ready: true,
   });
+
+  subscribeToLiveInventory();
+}
+
+let realtimeSubscribed = false;
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleInventoryRefresh() {
+  // Coalesce bursts of row-level change events (e.g. a multi-item checkout on
+  // the website) into a single refetch instead of one per row.
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(async () => {
+    const products = await posApi.fetchProducts();
+    const collections = posApi.deriveCollections(products, currentState.orders);
+    saveState({ ...currentState, products, collections });
+  }, 400);
+}
+
+function subscribeToLiveInventory() {
+  if (realtimeSubscribed) return;
+  realtimeSubscribed = true;
+
+  // Any stock change - from this POS, another POS terminal, or the website
+  // checkout - lands in product_variants/products. Push it to every open
+  // screen immediately instead of waiting for the next local action.
+  supabase
+    .channel('pos-inventory-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'product_variants' }, scheduleInventoryRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, scheduleInventoryRefresh)
+    .subscribe();
 }
 
 export const store = {
