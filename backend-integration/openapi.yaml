@@ -1,0 +1,427 @@
+openapi: 3.0.3
+info:
+  title: STUDIO DENY Commerce Operating System API
+  description: Production REST API specification for Studio Deny Billing, Inventory, Orders, CRM and POS Register.
+  version: 1.0.0
+servers:
+  - url: https://api.studiodeny.com/api/v1
+    description: Production Cluster
+  - url: https://staging-api.studiodeny.com/api/v1
+    description: Staging Environment
+  - url: http://localhost:4000/api/v1
+    description: Local Development Server
+
+paths:
+  /auth/login:
+    post:
+      summary: Operator Authentication
+      description: Verifies operator credentials and returns access token and user profile with set-cookie refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: lead@studiodeny.com
+                password:
+                  type: string
+                  format: password
+                  example: StudioDeny@2026!
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthLoginResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/me:
+    get:
+      summary: Current Session Operator
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+
+  /orders:
+    get:
+      summary: List Bills & Orders
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: channel
+          in: query
+          schema:
+            type: string
+            enum: [ALL, OFFLINE, ONLINE]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+
+    post:
+      summary: Settle Bill & Create Order (POS Checkout)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderPayload'
+      responses:
+        '201':
+          description: Order created and stock decremented atomically
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Order'
+        '409':
+          description: Insufficient stock conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{id}:
+    get:
+      summary: Get Order Detail by ID or Order Number
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Order'
+
+  /products:
+    get:
+      summary: List Products & Variants
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: collection
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+  /inventory/adjust:
+    post:
+      summary: Adjust Variant Inventory Level
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, variantId, changeQty, reason]
+              properties:
+                productId:
+                  type: string
+                variantId:
+                  type: string
+                changeQty:
+                  type: integer
+                  example: 10
+                reason:
+                  type: string
+                  enum: [SALE, RESTOCK, ADJUSTMENT, RETURN_RESTOCK, DAMAGED]
+                note:
+                  type: string
+      responses:
+        '200':
+          description: Stock adjusted
+
+  /customers:
+    get:
+      summary: List Customers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: segment
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer records
+
+  /reports/sales-audit:
+    get:
+      summary: Daily Sales & Register Reconciliation Audit
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: timeRange
+          in: query
+          schema:
+            type: string
+            enum: [ALL, TODAY, WEEK, MONTH]
+      responses:
+        '200':
+          description: Consolidated sales audit numbers
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [OWNER, MANAGER, BILLING, ADMIN, FULFILLMENT]
+        permissions:
+          type: array
+          items:
+            type: string
+
+    AuthLoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/AuthUser'
+            accessToken:
+              type: string
+            expiresIn:
+              type: integer
+
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: string
+        sku:
+          type: string
+        color:
+          type: string
+        size:
+          type: string
+        price:
+          type: number
+        compareAtPrice:
+          type: number
+        stock:
+          type: integer
+        barcode:
+          type: string
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        sku:
+          type: string
+        name:
+          type: string
+        collection:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+        compareAtPrice:
+          type: number
+        totalStock:
+          type: integer
+        status:
+          type: string
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+
+    CreateOrderPayload:
+      type: object
+      required: [customerName, customerPhone, items, subtotal, grandTotal, paymentMethod]
+      properties:
+        customerId:
+          type: string
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        channel:
+          type: string
+          enum: [ONLINE, OFFLINE]
+        items:
+          type: array
+          items:
+            type: object
+            required: [productId, variantId, quantity, unitPrice]
+            properties:
+              productId:
+                type: string
+              variantId:
+                type: string
+              quantity:
+                type: integer
+              unitPrice:
+                type: number
+              total:
+                type: number
+        subtotal:
+          type: number
+        discount:
+          type: number
+        discountType:
+          type: string
+          enum: [PERCENT, FIXED]
+        taxAmount:
+          type: number
+        grandTotal:
+          type: number
+        paymentMethod:
+          type: string
+          enum: [UPI, CARD, CASH, OTHER, SPLIT, COD, BANK]
+        paymentSplits:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              method:
+                type: string
+              amount:
+                type: number
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        orderNumber:
+          type: string
+        channel:
+          type: string
+        grandTotal:
+          type: number
+        paymentStatus:
+          type: string
+        fulfillmentStatus:
+          type: string
+        createdAt:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        errors:
+          type: object
+
+  responses:
+    UnauthorizedError:
+      description: Access token missing or expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

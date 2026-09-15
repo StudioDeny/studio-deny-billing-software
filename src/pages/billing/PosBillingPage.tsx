@@ -1,12 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore, store } from '../../services/store';
+import { ordersApi } from '../../api/orders';
+import { customersApi } from '../../api/customers';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { formatINR } from '../../utils/formatters';
 import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter';
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
-import { Product, ProductVariant, PaymentSplit } from '../../types';
+import { Product, ProductVariant, PaymentSplit, Order, Customer } from '../../types';
 import {
   Search,
   Plus,
@@ -290,21 +292,34 @@ export const PosBillingPage: React.FC = () => {
   };
 
   // Quick Customer Creation
-  const handleQuickAddCustomer = (e: React.FormEvent) => {
+  const handleQuickAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCustName.trim() || !newCustPhone.trim()) {
       store.addToast('Validation', 'Customer Name and Phone are required.', 'error');
       return;
     }
 
-    const created = store.addCustomer({
+    const payload = {
       name: newCustName.trim(),
       email: `${newCustName.toLowerCase().replace(/\s+/g, '')}@patron.studiodeny.com`,
       phone: newCustPhone.trim(),
       address: 'Studio Deny In-Store Counter',
       city: 'Mumbai',
-      segment: 'NEW',
-    });
+      segment: 'NEW' as const,
+    };
+
+    let created: Customer;
+    try {
+      created = await customersApi.create(payload);
+      store.addCustomer(payload); // Ensure local store sync
+    } catch (err: any) {
+      if (import.meta.env.VITE_ENABLE_MOCK_FALLBACK === 'true') {
+        created = store.addCustomer(payload);
+      } else {
+        store.addToast('Error', err.message || 'Could not register customer on server.', 'error');
+        return;
+      }
+    }
 
     setSelectedCustomerId(created.id);
     setIsGuest(false);
@@ -340,7 +355,7 @@ export const PosBillingPage: React.FC = () => {
   };
 
   // EXECUTE SETTLEMENT: SAVE FIRST, THEN PRINT
-  const handleCompletePayment = (shouldPrint: boolean) => {
+  const handleCompletePayment = async (shouldPrint: boolean) => {
     if (cart.length === 0) {
       store.addToast('Empty Bill', 'Add at least one product before checking out.', 'warning');
       return;
@@ -387,45 +402,58 @@ export const PosBillingPage: React.FC = () => {
         ? 'SPLIT'
         : (paymentSplits[0]?.method as any) || 'UPI';
 
-    setTimeout(() => {
-      // 1. TRANSACTION SAVED BEFORE ATTEMPTING PRINT (Critical Requirement)
-      const savedBill = store.createOrder({
-        customerId: isGuest ? 'guest' : selectedCustomerId,
-        customerName,
-        customerEmail,
-        customerPhone,
-        channel: 'OFFLINE',
-        shippingAddress: {
-          street: 'Studio Deny Flagship Store POS Register #01',
-          city: customerCity,
-          state: 'Maharashtra',
-          pincode: '400050',
-          country: 'India',
-        },
-        items: orderItems,
-        subtotal: grossSubtotal,
-        discount: totalDiscountAmount,
-        discountType,
-        discountPercent:
-          discountType === 'PERCENT'
-            ? discountValue
-            : grossSubtotal > 0
-            ? Math.round((totalDiscountAmount / grossSubtotal) * 100)
-            : 0,
-        discountReason: effectiveDiscountReason,
-        shippingFee: 0,
-        taxAmount,
-        grandTotal,
-        paymentStatus: 'PAID',
-        fulfillmentStatus: 'DELIVERED', // Handed over in-store
-        paymentMethod: primaryMethod,
-        paymentSplits,
-        tenderedAmount: numCashTendered > 0 ? numCashTendered : grandTotal,
-        changeAmount: changeToReturn,
-        notes: `In-store POS bill. Channel: OFFLINE. ${
-          effectiveDiscountReason ? `Discount: [${effectiveDiscountReason}]. ` : ''
-        }Tender: ${paymentSplits.map((s) => `${s.method}: ₹${s.amount}`).join(', ')}`,
-      });
+    const orderPayload = {
+      customerId: isGuest ? 'guest' : selectedCustomerId,
+      customerName,
+      customerEmail,
+      customerPhone,
+      channel: 'OFFLINE' as const,
+      shippingAddress: {
+        street: 'Studio Deny Flagship Store POS Register #01',
+        city: customerCity,
+        state: 'Maharashtra',
+        pincode: '400050',
+        country: 'India',
+      },
+      items: orderItems,
+      subtotal: grossSubtotal,
+      discount: totalDiscountAmount,
+      discountType,
+      discountPercent:
+        discountType === 'PERCENT'
+          ? discountValue
+          : grossSubtotal > 0
+          ? Math.round((totalDiscountAmount / grossSubtotal) * 100)
+          : 0,
+      discountReason: effectiveDiscountReason,
+      shippingFee: 0,
+      taxAmount,
+      grandTotal,
+      paymentStatus: 'PAID' as const,
+      fulfillmentStatus: 'DELIVERED' as const, // Handed over in-store
+      paymentMethod: primaryMethod,
+      paymentSplits,
+      tenderedAmount: numCashTendered > 0 ? numCashTendered : grandTotal,
+      changeAmount: changeToReturn,
+      notes: `In-store POS bill. Channel: OFFLINE. ${
+        effectiveDiscountReason ? `Discount: [${effectiveDiscountReason}]. ` : ''
+      }Tender: ${paymentSplits.map((s) => `${s.method}: ₹${s.amount}`).join(', ')}`,
+    };
+
+    try {
+      let savedBill: Order;
+      try {
+        savedBill = await ordersApi.create(orderPayload);
+      } catch (apiErr: any) {
+        if (import.meta.env.VITE_ENABLE_MOCK_FALLBACK === 'true') {
+          console.warn('[POS Billing] Backend API unavailable. Committing to local register.', apiErr);
+          savedBill = store.createOrder(orderPayload);
+        } else {
+          store.addToast('Checkout Failed', apiErr.message || 'Error processing bill on backend.', 'error');
+          setIsProcessingPayment(false);
+          return;
+        }
+      }
 
       setIsProcessingPayment(false);
       setReceiptOrder(savedBill);
@@ -443,7 +471,10 @@ export const PosBillingPage: React.FC = () => {
       if (shouldPrint) {
         triggerThermalPrint(savedBill);
       }
-    }, 450);
+    } catch (err: any) {
+      setIsProcessingPayment(false);
+      store.addToast('Error', err.message || 'Payment processing encountered an issue.', 'error');
+    }
   };
 
   // Printing execution with dedicated isolated thermal print engine

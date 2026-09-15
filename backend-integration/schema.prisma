@@ -1,0 +1,340 @@
+// STUDIO DENY COMMERCE OPERATING SYSTEM - DATABASE SCHEMA
+// Provider: PostgreSQL (Compatible with PostgreSQL 14+ and Supabase / AWS RDS)
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum StaffRole {
+  OWNER
+  MANAGER
+  BILLING
+  ADMIN
+  FULFILLMENT
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  CASH
+  OTHER
+  SPLIT
+  COD
+  BANK
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  REFUNDED
+  FAILED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PROCESSING
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum CustomerSegment {
+  VIP
+  HIGH_VALUE
+  ACTIVE
+  NEW
+  AT_RISK
+}
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  IN_TRANSIT
+  RECEIVED
+  INSPECTED
+  REFUNDED
+  EXCHANGED
+  REJECTED
+}
+
+enum SalesChannel {
+  ONLINE
+  OFFLINE
+}
+
+enum InventoryChangeReason {
+  SALE
+  RESTOCK
+  ADJUSTMENT
+  RETURN_RESTOCK
+  DAMAGED
+}
+
+model Staff {
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  passwordHash String         @map("password_hash")
+  role         StaffRole      @default(BILLING)
+  status       String         @default("ACTIVE") // ACTIVE, OFFLINE
+  permissions  Json           @default("[]")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  orders       Order[]
+  inventoryLogs InventoryLog[]
+
+  @@map("staff")
+}
+
+model Customer {
+  id                String          @id @default(uuid())
+  name              String
+  email             String          @unique
+  phone             String
+  address           String?
+  city              String?
+  segment           CustomerSegment @default(NEW)
+  ordersCount       Int             @default(0) @map("orders_count")
+  totalSpend        Decimal         @default(0) @map("total_spend") @db.Decimal(12, 2)
+  averageOrderValue Decimal         @default(0) @map("average_order_value") @db.Decimal(12, 2)
+  lastOrderNumber   String?         @map("last_order_number")
+  lastOrderDate     DateTime?       @map("last_order_date")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  orders            Order[]
+  returns           ReturnRequest[]
+
+  @@index([phone])
+  @@index([segment])
+  @@map("customers")
+}
+
+model Collection {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  code        String    @unique
+  description String?
+  status      String    @default("ACTIVE") // ACTIVE, ARCHIVED
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  products    Product[]
+
+  @@map("collections")
+}
+
+model Product {
+  id             String           @id @default(uuid())
+  sku            String           @unique
+  name           String
+  collectionId   String?          @map("collection_id")
+  collection     Collection?      @relation(fields: [collectionId], references: [id])
+  category       String
+  price          Decimal          @db.Decimal(10, 2)
+  compareAtPrice Decimal?         @map("compare_at_price") @db.Decimal(10, 2)
+  totalStock     Int              @default(0) @map("total_stock")
+  status         String           @default("ACTIVE") // ACTIVE, ARCHIVED, DRAFT
+  image          String?
+  description    String?
+  tags           String[]         @default([])
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  variants       ProductVariant[]
+  orderItems     OrderItem[]
+  inventoryLogs  InventoryLog[]
+
+  @@index([category])
+  @@index([status])
+  @@map("products")
+}
+
+model ProductVariant {
+  id             String         @id @default(uuid())
+  productId      String         @map("product_id")
+  product        Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku            String         @unique
+  color          String
+  size           String
+  price          Decimal        @db.Decimal(10, 2)
+  compareAtPrice Decimal?       @map("compare_at_price") @db.Decimal(10, 2)
+  stock          Int            @default(0)
+  barcode        String?
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+  orderItems     OrderItem[]
+  inventoryLogs  InventoryLog[]
+
+  @@index([productId])
+  @@index([barcode])
+  @@map("product_variants")
+}
+
+model Order {
+  id                String               @id @default(uuid())
+  orderNumber       String               @unique @map("order_number")
+  idempotencyKey    String?              @unique @map("idempotency_key")
+  customerId        String?              @map("customer_id")
+  customer          Customer?            @relation(fields: [customerId], references: [id])
+  customerName      String               @map("customer_name")
+  customerEmail     String               @map("customer_email")
+  customerPhone     String               @map("customer_phone")
+  channel           SalesChannel         @default(OFFLINE)
+  shippingAddress   Json?                @map("shipping_address")
+  subtotal          Decimal              @db.Decimal(10, 2)
+  discount          Decimal              @default(0) @db.Decimal(10, 2)
+  discountType      String?              @map("discount_type") // PERCENT, FIXED
+  discountPercent   Decimal?             @map("discount_percent") @db.Decimal(5, 2)
+  discountReason    String?              @map("discount_reason")
+  shippingFee       Decimal              @default(0) @map("shipping_fee") @db.Decimal(10, 2)
+  taxAmount         Decimal              @default(0) @map("tax_amount") @db.Decimal(10, 2)
+  grandTotal        Decimal              @map("grand_total") @db.Decimal(10, 2)
+  paymentStatus     PaymentStatus        @default(PAID) @map("payment_status")
+  fulfillmentStatus FulfillmentStatus    @default(DELIVERED) @map("fulfillment_status")
+  paymentMethod     PaymentMethod        @default(UPI) @map("payment_method")
+  tenderedAmount    Decimal?             @map("tendered_amount") @db.Decimal(10, 2)
+  changeAmount      Decimal?             @map("change_amount") @db.Decimal(10, 2)
+  courierName       String?              @map("courier_name")
+  trackingNumber    String?              @map("tracking_number")
+  notes             String?
+  staffId           String?              @map("staff_id")
+  staff             Staff?               @relation(fields: [staffId], references: [id])
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+  items             OrderItem[]
+  payments          PaymentTransaction[]
+  timeline          OrderTimeline[]
+  returns           ReturnRequest[]
+
+  @@index([channel, createdAt])
+  @@index([paymentStatus])
+  @@index([fulfillmentStatus])
+  @@index([createdAt(sort: Desc)])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String         @id @default(uuid())
+  orderId        String         @map("order_id")
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String         @map("product_id")
+  product        Product        @relation(fields: [productId], references: [id])
+  variantId      String         @map("variant_id")
+  variant        ProductVariant @relation(fields: [variantId], references: [id])
+  name           String
+  variantName    String         @map("variant_name")
+  size           String
+  color          String
+  quantity       Int
+  unitPrice      Decimal        @map("unit_price") @db.Decimal(10, 2)
+  itemDiscount   Decimal        @default(0) @map("item_discount") @db.Decimal(10, 2)
+  discountReason String?        @map("discount_reason")
+  total          Decimal        @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([variantId])
+  @@map("order_items")
+}
+
+model PaymentTransaction {
+  id             String        @id @default(uuid())
+  transactionRef String        @unique @map("transaction_ref")
+  orderId        String        @map("order_id")
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderNumber    String        @map("order_number")
+  customerName   String        @map("customer_name")
+  amount         Decimal       @db.Decimal(10, 2)
+  method         PaymentMethod
+  status         String        @default("SUCCESS") // SUCCESS, REFUNDED, PENDING
+  tendered       Decimal?      @db.Decimal(10, 2)
+  change         Decimal?      @db.Decimal(10, 2)
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("payment_transactions")
+}
+
+model OrderTimeline {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    String
+  time      DateTime @default(now())
+  note      String?
+
+  @@index([orderId])
+  @@map("order_timeline")
+}
+
+model InventoryLog {
+  id          String                @id @default(uuid())
+  productId   String                @map("product_id")
+  product     Product               @relation(fields: [productId], references: [id])
+  variantId   String                @map("variant_id")
+  variant     ProductVariant        @relation(fields: [variantId], references: [id])
+  changeQty   Int                   @map("change_qty")
+  newStock    Int                   @map("new_stock")
+  reason      InventoryChangeReason
+  staffId     String?               @map("staff_id")
+  staff       Staff?                @relation(fields: [staffId], references: [id])
+  createdAt   DateTime              @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@index([variantId])
+  @@index([createdAt(sort: Desc)])
+  @@map("inventory_logs")
+}
+
+model ReturnRequest {
+  id           String       @id @default(uuid())
+  returnNumber String       @unique @map("return_number")
+  orderId      String       @map("order_id")
+  order        Order        @relation(fields: [orderId], references: [id])
+  orderNumber  String       @map("order_number")
+  customerId   String?      @map("customer_id")
+  customer     Customer?    @relation(fields: [customerId], references: [id])
+  customerName String       @map("customer_name")
+  productTitle String       @map("product_title")
+  variantName  String       @map("variant_name")
+  reason       String
+  condition    String
+  refundAmount Decimal      @map("refund_amount") @db.Decimal(10, 2)
+  status       ReturnStatus @default(REQUESTED)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@index([status])
+  @@map("return_requests")
+}
+
+model CommerceSettings {
+  id                     String   @id @default("default")
+  storeName              String   @default("STUDIO DENY") @map("store_name")
+  brand                  String   @default("DENY OS")
+  tagline                String?
+  address                String?
+  cityState              String?  @map("city_state")
+  country                String   @default("India")
+  phone                  String?
+  email                  String?
+  website                String?
+  gstin                  String?
+  pan                    String?
+  invoicePrefix          String   @default("SD-INV-") @map("invoice_prefix")
+  startingInvoiceNumber  Int      @default(1000248) @map("starting_invoice_number")
+  currency               String   @default("INR")
+  taxRate                Decimal  @default(12) @map("tax_rate") @db.Decimal(5, 2)
+  shippingFlatRate       Decimal  @default(250) @map("shipping_flat_rate") @db.Decimal(10, 2)
+  freeShippingThreshold  Decimal  @default(5000) @map("free_shipping_threshold") @db.Decimal(10, 2)
+  printerConfig          Json?    @map("printer_config")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  @@map("commerce_settings")
+}
