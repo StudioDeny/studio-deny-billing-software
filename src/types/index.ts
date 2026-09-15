@@ -131,6 +131,7 @@ export interface Order {
   createdAt: string;
   timeline: OrderTimelineEvent[];
   notes?: string;
+  billStatus?: 'COMPLETED' | 'VOID' | 'RETURNED';
 }
 
 // Clothing Price Tag Types

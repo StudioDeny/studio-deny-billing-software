@@ -17,13 +17,16 @@ import {
   Split,
   Building2,
   CheckCircle2,
+  Ban,
 } from 'lucide-react';
 
 export const BillDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { orders, settings } = useStore();
+  const { orders, settings, currentStaff } = useStore();
   const [activeView, setActiveView] = useState<'SLIP' | 'TAX_INVOICE'>('SLIP');
+  const [isVoiding, setIsVoiding] = useState(false);
+  const canVoid = currentStaff?.permissions.includes('BILLS');
 
   const bill = orders.find(
     (o) =>
@@ -78,6 +81,25 @@ export const BillDetailPage: React.FC = () => {
     }
   };
 
+  const handleVoidBill = async () => {
+    const reason = window.prompt(
+      `Void ${bill.orderNumber}? This restores all ${bill.items.reduce((s, i) => s + i.quantity, 0)} units to stock and cannot be undone.\n\nReason for voiding:`
+    );
+    if (reason === null) return;
+    if (!reason.trim()) {
+      store.addToast('Reason Required', 'A reason is required to void a bill.', 'error');
+      return;
+    }
+    setIsVoiding(true);
+    try {
+      await store.voidBill(bill.id, reason.trim());
+    } catch (err) {
+      store.addToast('Void Failed', err instanceof Error ? err.message : 'Could not void this bill.', 'error');
+    } finally {
+      setIsVoiding(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Action Bar (hidden when printing) */}
@@ -91,6 +113,11 @@ export const BillDetailPage: React.FC = () => {
             {bill.orderNumber}
           </span>
           <StatusBadge status={bill.paymentStatus} />
+          {bill.billStatus === 'VOID' && (
+            <span className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold font-mono uppercase">
+              VOIDED
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -117,6 +144,12 @@ export const BillDetailPage: React.FC = () => {
               FULL TAX INVOICE
             </button>
           </div>
+
+          {canVoid && bill.billStatus !== 'VOID' && (
+            <Button variant="secondary" size="sm" onClick={handleVoidBill} disabled={isVoiding}>
+              <Ban size={14} className="mr-1.5" /> {isVoiding ? 'VOIDING...' : 'VOID BILL'}
+            </Button>
+          )}
 
           <Button variant="primary" size="sm" onClick={handlePrint}>
             <Printer size={14} className="mr-1.5" /> REPRINT

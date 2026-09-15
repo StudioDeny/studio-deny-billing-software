@@ -17,14 +17,16 @@ import {
   Tag,
   Eye,
   EyeOff,
+  AlertTriangle,
 } from 'lucide-react';
 import { ALL_PERMISSIONS, DEFAULT_PERMISSIONS_BY_ROLE, PERMISSION_LABELS, PermissionKey, DbStaffRole } from '../../constants/permissions';
 import { printThermalReceipt } from '../../utils/receiptPrinter';
+import { EditInvoicePanel } from './EditInvoicePanel';
 
 export const SettingsPage: React.FC = () => {
   const { settings, staff, currentStaff } = useStore();
   const canManageStaff = currentStaff?.role === 'OWNER';
-  const [activeTab, setActiveTab] = useState<'BUSINESS' | 'BILLING' | 'PRINTER' | 'STAFF'>('BUSINESS');
+  const [activeTab, setActiveTab] = useState<'BUSINESS' | 'BILLING' | 'PRINTER' | 'STAFF' | 'INVOICES'>('BUSINESS');
 
   // Business Profile Form
   const [brand, setBrand] = useState(settings.brand);
@@ -192,6 +194,9 @@ export const SettingsPage: React.FC = () => {
     { id: 'BILLING' as const, label: 'BILLING & TAX', icon: <Receipt size={14} /> },
     { id: 'PRINTER' as const, label: 'PRINTER CONFIG', icon: <Printer size={14} /> },
     { id: 'STAFF' as const, label: 'STAFF & ROLES', icon: <ShieldCheck size={14} /> },
+    // Deliberately not a prominent action anywhere else - only the OWNER
+    // ever sees this tab exists at all.
+    ...(canManageStaff ? [{ id: 'INVOICES' as const, label: 'EDIT INVOICES', icon: <AlertTriangle size={14} /> }] : []),
   ];
 
   return (
@@ -572,12 +577,17 @@ export const SettingsPage: React.FC = () => {
           </div>
         )}
 
+        {/* 5. EDIT INVOICES TAB - OWNER only, not surfaced anywhere else */}
+        {activeTab === 'INVOICES' && <EditInvoicePanel />}
+
         {/* Save Button */}
-        <div className="flex justify-end pt-2">
-          <Button type="submit" variant="primary" size="md">
-            <Save size={14} className="mr-2" /> SAVE SETTINGS
-          </Button>
-        </div>
+        {activeTab !== 'INVOICES' && (
+          <div className="flex justify-end pt-2">
+            <Button type="submit" variant="primary" size="md">
+              <Save size={14} className="mr-2" /> SAVE SETTINGS
+            </Button>
+          </div>
+        )}
       </form>
 
       {/* Quick Add Staff Modal */}

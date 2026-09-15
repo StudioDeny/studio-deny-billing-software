@@ -213,6 +213,23 @@ export async function createCustomer(input: {
   return mapCustomer(data as DbPosCustomer);
 }
 
+export async function updateCustomer(
+  id: string,
+  updates: { name?: string; phone?: string; email?: string; address?: string; city?: string }
+): Promise<void> {
+  const payload: Record<string, unknown> = {
+    name: updates.name,
+    phone: updates.phone,
+    email: updates.email,
+    address: updates.address,
+    city: updates.city,
+  };
+  Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
+  const { error } = await supabase.from('pos_customers').update(payload).eq('id', id);
+  if (error) throw error;
+}
+
 function mapStaff(s: DbPosStaff): StaffMember {
   return {
     id: s.id,
@@ -340,6 +357,7 @@ function mapBillToOrder(bill: DbPosBill, items: DbPosBillItem[], customer: DbPos
       { status: 'ORDER PLACED', time: bill.created_at.replace('T', ' ').substring(0, 19), note: 'Bill settled in Deny OS' },
     ],
     notes: bill.notes || undefined,
+    billStatus: bill.status,
   };
 }
 
@@ -427,6 +445,66 @@ export async function checkout(input: {
   }
 
   return mapBillToOrder(bill, (items || []) as DbPosBillItem[], customer);
+}
+
+async function fetchOrderByBillId(billId: string): Promise<Order> {
+  const [{ data: bill, error: bErr }, { data: items, error: iErr }] = await Promise.all([
+    supabase.from('pos_bills').select('*').eq('id', billId).single(),
+    supabase.from('pos_bill_items').select('*').eq('bill_id', billId),
+  ]);
+  if (bErr) throw bErr;
+  if (iErr) throw iErr;
+
+  let customer: DbPosCustomer | undefined;
+  if (bill.pos_customer_id) {
+    const { data: c } = await supabase.from('pos_customers').select('*').eq('id', bill.pos_customer_id).single();
+    customer = c as DbPosCustomer;
+  }
+
+  return mapBillToOrder(bill as DbPosBill, (items || []) as DbPosBillItem[], customer);
+}
+
+export async function voidBill(billId: string, staffId: string | null, reason: string): Promise<Order> {
+  const { error } = await supabase.rpc('pos_void_bill', {
+    p_bill_id: billId,
+    p_staff_id: staffId,
+    p_reason: reason,
+  });
+  if (error) throw error;
+  return fetchOrderByBillId(billId);
+}
+
+export async function editBill(input: {
+  billId: string;
+  items: CheckoutItemInput[];
+  discount: number;
+  discountReason: string | null;
+  taxAmount: number;
+  shippingFee: number;
+  notes: string | null;
+  editorStaffId: string | null;
+}): Promise<Order> {
+  const { error } = await supabase.rpc('pos_edit_bill', {
+    p_bill_id: input.billId,
+    p_items: input.items.map((i) => ({
+      variant_id: i.variantId,
+      product_slug: i.productSlug,
+      product_name: i.productName,
+      size: i.size,
+      color: i.color,
+      qty: i.qty,
+      unit_price: i.unitPrice,
+      item_discount: i.itemDiscount,
+    })),
+    p_discount: input.discount,
+    p_discount_reason: input.discountReason,
+    p_tax_amount: input.taxAmount,
+    p_shipping_fee: input.shippingFee,
+    p_notes: input.notes,
+    p_editor_staff_id: input.editorStaffId,
+  });
+  if (error) throw error;
+  return fetchOrderByBillId(input.billId);
 }
 
 export async function adjustStock(

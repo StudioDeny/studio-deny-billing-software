@@ -3,6 +3,7 @@ import {
   Product,
   Collection,
   Order,
+  OrderItem,
   Customer,
   ReturnRequest,
   PaymentTransaction,
@@ -259,6 +260,64 @@ export const store = {
     return newOrder;
   },
 
+  voidBill: async (billId: string, reason: string): Promise<Order> => {
+    const voided = await posApi.voidBill(billId, currentStaffId, reason);
+
+    const [orders, products, customers, inventoryLogs] = await Promise.all([
+      posApi.fetchBills(),
+      posApi.fetchProducts(),
+      posApi.fetchCustomers(),
+      posApi.fetchInventoryLogs(),
+    ]);
+    saveState({ ...currentState, orders, products, customers, inventoryLogs });
+
+    store.addToast('Bill Voided', `${voided.orderNumber} voided and stock restored.`, 'info');
+    return voided;
+  },
+
+  editBill: async (
+    billId: string,
+    items: OrderItem[],
+    fields: { discount: number; discountReason?: string; taxAmount: number; shippingFee: number; notes?: string }
+  ): Promise<Order> => {
+    const checkoutItems = items.map((item) => {
+      const product = currentState.products.find((p) => p.id === item.productId);
+      const hasRealVariant = !!product?.variants.find((v) => v.id === item.variantId && v.id !== product.id);
+      return {
+        variantId: hasRealVariant ? item.variantId : null,
+        productSlug: item.productId,
+        productName: item.name,
+        size: item.size || null,
+        color: item.color || null,
+        qty: item.quantity,
+        unitPrice: item.unitPrice,
+        itemDiscount: item.itemDiscount || 0,
+      };
+    });
+
+    const edited = await posApi.editBill({
+      billId,
+      items: checkoutItems,
+      discount: fields.discount,
+      discountReason: fields.discountReason || null,
+      taxAmount: fields.taxAmount,
+      shippingFee: fields.shippingFee,
+      notes: fields.notes || null,
+      editorStaffId: currentStaffId,
+    });
+
+    const [orders, products, customers, inventoryLogs] = await Promise.all([
+      posApi.fetchBills(),
+      posApi.fetchProducts(),
+      posApi.fetchCustomers(),
+      posApi.fetchInventoryLogs(),
+    ]);
+    saveState({ ...currentState, orders, products, customers, inventoryLogs });
+
+    store.addToast('Bill Updated', `${edited.orderNumber} updated to ₹${edited.grandTotal.toLocaleString('en-IN')}.`, 'success');
+    return edited;
+  },
+
   updateFulfillmentStatus: (
     orderId: string,
     status: FulfillmentStatus,
@@ -367,6 +426,16 @@ export const store = {
     saveState({ ...currentState, customers });
     store.addToast('Customer Created', `${newCustomer.name} added to CRM.`, 'success');
     return newCustomer;
+  },
+
+  updateCustomer: async (
+    id: string,
+    updates: { name?: string; phone?: string; email?: string; address?: string; city?: string }
+  ): Promise<void> => {
+    await posApi.updateCustomer(id, updates);
+    const customers = await posApi.fetchCustomers();
+    saveState({ ...currentState, customers });
+    store.addToast('Customer Updated', 'Details saved.', 'success');
   },
 
   // STAFF
