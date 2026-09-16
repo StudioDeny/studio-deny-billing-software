@@ -310,7 +310,12 @@ export async function updateStaffPermissions(
   if (error) throw new Error(error.message);
 }
 
-function mapBillToOrder(bill: DbPosBill, items: DbPosBillItem[], customer: DbPosCustomer | undefined): Order {
+function mapBillToOrder(
+  bill: DbPosBill,
+  items: DbPosBillItem[],
+  customer: DbPosCustomer | undefined,
+  staffName?: string
+): Order {
   const orderItems: OrderItem[] = items
     .filter((i) => i.bill_id === bill.id)
     .map((i) => ({
@@ -358,23 +363,37 @@ function mapBillToOrder(bill: DbPosBill, items: DbPosBillItem[], customer: DbPos
     ],
     notes: bill.notes || undefined,
     billStatus: bill.status,
+    staffId: bill.staff_id || undefined,
+    staffName,
   };
 }
 
 export async function fetchBills(): Promise<Order[]> {
-  const [{ data: bills, error: bErr }, { data: items, error: iErr }, { data: customers, error: cErr }] =
-    await Promise.all([
-      supabase.from('pos_bills').select('*').order('created_at', { ascending: false }),
-      supabase.from('pos_bill_items').select('*'),
-      supabase.from('pos_customers').select('*'),
-    ]);
+  const [
+    { data: bills, error: bErr },
+    { data: items, error: iErr },
+    { data: customers, error: cErr },
+    { data: staffRows, error: sErr },
+  ] = await Promise.all([
+    supabase.from('pos_bills').select('*').order('created_at', { ascending: false }),
+    supabase.from('pos_bill_items').select('*'),
+    supabase.from('pos_customers').select('*'),
+    supabase.from('pos_staff').select('*'),
+  ]);
   if (bErr) throw new Error(bErr.message);
   if (iErr) throw new Error(iErr.message);
   if (cErr) throw new Error(cErr.message);
+  if (sErr) throw new Error(sErr.message);
 
   const customerById = new Map(((customers || []) as DbPosCustomer[]).map((c) => [c.id, c]));
+  const staffNameById = new Map(((staffRows || []) as DbPosStaff[]).map((s) => [s.id, s.display_name]));
   return ((bills || []) as DbPosBill[]).map((b) =>
-    mapBillToOrder(b, (items || []) as DbPosBillItem[], b.pos_customer_id ? customerById.get(b.pos_customer_id) : undefined)
+    mapBillToOrder(
+      b,
+      (items || []) as DbPosBillItem[],
+      b.pos_customer_id ? customerById.get(b.pos_customer_id) : undefined,
+      b.staff_id ? staffNameById.get(b.staff_id) : undefined
+    )
   );
 }
 
@@ -443,8 +462,15 @@ export async function checkout(input: {
     const { data: c } = await supabase.from('pos_customers').select('*').eq('id', bill.pos_customer_id).single();
     customer = c as DbPosCustomer;
   }
+  const staffName = await fetchStaffName(bill.staff_id);
 
-  return mapBillToOrder(bill, (items || []) as DbPosBillItem[], customer);
+  return mapBillToOrder(bill, (items || []) as DbPosBillItem[], customer, staffName);
+}
+
+async function fetchStaffName(staffId: string | null): Promise<string | undefined> {
+  if (!staffId) return undefined;
+  const { data } = await supabase.from('pos_staff').select('display_name').eq('id', staffId).maybeSingle();
+  return data?.display_name || undefined;
 }
 
 async function fetchOrderByBillId(billId: string): Promise<Order> {
@@ -460,8 +486,9 @@ async function fetchOrderByBillId(billId: string): Promise<Order> {
     const { data: c } = await supabase.from('pos_customers').select('*').eq('id', bill.pos_customer_id).single();
     customer = c as DbPosCustomer;
   }
+  const staffName = await fetchStaffName(bill.staff_id);
 
-  return mapBillToOrder(bill as DbPosBill, (items || []) as DbPosBillItem[], customer);
+  return mapBillToOrder(bill as DbPosBill, (items || []) as DbPosBillItem[], customer, staffName);
 }
 
 export async function voidBill(billId: string, staffId: string | null, reason: string): Promise<Order> {

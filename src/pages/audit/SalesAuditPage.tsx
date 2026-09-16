@@ -77,6 +77,27 @@ export const SalesAuditPage: React.FC = () => {
     (r) => offlineOrderIds.has(r.orderId) && r.status !== 'REFUNDED' && r.status !== 'REJECTED'
   ).length;
 
+  // Staff accountability - who settled which POS bills, and how much
+  // discount each staff member has given out. Only offline (counter) bills
+  // carry a real staff_id; online orders are self-checkout, no staff to
+  // attribute.
+  const staffBreakdown = useMemo(() => {
+    const byStaff = new Map<
+      string,
+      { staffId: string; staffName: string; billCount: number; totalDiscount: number; netRevenue: number }
+    >();
+    offlineOrders.forEach((o) => {
+      const key = o.staffId || 'unknown';
+      const name = o.staffName || 'Unknown Operator';
+      const entry = byStaff.get(key) || { staffId: key, staffName: name, billCount: 0, totalDiscount: 0, netRevenue: 0 };
+      entry.billCount += 1;
+      entry.totalDiscount += o.discount || 0;
+      entry.netRevenue += o.grandTotal;
+      byStaff.set(key, entry);
+    });
+    return Array.from(byStaff.values()).sort((a, b) => b.totalDiscount - a.totalDiscount);
+  }, [offlineOrders]);
+
   const onlineGross = onlineOrders.reduce((sum, o) => sum + o.subtotal, 0);
   const onlineDiscounts = onlineOrders.reduce((sum, o) => sum + (o.discount || 0), 0);
   const onlineTax = onlineOrders.reduce((sum, o) => sum + o.taxAmount, 0);
@@ -426,6 +447,52 @@ export const SalesAuditPage: React.FC = () => {
       </div>
 
       {/* =========================================================================
+          STAFF ACCOUNTABILITY - who settled what, and how much they discounted
+      ========================================================================= */}
+      <div className="bg-white border border-[#CFCFD2] shadow-subtle overflow-hidden no-print">
+        <div className="p-4 border-b border-[#CFCFD2] bg-[#FAFAFA] flex items-center gap-2">
+          <ShieldCheck size={15} className="text-[#0A0A0A]" />
+          <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">
+            STAFF ACCOUNTABILITY - POS COUNTER
+          </h3>
+        </div>
+        {staffBreakdown.length === 0 ? (
+          <div className="py-8 text-center text-xs font-mono text-[#888888]">
+            No in-store bills settled for the selected time range.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse font-mono text-xs">
+              <thead>
+                <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+                  <th className="py-2.5 px-4">STAFF MEMBER</th>
+                  <th className="py-2.5 px-4 text-right">BILLS SETTLED</th>
+                  <th className="py-2.5 px-4 text-right">TOTAL DISCOUNT GIVEN</th>
+                  <th className="py-2.5 px-4 text-right">AVG DISCOUNT / BILL</th>
+                  <th className="py-2.5 px-4 text-right">NET REVENUE</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E7]">
+                {staffBreakdown.map((s) => (
+                  <tr key={s.staffId}>
+                    <td className="py-3 px-4 font-bold text-[#0A0A0A]">{s.staffName}</td>
+                    <td className="py-3 px-4 text-right">{s.billCount}</td>
+                    <td className="py-3 px-4 text-right text-emerald-700 font-semibold">
+                      {formatINR(s.totalDiscount)}
+                    </td>
+                    <td className="py-3 px-4 text-right text-[#666666]">
+                      {formatINR(Math.round(s.totalDiscount / s.billCount))}
+                    </td>
+                    <td className="py-3 px-4 text-right font-bold text-[#0A0A0A]">{formatINR(s.netRevenue)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* =========================================================================
           CHANNEL TRANSACTION AUDIT LEDGER
       ========================================================================= */}
       <div className="bg-white border border-[#CFCFD2] shadow-subtle overflow-hidden space-y-0 no-print">
@@ -487,6 +554,7 @@ export const SalesAuditPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium">CHANNEL</th>
                 <th className="py-3 px-4 font-medium">TIMESTAMP</th>
                 <th className="py-3 px-4 font-medium">CUSTOMER</th>
+                <th className="py-3 px-4 font-medium">STAFF</th>
                 <th className="py-3 px-4 text-right font-medium">SUBTOTAL</th>
                 <th className="py-3 px-4 text-right font-medium">DISCOUNT</th>
                 <th className="py-3 px-4 text-right font-medium">TAX (GST)</th>
@@ -498,7 +566,7 @@ export const SalesAuditPage: React.FC = () => {
             <tbody className="divide-y divide-[#E5E5E7]">
               {auditedTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-[#888888]">
+                  <td colSpan={11} className="py-12 text-center text-[#888888]">
                     No sales audit records found for the selected criteria.
                   </td>
                 </tr>
@@ -528,6 +596,7 @@ export const SalesAuditPage: React.FC = () => {
                         <div className="font-bold text-[#0A0A0A]">{order.customerName}</div>
                         <div className="text-[10px] text-[#888888]">{order.customerPhone}</div>
                       </td>
+                      <td className="py-3 px-4 text-[#444444]">{order.staffName || (isOffline ? 'Unknown Operator' : '—')}</td>
                       <td className="py-3 px-4 text-right">{formatINR(order.subtotal)}</td>
                       <td className="py-3 px-4 text-right">
                         {order.discount > 0 ? (
