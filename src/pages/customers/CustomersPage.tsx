@@ -95,15 +95,15 @@ export const CustomersPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             CLIENT RELATIONSHIP MANAGEMENT
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             CUSTOMERS & COLLECTORS
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Managing {customers.length} Verified Streetwear Patrons & VIP Drop Subscribers
           </div>
         </div>
@@ -141,23 +141,23 @@ export const CustomersPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Search Bar */}
-      <div className="flex items-center gap-3 bg-white p-3 border border-[#CFCFD2]">
-        <Search size={15} className="text-[#888888]" />
+      <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
+        <Search size={15} className="text-[#4A4844]" />
         <input
           type="text"
           placeholder="Search by client name, email, phone number, or city..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
         />
       </div>
 
       {/* Customers Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">PATRON DOSSIER</th>
                 <th className="py-3 px-4 font-medium">CONTACT & CITY</th>
                 <th className="py-3 px-4 font-medium">TIER STATUS</th>
@@ -168,35 +168,35 @@ export const CustomersPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredCustomers.map((cust) => (
                 <tr
                   key={cust.id}
                   onClick={() => navigate(`/customers/${cust.id}`)}
-                  className="hover:bg-[#FAFAFA] transition-colors cursor-pointer group"
+                  className="hover:bg-[#E2E2E4] transition-colors cursor-pointer group"
                 >
                   {/* Patron Dossier */}
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                      <div className="w-9 h-9 bg-[#111111] text-[#E2E2E4] flex items-center justify-center font-bold text-xs shrink-0">
                         {cust.name.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-bold text-[#0A0A0A] group-hover:underline flex items-center gap-1.5">
+                        <div className="font-bold text-[#111111] group-hover:underline flex items-center gap-1.5">
                           {cust.name}
                           {cust.segment === 'VIP' && (
                             <Crown size={12} className="text-amber-500 fill-amber-500" />
                           )}
                         </div>
-                        <span className="text-[11px] text-[#666666] block">{cust.email}</span>
+                        <span className="text-[11px] text-[#4A4844] block">{cust.email}</span>
                       </div>
                     </div>
                   </td>
 
                   {/* Contact & City */}
-                  <td className="py-3 px-4 text-[#444444]">
+                  <td className="py-3 px-4 text-[#111111]">
                     <div>{cust.phone}</div>
-                    <span className="text-[10px] text-[#888888] flex items-center gap-1">
+                    <span className="text-[10px] text-[#4A4844] flex items-center gap-1">
                       <MapPin size={10} /> {cust.city}
                     </span>
                   </td>
@@ -207,37 +207,37 @@ export const CustomersPage: React.FC = () => {
                   </td>
 
                   {/* Orders */}
-                  <td className="py-3 px-4 text-center font-bold text-[#0A0A0A]">
+                  <td className="py-3 px-4 text-center font-bold text-[#111111]">
                     {cust.ordersCount} orders
                   </td>
 
                   {/* LTV */}
-                  <td className="py-3 px-4 font-bold text-[#0A0A0A]">
+                  <td className="py-3 px-4 font-bold text-[#111111]">
                     {formatINR(cust.totalSpend)}
                   </td>
 
                   {/* AOV */}
-                  <td className="py-3 px-4 text-[#444444] font-medium">
+                  <td className="py-3 px-4 text-[#111111] font-medium">
                     {formatINR(cust.averageOrderValue)}
                   </td>
 
                   {/* Last Order */}
-                  <td className="py-3 px-4 text-[#666666]">
+                  <td className="py-3 px-4 text-[#4A4844]">
                     <div>{cust.lastOrderNumber || '—'}</div>
-                    <span className="text-[10px] text-[#888888]">{cust.lastOrderDate || 'No orders yet'}</span>
+                    <span className="text-[10px] text-[#4A4844]">{cust.lastOrderDate || 'No orders yet'}</span>
                   </td>
 
                   {/* Action */}
                   <td className="py-3 px-4 text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => navigate(`/billing/new?customerId=${cust.id}`)}
-                      className="px-2.5 py-1 bg-[#0A0A0A] text-white text-xs font-mono font-semibold hover:bg-neutral-800"
+                      className="px-2.5 py-1 bg-[#111111] text-[#E2E2E4] text-xs font-mono font-semibold hover:bg-neutral-800"
                     >
                       + BILL
                     </button>
                     <button
                       onClick={() => navigate(`/customers/${cust.id}`)}
-                      className="px-2.5 py-1 border border-[#CFCFD2] hover:border-[#0A0A0A] text-xs font-mono"
+                      className="px-2.5 py-1 border border-[rgba(0,0,0,0.18)] hover:border-[#111111] text-xs font-mono"
                     >
                       VIEW
                     </button>
@@ -257,7 +257,7 @@ export const CustomersPage: React.FC = () => {
       >
         <form onSubmit={handleCreateCustomer} className="space-y-4 font-mono text-xs">
           <div>
-            <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+            <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
               Full Name
             </label>
             <Input
@@ -270,7 +270,7 @@ export const CustomersPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 Email Address
               </label>
               <Input
@@ -282,7 +282,7 @@ export const CustomersPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 Phone Number
               </label>
               <Input
@@ -295,7 +295,7 @@ export const CustomersPage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 City / Region
               </label>
               <Input
@@ -305,13 +305,13 @@ export const CustomersPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 Initial Tier Segment
               </label>
               <select
                 value={segment}
                 onChange={(e) => setSegment(e.target.value as any)}
-                className="w-full bg-[#FAFAFA] border border-[#CFCFD2] p-2.5 text-xs font-mono focus:bg-white focus:outline-none"
+                className="w-full bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] p-2.5 text-xs font-mono focus:bg-[#D5D5D8] focus:outline-none"
               >
                 <option value="ACTIVE">ACTIVE PATRON</option>
                 <option value="VIP">VIP COLLECTOR</option>
@@ -322,7 +322,7 @@ export const CustomersPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+            <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
               Primary Shipping Address
             </label>
             <textarea
@@ -330,11 +330,11 @@ export const CustomersPage: React.FC = () => {
               placeholder="Apartment, Street address, Pincode..."
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full bg-[#FAFAFA] border border-[#CFCFD2] p-2.5 text-xs font-mono focus:bg-white focus:outline-none"
+              className="w-full bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] p-2.5 text-xs font-mono focus:bg-[#D5D5D8] focus:outline-none"
             />
           </div>
 
-          <div className="pt-3 border-t border-[#CFCFD2] flex justify-end gap-3">
+          <div className="pt-3 border-t border-[rgba(0,0,0,0.18)] flex justify-end gap-3">
             <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>

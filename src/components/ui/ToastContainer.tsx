@@ -19,10 +19,10 @@ export const ToastContainer: React.FC = () => {
         };
 
         const bgStyles = {
-          success: 'bg-white border-emerald-300',
-          warning: 'bg-white border-amber-300',
-          error: 'bg-white border-rose-300',
-          info: 'bg-white border-[#0A0A0A]',
+          success: 'bg-[#D5D5D8] border-emerald-300',
+          warning: 'bg-[#D5D5D8] border-amber-300',
+          error: 'bg-[#D5D5D8] border-rose-300',
+          info: 'bg-[#D5D5D8] border-[#111111]',
         };
 
         return (
@@ -35,18 +35,18 @@ export const ToastContainer: React.FC = () => {
           >
             <div className="mt-0.5">{icons[toast.type || 'info']}</div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#0A0A0A]">
+              <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#111111]">
                 {toast.title}
               </div>
               {toast.message && (
-                <div className="text-xs text-[#666666] mt-0.5 font-sans leading-relaxed">
+                <div className="text-xs text-[#4A4844] mt-0.5 font-sans leading-relaxed">
                   {toast.message}
                 </div>
               )}
             </div>
             <button
               onClick={() => store.removeToast(toast.id)}
-              className="text-[#888888] hover:text-[#0A0A0A] p-0.5"
+              className="text-[#4A4844] hover:text-[#111111] p-0.5"
             >
               <X size={14} />
             </button>

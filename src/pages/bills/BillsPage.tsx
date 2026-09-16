@@ -67,13 +67,13 @@ export const BillsPage: React.FC = () => {
     const isSplit = bill.paymentSplits && bill.paymentSplits.length > 1;
     if (isSplit) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#0A0A0A] text-white text-[10px] font-bold">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#111111] text-[#E2E2E4] text-[10px] font-bold">
           <Split size={10} /> SPLIT ({bill.paymentSplits.length})
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#F1F1F3] border border-[#CFCFD2] text-[10px] text-[#222222] font-semibold">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-[10px] text-[#111111] font-semibold">
         {bill.paymentMethod === 'UPI' && <QrCode size={11} />}
         {bill.paymentMethod === 'CARD' && <CreditCard size={11} />}
         {(bill.paymentMethod === 'CASH' || bill.paymentMethod === 'COD') && <Banknote size={11} />}
@@ -85,15 +85,15 @@ export const BillsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-widest text-[#888888]">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844]">
             REGISTER LOG
           </div>
-          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             BILLS & TRANSACTIONS
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-1">
+          <div className="text-xs font-mono text-[#4A4844] mt-1">
             {orders.length} settled receipts · Total Revenue: {formatINR(totalBilled)}
           </div>
         </div>
@@ -120,9 +120,9 @@ export const BillsPage: React.FC = () => {
       {/* Filter & Search Bar */}
       <div className="space-y-2.5">
         {/* Channel Selector Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#F9F9FB] p-2.5 border border-[#CFCFD2]">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-[#E2E2E4] p-2.5 border border-[rgba(0,0,0,0.18)]">
           <div className="flex items-center gap-1.5 font-mono text-xs">
-            <span className="text-[10px] text-[#888888] font-bold uppercase mr-1">SALES CHANNEL:</span>
+            <span className="text-[10px] text-[#4A4844] font-bold uppercase mr-1">SALES CHANNEL:</span>
             {(['ALL', 'OFFLINE', 'ONLINE'] as const).map((ch) => (
               <button
                 key={ch}
@@ -130,9 +130,9 @@ export const BillsPage: React.FC = () => {
                 className={`px-3 py-1 font-bold text-xs uppercase transition-colors ${
                   channelFilter === ch
                     ? ch === 'ONLINE'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-[#0A0A0A] text-white'
-                    : 'bg-white text-[#666666] border border-[#CFCFD2] hover:text-[#0A0A0A]'
+                      ? 'bg-indigo-600 text-[#E2E2E4]'
+                      : 'bg-[#111111] text-[#E2E2E4]'
+                    : 'bg-[#D5D5D8] text-[#4A4844] border border-[rgba(0,0,0,0.18)] hover:text-[#111111]'
                 }`}
               >
                 {ch === 'ALL' ? 'ALL CHANNELS' : ch === 'OFFLINE' ? '🏢 OFFLINE POS' : '🌐 ONLINE STORE'}
@@ -140,7 +140,7 @@ export const BillsPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="text-xs font-mono text-[#666666]">
+          <div className="text-xs font-mono text-[#4A4844]">
             SHOWING {filteredBills.length} OF {orders.length} TRANSACTIONS
           </div>
         </div>
@@ -149,15 +149,15 @@ export const BillsPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           {/* Tender Filter Pills */}
           <div className="flex items-center gap-1 overflow-x-auto pb-1 font-mono text-xs">
-            <span className="text-[10px] text-[#888888] font-bold uppercase mr-1">TENDER:</span>
+            <span className="text-[10px] text-[#4A4844] font-bold uppercase mr-1">TENDER:</span>
             {['ALL', 'UPI', 'CASH', 'CARD', 'SPLIT'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setMethodFilter(tab)}
                 className={`px-3 py-1 font-bold uppercase transition-colors shrink-0 ${
                   methodFilter === tab
-                    ? 'bg-[#0A0A0A] text-white'
-                    : 'bg-white text-[#666666] border border-[#CFCFD2] hover:text-[#0A0A0A]'
+                    ? 'bg-[#111111] text-[#E2E2E4]'
+                    : 'bg-[#D5D5D8] text-[#4A4844] border border-[rgba(0,0,0,0.18)] hover:text-[#111111]'
                 }`}
               >
                 {tab}
@@ -166,25 +166,25 @@ export const BillsPage: React.FC = () => {
           </div>
 
           {/* Search */}
-          <div className="flex items-center gap-2 bg-white px-3 py-2 border border-[#CFCFD2] w-full sm:w-80">
-            <Search size={14} className="text-[#888888]" />
+          <div className="flex items-center gap-2 bg-[#D5D5D8] px-3 py-2 border border-[rgba(0,0,0,0.18)] w-full sm:w-80">
+            <Search size={14} className="text-[#4A4844]" />
             <input
               type="text"
               placeholder="Search invoice #, patron, phone, promo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+              className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
             />
           </div>
         </div>
       </div>
 
       {/* Bills Transaction Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden shadow-subtle">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden shadow-subtle">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">INVOICE #</th>
                 <th className="py-3 px-4 font-medium">CHANNEL</th>
                 <th className="py-3 px-4 font-medium">TIMESTAMP</th>
@@ -196,10 +196,10 @@ export const BillsPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredBills.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-[#888888]">
+                  <td colSpan={9} className="py-12 text-center text-[#4A4844]">
                     No bills found matching current filter.
                   </td>
                 </tr>
@@ -211,14 +211,14 @@ export const BillsPage: React.FC = () => {
                     <tr
                       key={b.id}
                       onClick={() => navigate(`/bills/${b.id}`)}
-                      className="hover:bg-[#FAFAFA] transition-colors cursor-pointer group"
+                      className="hover:bg-[#E2E2E4] transition-colors cursor-pointer group"
                     >
-                      <td className="py-3.5 px-4 font-bold text-[#0A0A0A] group-hover:underline">
+                      <td className="py-3.5 px-4 font-bold text-[#111111] group-hover:underline">
                         {b.orderNumber}
                       </td>
                       <td className="py-3 px-4">
                         {isOffline ? (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#0A0A0A] text-white text-[9px] font-bold">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#111111] text-[#E2E2E4] text-[9px] font-bold">
                             <Store size={9} /> POS
                           </span>
                         ) : (
@@ -227,19 +227,19 @@ export const BillsPage: React.FC = () => {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 text-[#666666]">{b.createdAt}</td>
+                      <td className="py-3 px-4 text-[#4A4844]">{b.createdAt}</td>
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-[#0A0A0A]">{b.customerName}</div>
-                        <div className="text-[10px] text-[#888888]">{b.customerPhone}</div>
+                        <div className="font-semibold text-[#111111]">{b.customerName}</div>
+                        <div className="text-[10px] text-[#4A4844]">{b.customerPhone}</div>
                       </td>
-                      <td className="py-3 px-4 text-[#555555]">{itemCount} pcs</td>
+                      <td className="py-3 px-4 text-[#4A4844]">{itemCount} pcs</td>
                       <td className="py-3 px-4">{getMethodBadge(b)}</td>
                       <td className="py-3 px-4 text-right">
-                        <div className="font-black text-[#0A0A0A]">{formatINR(b.grandTotal)}</div>
+                        <div className="font-black text-[#111111]">{formatINR(b.grandTotal)}</div>
                         {b.discount > 0 && (
                           <div className="text-[9px] text-emerald-700 font-bold">
                             -{formatINR(b.discount)}
-                            {b.discountReason && <span className="text-[#888888] font-normal ml-0.5">({b.discountReason})</span>}
+                            {b.discountReason && <span className="text-[#4A4844] font-normal ml-0.5">({b.discountReason})</span>}
                           </div>
                         )}
                       </td>
@@ -249,14 +249,14 @@ export const BillsPage: React.FC = () => {
                       <td className="py-3 px-4 text-right space-x-1.5" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => navigate(`/bills/${b.id}`)}
-                          className="px-2.5 py-1 text-[11px] font-mono border border-[#CFCFD2] hover:border-[#0A0A0A] hover:bg-[#F1F1F3] text-[#0A0A0A]"
+                          className="px-2.5 py-1 text-[11px] font-mono border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#D5D5D8] text-[#111111]"
                           title="View Tax Invoice & Slip"
                         >
                           VIEW
                         </button>
                         <button
                           onClick={(e) => handleReprint(b, e)}
-                          className="px-2.5 py-1 text-[11px] font-mono bg-[#0A0A0A] text-white hover:bg-neutral-800"
+                          className="px-2.5 py-1 text-[11px] font-mono bg-[#111111] text-[#E2E2E4] hover:bg-neutral-800"
                           title="Instant Thermal Print"
                         >
                           PRINT

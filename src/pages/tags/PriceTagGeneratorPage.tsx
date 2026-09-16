@@ -288,22 +288,22 @@ export const PriceTagGeneratorPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Header Bar */}
-      <div className="border-b border-[#CFCFD2] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4 no-print">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4 no-print">
         <div>
-          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#888888]">
+          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#4A4844]">
             <button
               onClick={() => navigate('/products')}
-              className="hover:text-[#0A0A0A] flex items-center gap-1"
+              className="hover:text-[#111111] flex items-center gap-1"
             >
               <ArrowLeft size={12} /> CATALOG
             </button>
             <span>/</span>
             <span>SMART LABELING ENGINE</span>
           </div>
-          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             CLOTHING PRICE TAG GENERATOR
           </h1>
-          <p className="text-xs font-mono text-[#666666] mt-1">
+          <p className="text-xs font-mono text-[#4A4844] mt-1">
             Automated Barcode & Price Tag Formatting for T-Shirts, Shirts, Jeans, Footwear & Outerwear
           </p>
         </div>
@@ -336,12 +336,12 @@ export const PriceTagGeneratorPage: React.FC = () => {
         ========================================================================= */}
         <div className="lg:col-span-7 space-y-6 no-print">
           {/* 1. CLOTHING CATEGORY PRESET SELECTOR */}
-          <div className="bg-white border border-[#CFCFD2] p-4 sm:p-5 space-y-3">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-4 sm:p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#888888] font-bold">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844] font-bold">
                 1. SELECT CLOTHING SILHOUETTE
               </span>
-              <span className="text-[10px] font-mono text-[#666666]">
+              <span className="text-[10px] font-mono text-[#4A4844]">
                 Tailors legal metrology, sizing & fabric specs
               </span>
             </div>
@@ -353,8 +353,8 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   onClick={() => handleSelectCategory(cat)}
                   className={`p-2.5 text-left border font-mono transition-all ${
                     selectedCategory === cat
-                      ? 'bg-[#0A0A0A] text-white border-[#0A0A0A] font-bold shadow-subtle'
-                      : 'bg-white text-[#444444] border-[#CFCFD2] hover:border-[#0A0A0A]'
+                      ? 'bg-[#111111] text-[#E2E2E4] border-[#111111] font-bold shadow-subtle'
+                      : 'bg-[#D5D5D8] text-[#111111] border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
                   }`}
                 >
                   <div className="text-base">{CATEGORY_PRESETS[cat].icon}</div>
@@ -365,18 +365,18 @@ export const PriceTagGeneratorPage: React.FC = () => {
           </div>
 
           {/* 2. PRODUCT & GARMENT METRICS */}
-          <div className="bg-white border border-[#CFCFD2] p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E5E5E7] pb-2.5">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#888888] font-bold">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-4 sm:p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.1)] pb-2.5">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844] font-bold">
                 2. PRODUCT & BRAND METADATA
               </span>
 
               {/* Fast Import From Catalog */}
               <div className="flex items-center gap-1.5 text-xs font-mono">
-                <span className="text-[#888888] text-[10px]">IMPORT CATALOG:</span>
+                <span className="text-[#4A4844] text-[10px]">IMPORT CATALOG:</span>
                 <select
                   onChange={(e) => handleLoadProduct(e.target.value)}
-                  className="bg-[#F1F1F3] border border-[#CFCFD2] p-1 text-[11px] font-mono focus:outline-none"
+                  className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-1 text-[11px] font-mono focus:outline-none"
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -389,74 +389,74 @@ export const PriceTagGeneratorPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
               <div>
-                <label className="block text-[10px] text-[#666666] uppercase mb-1">Brand Name</label>
+                <label className="block text-[10px] text-[#4A4844] uppercase mb-1">Brand Name</label>
                 <input
                   type="text"
                   value={brandName}
                   onChange={(e) => setBrandName(e.target.value)}
-                  className="w-full p-2 bg-[#FAFAFA] border border-[#CFCFD2] text-xs font-bold uppercase focus:bg-white focus:outline-none"
+                  className="w-full p-2 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] text-xs font-bold uppercase focus:bg-[#D5D5D8] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#666666] uppercase mb-1">Style / Product Name</label>
+                <label className="block text-[10px] text-[#4A4844] uppercase mb-1">Style / Product Name</label>
                 <input
                   type="text"
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  className="w-full p-2 bg-[#FAFAFA] border border-[#CFCFD2] text-xs font-bold uppercase focus:bg-white focus:outline-none"
+                  className="w-full p-2 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] text-xs font-bold uppercase focus:bg-[#D5D5D8] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#666666] uppercase mb-1">Fabric Composition & GSM</label>
+                <label className="block text-[10px] text-[#4A4844] uppercase mb-1">Fabric Composition & GSM</label>
                 <input
                   type="text"
                   value={fabricSpecs}
                   onChange={(e) => setFabricSpecs(e.target.value)}
                   placeholder="e.g. 100% Combed Cotton 260 GSM"
-                  className="w-full p-2 bg-[#FAFAFA] border border-[#CFCFD2] text-xs focus:bg-white focus:outline-none"
+                  className="w-full p-2 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] text-xs focus:bg-[#D5D5D8] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#666666] uppercase mb-1">Silhouette & Fit Pattern</label>
+                <label className="block text-[10px] text-[#4A4844] uppercase mb-1">Silhouette & Fit Pattern</label>
                 <input
                   type="text"
                   value={garmentFit}
                   onChange={(e) => setGarmentFit(e.target.value)}
                   placeholder="e.g. Oversized Drop-Shoulder"
-                  className="w-full p-2 bg-[#FAFAFA] border border-[#CFCFD2] text-xs focus:bg-white focus:outline-none"
+                  className="w-full p-2 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] text-xs focus:bg-[#D5D5D8] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#666666] uppercase mb-1">Mfg & Packaging Month/Year</label>
+                <label className="block text-[10px] text-[#4A4844] uppercase mb-1">Mfg & Packaging Month/Year</label>
                 <input
                   type="text"
                   value={mfdDate}
                   onChange={(e) => setMfdDate(e.target.value)}
                   placeholder="e.g. 09/2026"
-                  className="w-full p-2 bg-[#FAFAFA] border border-[#CFCFD2] text-xs focus:bg-white focus:outline-none"
+                  className="w-full p-2 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] text-xs focus:bg-[#D5D5D8] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#666666] uppercase mb-1">Country of Origin</label>
+                <label className="block text-[10px] text-[#4A4844] uppercase mb-1">Country of Origin</label>
                 <input
                   type="text"
                   value={countryOfOrigin}
                   onChange={(e) => setCountryOfOrigin(e.target.value)}
-                  className="w-full p-2 bg-[#FAFAFA] border border-[#CFCFD2] text-xs uppercase focus:bg-white focus:outline-none"
+                  className="w-full p-2 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] text-xs uppercase focus:bg-[#D5D5D8] focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* 3. TAG FORMAT & DIMENSIONS */}
-          <div className="bg-white border border-[#CFCFD2] p-4 sm:p-5 space-y-3">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-4 sm:p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#888888] font-bold">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844] font-bold">
                 3. TAG FORMAT & PRINT FORM FACTOR
               </span>
             </div>
@@ -467,8 +467,8 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 onClick={() => setTagFormat('HANG_TAG')}
                 className={`p-3 text-left border transition-all ${
                   tagFormat === 'HANG_TAG'
-                    ? 'bg-[#0A0A0A] text-white border-[#0A0A0A] font-bold'
-                    : 'bg-white text-[#444444] border-[#CFCFD2] hover:border-[#0A0A0A]'
+                    ? 'bg-[#111111] text-[#E2E2E4] border-[#111111] font-bold'
+                    : 'bg-[#D5D5D8] text-[#111111] border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
                 }`}
               >
                 <div className="text-xs uppercase">🏷️ LUXURY HANG TAG</div>
@@ -480,8 +480,8 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 onClick={() => setTagFormat('STICKER')}
                 className={`p-3 text-left border transition-all ${
                   tagFormat === 'STICKER'
-                    ? 'bg-[#0A0A0A] text-white border-[#0A0A0A] font-bold'
-                    : 'bg-white text-[#444444] border-[#CFCFD2] hover:border-[#0A0A0A]'
+                    ? 'bg-[#111111] text-[#E2E2E4] border-[#111111] font-bold'
+                    : 'bg-[#D5D5D8] text-[#111111] border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
                 }`}
               >
                 <div className="text-xs uppercase">🏷️ BARCODE STICKER</div>
@@ -493,8 +493,8 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 onClick={() => setTagFormat('SHOEBOX')}
                 className={`p-3 text-left border transition-all ${
                   tagFormat === 'SHOEBOX'
-                    ? 'bg-[#0A0A0A] text-white border-[#0A0A0A] font-bold'
-                    : 'bg-white text-[#444444] border-[#CFCFD2] hover:border-[#0A0A0A]'
+                    ? 'bg-[#111111] text-[#E2E2E4] border-[#111111] font-bold'
+                    : 'bg-[#D5D5D8] text-[#111111] border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
                 }`}
               >
                 <div className="text-xs uppercase">👟 FOOTWEAR BOX LABEL</div>
@@ -504,13 +504,13 @@ export const PriceTagGeneratorPage: React.FC = () => {
           </div>
 
           {/* 4. MULTI-SIZE VARIANT BATCH MATRIX */}
-          <div className="bg-white border border-[#CFCFD2] overflow-hidden">
-            <div className="p-4 bg-[#FAFAFA] border-b border-[#CFCFD2] flex items-center justify-between">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
+            <div className="p-4 bg-[#E2E2E4] border-b border-[rgba(0,0,0,0.18)] flex items-center justify-between">
               <div>
-                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">
+                <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#111111]">
                   4. SIZES, BARCODES & QUANTITY MATRIX
                 </h3>
-                <p className="text-[11px] font-mono text-[#666666] mt-0.5">
+                <p className="text-[11px] font-mono text-[#4A4844] mt-0.5">
                   Specify MRP, Offer Price and sticker quantity per size
                 </p>
               </div>
@@ -518,7 +518,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleAddVariantRow}
-                className="px-2.5 py-1 bg-[#0A0A0A] text-white text-xs font-mono font-bold hover:bg-neutral-800 transition-colors flex items-center gap-1"
+                className="px-2.5 py-1 bg-[#111111] text-[#E2E2E4] text-xs font-mono font-bold hover:bg-neutral-800 transition-colors flex items-center gap-1"
               >
                 <Plus size={12} /> ADD SIZE
               </button>
@@ -527,7 +527,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left font-mono text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+                  <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                     <th className="py-2.5 px-3">SIZE</th>
                     <th className="py-2.5 px-3">COLORWAY</th>
                     <th className="py-2.5 px-3">SKU / BARCODE</th>
@@ -538,11 +538,11 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     <th className="py-2.5 px-3 text-right">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E5E5E7]">
+                <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
                   {variantList.map((v, idx) => (
                     <tr
                       key={v.id}
-                      className={`hover:bg-[#FAFAFA] transition-colors ${
+                      className={`hover:bg-[#E2E2E4] transition-colors ${
                         previewVariantIndex === idx ? 'bg-amber-50/50' : ''
                       }`}
                     >
@@ -551,7 +551,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                           type="text"
                           value={v.size}
                           onChange={(e) => handleUpdateVariantField(v.id, 'size', e.target.value)}
-                          className="w-16 p-1 border border-[#CFCFD2] font-bold text-center text-xs focus:outline-none"
+                          className="w-16 p-1 border border-[rgba(0,0,0,0.18)] font-bold text-center text-xs focus:outline-none"
                         />
                       </td>
 
@@ -560,7 +560,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                           type="text"
                           value={v.color}
                           onChange={(e) => handleUpdateVariantField(v.id, 'color', e.target.value)}
-                          className="w-24 p-1 border border-[#CFCFD2] text-xs focus:outline-none"
+                          className="w-24 p-1 border border-[rgba(0,0,0,0.18)] text-xs focus:outline-none"
                         />
                       </td>
 
@@ -569,7 +569,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                           type="text"
                           value={v.sku}
                           onChange={(e) => handleUpdateVariantField(v.id, 'sku', e.target.value)}
-                          className="w-32 p-1 border border-[#CFCFD2] text-xs uppercase font-mono focus:outline-none"
+                          className="w-32 p-1 border border-[rgba(0,0,0,0.18)] text-xs uppercase font-mono focus:outline-none"
                         />
                       </td>
 
@@ -580,7 +580,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                           onChange={(e) =>
                             handleUpdateVariantField(v.id, 'mrp', Number(e.target.value) || 0)
                           }
-                          className="w-20 p-1 border border-[#CFCFD2] text-right text-xs focus:outline-none"
+                          className="w-20 p-1 border border-[rgba(0,0,0,0.18)] text-right text-xs focus:outline-none"
                         />
                       </td>
 
@@ -591,7 +591,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                           onChange={(e) =>
                             handleUpdateVariantField(v.id, 'price', Number(e.target.value) || 0)
                           }
-                          className="w-20 p-1 border border-[#CFCFD2] text-right text-xs font-bold focus:outline-none"
+                          className="w-20 p-1 border border-[rgba(0,0,0,0.18)] text-right text-xs font-bold focus:outline-none"
                         />
                       </td>
 
@@ -608,7 +608,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                               Math.max(1, Number(e.target.value) || 1)
                             )
                           }
-                          className="w-12 p-1 border border-[#0A0A0A] text-center font-bold text-xs focus:outline-none"
+                          className="w-12 p-1 border border-[#111111] text-center font-bold text-xs focus:outline-none"
                         />
                       </td>
 
@@ -618,8 +618,8 @@ export const PriceTagGeneratorPage: React.FC = () => {
                           onClick={() => setPreviewVariantIndex(idx)}
                           className={`px-2 py-0.5 text-[10px] font-bold uppercase transition-colors ${
                             previewVariantIndex === idx
-                              ? 'bg-[#0A0A0A] text-white'
-                              : 'bg-white text-[#666666] border border-[#CFCFD2] hover:text-[#0A0A0A]'
+                              ? 'bg-[#111111] text-[#E2E2E4]'
+                              : 'bg-[#D5D5D8] text-[#4A4844] border border-[rgba(0,0,0,0.18)] hover:text-[#111111]'
                           }`}
                         >
                           {previewVariantIndex === idx ? 'VIEWING' : 'PREVIEW'}
@@ -631,7 +631,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                           type="button"
                           onClick={() => handleRemoveVariantRow(v.id)}
                           disabled={variantList.length <= 1}
-                          className="text-[#888888] hover:text-red-600 disabled:opacity-30 p-1"
+                          className="text-[#4A4844] hover:text-red-600 disabled:opacity-30 p-1"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -642,11 +642,11 @@ export const PriceTagGeneratorPage: React.FC = () => {
               </table>
             </div>
 
-            <div className="p-3 bg-[#F1F1F3] border-t border-[#CFCFD2] flex items-center justify-between font-mono text-xs">
-              <span className="text-[#666666]">
-                Total Sizing Rows: <strong className="text-[#0A0A0A]">{variantList.length}</strong>
+            <div className="p-3 bg-[#D5D5D8] border-t border-[rgba(0,0,0,0.18)] flex items-center justify-between font-mono text-xs">
+              <span className="text-[#4A4844]">
+                Total Sizing Rows: <strong className="text-[#111111]">{variantList.length}</strong>
               </span>
-              <span className="font-bold text-[#0A0A0A]">
+              <span className="font-bold text-[#111111]">
                 Total Tags Scheduled for Print: {totalTagsInBatch} Units
               </span>
             </div>
@@ -657,78 +657,78 @@ export const PriceTagGeneratorPage: React.FC = () => {
             RIGHT COLUMN (COL 5): INTERACTIVE LIVE PRINT PREVIEW
         ========================================================================= */}
         <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-20 no-print">
-          <div className="bg-white border border-[#CFCFD2] p-4 space-y-3">
-            <div className="flex items-center justify-between border-b border-[#E5E5E7] pb-2">
-              <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#0A0A0A] uppercase tracking-wider">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-4 space-y-3">
+            <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.1)] pb-2">
+              <div className="flex items-center gap-2 font-mono text-xs font-bold text-[#111111] uppercase tracking-wider">
                 <Tag size={14} />
                 <span>LIVE TAG PREVIEW ({activePreviewVariant.size})</span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#0A0A0A] text-white font-bold uppercase">
+              <span className="text-[10px] font-mono px-2 py-0.5 bg-[#111111] text-[#E2E2E4] font-bold uppercase">
                 {tagFormat.replace('_', ' ')}
               </span>
             </div>
 
             {/* LIVE RENDER OF SELECTED TAG FORMAT */}
-            <div className="bg-neutral-100 p-6 flex items-center justify-center border border-[#E5E5E7] overflow-hidden min-h-[420px]">
+            <div className="bg-neutral-100 p-6 flex items-center justify-center border border-[rgba(0,0,0,0.1)] overflow-hidden min-h-[420px]">
               {tagFormat === 'HANG_TAG' && (
                 /* -------------------------------------------------------------
                    PREVIEW 1: LUXURY APPAREL HANG TAG (50x105mm)
                 ------------------------------------------------------------- */
-                <div className="w-[230px] bg-white border-2 border-[#0A0A0A] p-4 text-center font-mono text-xs shadow-xl relative select-none">
+                <div className="w-[230px] bg-[#D5D5D8] border-2 border-[#111111] p-4 text-center font-mono text-xs shadow-xl relative select-none">
                   {/* Punch Hole Cutout Guide */}
-                  <div className="w-3.5 h-3.5 rounded-full border-2 border-[#0A0A0A] mx-auto mb-2 bg-[#FAFAFA]" />
+                  <div className="w-3.5 h-3.5 rounded-full border-2 border-[#111111] mx-auto mb-2 bg-[#E2E2E4]" />
 
                   {/* Brand Header */}
-                  <div className="border-b-2 border-[#0A0A0A] pb-2">
-                    <div className="font-display font-black text-lg tracking-tight text-[#0A0A0A]">
+                  <div className="border-b-2 border-[#111111] pb-2">
+                    <div className="font-display font-black text-lg tracking-tight text-[#111111]">
                       {brandName}
                     </div>
-                    <div className="text-[8px] uppercase tracking-widest text-[#666666] font-bold">
+                    <div className="text-[8px] uppercase tracking-widest text-[#4A4844] font-bold">
                       CAPSULE: {collectionName}
                     </div>
                   </div>
 
                   {/* Style & Details */}
                   <div className="py-2.5 space-y-1">
-                    <div className="font-display font-bold text-xs uppercase text-[#0A0A0A] leading-tight">
+                    <div className="font-display font-bold text-xs uppercase text-[#111111] leading-tight">
                       {productName}
                     </div>
-                    <div className="text-[9px] text-[#666666] uppercase">
-                      COLOR: <span className="font-bold text-[#0A0A0A]">{activePreviewVariant.color}</span>
+                    <div className="text-[9px] text-[#4A4844] uppercase">
+                      COLOR: <span className="font-bold text-[#111111]">{activePreviewVariant.color}</span>
                     </div>
 
                     {/* Dominant Size Badge */}
-                    <div className="my-2 py-1 bg-[#0A0A0A] text-white font-display font-black text-base uppercase tracking-wider">
+                    <div className="my-2 py-1 bg-[#111111] text-[#E2E2E4] font-display font-black text-base uppercase tracking-wider">
                       SIZE: {activePreviewVariant.size}
                     </div>
 
-                    <div className="text-[8px] text-[#666666] leading-tight px-1">
+                    <div className="text-[8px] text-[#4A4844] leading-tight px-1">
                       {fabricSpecs}
                     </div>
                   </div>
 
                   {/* Barcode SVG */}
-                  <div className="border-t border-[#E5E5E7] pt-2">
+                  <div className="border-t border-[rgba(0,0,0,0.1)] pt-2">
                     <BarcodeSvg value={activePreviewVariant.sku} width={170} height={26} />
                   </div>
 
                   {/* Pricing Matrix */}
-                  <div className="border-t-2 border-[#0A0A0A] pt-2 mt-2 space-y-0.5">
+                  <div className="border-t-2 border-[#111111] pt-2 mt-2 space-y-0.5">
                     {activePreviewVariant.mrp > activePreviewVariant.price && (
-                      <div className="text-[9px] text-[#888888] line-through">
+                      <div className="text-[9px] text-[#4A4844] line-through">
                         MRP {formatINR(activePreviewVariant.mrp)}
                       </div>
                     )}
-                    <div className="font-display font-black text-lg text-[#0A0A0A]">
+                    <div className="font-display font-black text-lg text-[#111111]">
                       {formatINR(activePreviewVariant.price)}
                     </div>
-                    <div className="text-[7px] text-[#666666] uppercase tracking-wider">
+                    <div className="text-[7px] text-[#4A4844] uppercase tracking-wider">
                       INCL. OF ALL TAXES · NET QTY: 1 N
                     </div>
                   </div>
 
                   {/* Legal Metrology Footer */}
-                  <div className="border-t border-[#E5E5E7] pt-2 mt-2 text-[7px] text-[#888888] uppercase leading-tight">
+                  <div className="border-t border-[rgba(0,0,0,0.1)] pt-2 mt-2 text-[7px] text-[#4A4844] uppercase leading-tight">
                     <div>MFD: {mfdDate} · {countryOfOrigin}</div>
                     <div>STUDIO DENY APPAREL CO., MUMBAI</div>
                   </div>
@@ -739,17 +739,17 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 /* -------------------------------------------------------------
                    PREVIEW 2: RETAIL ADHESIVE STICKER (50x30mm)
                 ------------------------------------------------------------- */
-                <div className="w-[240px] bg-white border border-[#0A0A0A] p-2.5 font-mono text-xs shadow-md select-none">
-                  <div className="flex justify-between items-start border-b border-[#0A0A0A] pb-1">
+                <div className="w-[240px] bg-[#D5D5D8] border border-[#111111] p-2.5 font-mono text-xs shadow-md select-none">
+                  <div className="flex justify-between items-start border-b border-[#111111] pb-1">
                     <div>
-                      <div className="font-display font-black text-xs text-[#0A0A0A] tracking-tight">
+                      <div className="font-display font-black text-xs text-[#111111] tracking-tight">
                         {brandName}
                       </div>
-                      <div className="text-[8px] font-bold text-[#444444] uppercase truncate max-w-[140px]">
+                      <div className="text-[8px] font-bold text-[#111111] uppercase truncate max-w-[140px]">
                         {productName}
                       </div>
                     </div>
-                    <div className="bg-[#0A0A0A] text-white text-[10px] font-black px-1.5 py-0.5">
+                    <div className="bg-[#111111] text-[#E2E2E4] text-[10px] font-black px-1.5 py-0.5">
                       {activePreviewVariant.size}
                     </div>
                   </div>
@@ -758,15 +758,15 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     <BarcodeSvg value={activePreviewVariant.sku} width={180} height={24} />
                   </div>
 
-                  <div className="flex justify-between items-baseline border-t border-[#0A0A0A] pt-1 text-[9px]">
-                    <span className="text-[#666666]">{activePreviewVariant.color}</span>
+                  <div className="flex justify-between items-baseline border-t border-[#111111] pt-1 text-[9px]">
+                    <span className="text-[#4A4844]">{activePreviewVariant.color}</span>
                     <div className="text-right">
                       {activePreviewVariant.mrp > activePreviewVariant.price && (
-                        <span className="text-[8px] text-[#888888] line-through mr-1">
+                        <span className="text-[8px] text-[#4A4844] line-through mr-1">
                           {formatINR(activePreviewVariant.mrp)}
                         </span>
                       )}
-                      <span className="font-black text-xs text-[#0A0A0A]">
+                      <span className="font-black text-xs text-[#111111]">
                         {formatINR(activePreviewVariant.price)}
                       </span>
                     </div>
@@ -778,13 +778,13 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 /* -------------------------------------------------------------
                    PREVIEW 3: FOOTWEAR SHOEBOX SPECIFICATION LABEL (95x60mm)
                 ------------------------------------------------------------- */
-                <div className="w-[280px] bg-white border-2 border-[#0A0A0A] p-3 font-mono text-xs shadow-lg select-none">
-                  <div className="flex items-center justify-between border-b-2 border-[#0A0A0A] pb-1.5">
+                <div className="w-[280px] bg-[#D5D5D8] border-2 border-[#111111] p-3 font-mono text-xs shadow-lg select-none">
+                  <div className="flex items-center justify-between border-b-2 border-[#111111] pb-1.5">
                     <div>
-                      <div className="font-display font-black text-sm text-[#0A0A0A]">
+                      <div className="font-display font-black text-sm text-[#111111]">
                         {brandName} FOOTWEAR
                       </div>
-                      <div className="text-[9px] font-bold text-[#666666] uppercase truncate max-w-[180px]">
+                      <div className="text-[9px] font-bold text-[#4A4844] uppercase truncate max-w-[180px]">
                         {productName}
                       </div>
                     </div>
@@ -792,39 +792,39 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   </div>
 
                   {/* Multi-Region Size Matrix */}
-                  <div className="grid grid-cols-4 gap-1 border-b border-[#0A0A0A] py-1.5 text-center">
-                    <div className="bg-[#0A0A0A] text-white p-1">
+                  <div className="grid grid-cols-4 gap-1 border-b border-[#111111] py-1.5 text-center">
+                    <div className="bg-[#111111] text-[#E2E2E4] p-1">
                       <div className="text-[7px] text-neutral-300">SIZE</div>
                       <div className="font-black text-xs">{activePreviewVariant.size}</div>
                     </div>
-                    <div className="bg-[#F1F1F3] p-1 border border-[#CFCFD2]">
-                      <div className="text-[7px] text-[#666666]">COLOR</div>
+                    <div className="bg-[#D5D5D8] p-1 border border-[rgba(0,0,0,0.18)]">
+                      <div className="text-[7px] text-[#4A4844]">COLOR</div>
                       <div className="font-bold text-[9px] truncate">{activePreviewVariant.color}</div>
                     </div>
-                    <div className="bg-[#F1F1F3] p-1 border border-[#CFCFD2]">
-                      <div className="text-[7px] text-[#666666]">ORIGIN</div>
+                    <div className="bg-[#D5D5D8] p-1 border border-[rgba(0,0,0,0.18)]">
+                      <div className="text-[7px] text-[#4A4844]">ORIGIN</div>
                       <div className="font-bold text-[9px]">IND</div>
                     </div>
-                    <div className="bg-[#F1F1F3] p-1 border border-[#CFCFD2]">
-                      <div className="text-[7px] text-[#666666]">YEAR</div>
+                    <div className="bg-[#D5D5D8] p-1 border border-[rgba(0,0,0,0.18)]">
+                      <div className="text-[7px] text-[#4A4844]">YEAR</div>
                       <div className="font-bold text-[9px]">2026</div>
                     </div>
                   </div>
 
-                  <div className="text-[8px] text-[#666666] py-1 truncate">
+                  <div className="text-[8px] text-[#4A4844] py-1 truncate">
                     UPPER: {fabricSpecs} · SOLE: {garmentFit}
                   </div>
 
                   {/* Barcode & Price */}
-                  <div className="flex items-center justify-between pt-1 border-t border-[#0A0A0A]">
+                  <div className="flex items-center justify-between pt-1 border-t border-[#111111]">
                     <div className="w-[140px]">
                       <BarcodeSvg value={activePreviewVariant.sku} width={130} height={20} />
                     </div>
                     <div className="text-right">
-                      <div className="text-[7px] text-[#888888] line-through">
+                      <div className="text-[7px] text-[#4A4844] line-through">
                         MRP {formatINR(activePreviewVariant.mrp)}
                       </div>
-                      <div className="font-black text-sm text-[#0A0A0A]">
+                      <div className="font-black text-sm text-[#111111]">
                         {formatINR(activePreviewVariant.price)}
                       </div>
                     </div>
@@ -889,12 +889,12 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   style={{
                     width: '52mm',
                     height: '105mm',
-                    border: '1.5px solid #000000',
+                    border: '1.5px solid #111111',
                     padding: '3mm',
                     boxSizing: 'border-box',
                     textAlign: 'center',
-                    background: '#ffffff',
-                    color: '#000000',
+                    background: '#E2E2E4',
+                    color: '#111111',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
@@ -907,7 +907,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                         width: '3.5mm',
                         height: '3.5mm',
                         borderRadius: '50%',
-                        border: '1.5px solid #000000',
+                        border: '1.5px solid #111111',
                         margin: '0 auto 2mm',
                       }}
                     />
@@ -916,25 +916,25 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     <div style={{ fontSize: '13px', fontWeight: 900, letterSpacing: '-0.5px' }}>
                       {brandName}
                     </div>
-                    <div style={{ fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', color: '#444444' }}>
+                    <div style={{ fontSize: '7px', fontWeight: 700, textTransform: 'uppercase', color: '#111111' }}>
                       COLLECTION: {collectionName}
                     </div>
 
-                    <div style={{ borderBottom: '1px solid #000000', margin: '2mm 0' }} />
+                    <div style={{ borderBottom: '1px solid #111111', margin: '2mm 0' }} />
 
                     {/* Style */}
                     <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', lineHeight: '1.2' }}>
                       {productName}
                     </div>
-                    <div style={{ fontSize: '8px', color: '#333333', marginTop: '1mm' }}>
+                    <div style={{ fontSize: '8px', color: '#111111', marginTop: '1mm' }}>
                       COLOR: <strong>{tagItem.color}</strong>
                     </div>
 
                     {/* Size Box */}
                     <div
                       style={{
-                        background: '#000000',
-                        color: '#ffffff',
+                        background: '#111111',
+                        color: '#E2E2E4',
                         fontWeight: 900,
                         fontSize: '13px',
                         padding: '1.5mm 0',
@@ -946,7 +946,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                       SIZE: {tagItem.size}
                     </div>
 
-                    <div style={{ fontSize: '7.5px', color: '#333333', lineHeight: '1.2' }}>
+                    <div style={{ fontSize: '7.5px', color: '#111111', lineHeight: '1.2' }}>
                       {fabricSpecs}
                     </div>
                   </div>
@@ -956,22 +956,22 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     <BarcodeSvg value={tagItem.sku} width={150} height={24} />
 
                     {/* Price */}
-                    <div style={{ borderTop: '1px solid #000000', paddingTop: '1.5mm', marginTop: '1.5mm' }}>
+                    <div style={{ borderTop: '1px solid #111111', paddingTop: '1.5mm', marginTop: '1.5mm' }}>
                       {tagItem.mrp > tagItem.price && (
-                        <div style={{ fontSize: '8px', color: '#555555', textDecoration: 'line-through' }}>
+                        <div style={{ fontSize: '8px', color: '#4A4844', textDecoration: 'line-through' }}>
                           MRP {formatINR(tagItem.mrp)}
                         </div>
                       )}
                       <div style={{ fontSize: '14px', fontWeight: 900 }}>
                         {formatINR(tagItem.price)}
                       </div>
-                      <div style={{ fontSize: '6.5px', textTransform: 'uppercase', color: '#333333' }}>
+                      <div style={{ fontSize: '6.5px', textTransform: 'uppercase', color: '#111111' }}>
                         INCL. ALL TAXES · QTY: 1 N
                       </div>
                     </div>
 
                     {/* Footer */}
-                    <div style={{ fontSize: '6px', color: '#555555', marginTop: '1.5mm', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: '6px', color: '#4A4844', marginTop: '1.5mm', textTransform: 'uppercase' }}>
                       MFD: {mfdDate} · {countryOfOrigin}
                     </div>
                   </div>
@@ -983,11 +983,11 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   style={{
                     width: '50mm',
                     height: '30mm',
-                    border: '1px solid #000000',
+                    border: '1px solid #111111',
                     padding: '2mm',
                     boxSizing: 'border-box',
-                    background: '#ffffff',
-                    color: '#000000',
+                    background: '#E2E2E4',
+                    color: '#111111',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
@@ -1000,15 +1000,15 @@ export const PriceTagGeneratorPage: React.FC = () => {
                         {productName}
                       </div>
                     </div>
-                    <div style={{ background: '#000000', color: '#ffffff', fontSize: '9px', fontWeight: 900, padding: '0.5mm 1.5mm' }}>
+                    <div style={{ background: '#111111', color: '#E2E2E4', fontSize: '9px', fontWeight: 900, padding: '0.5mm 1.5mm' }}>
                       {tagItem.size}
                     </div>
                   </div>
 
                   <BarcodeSvg value={tagItem.sku} width={140} height={18} />
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '0.8px solid #000000', paddingTop: '0.8mm' }}>
-                    <span style={{ fontSize: '7px', color: '#444444' }}>{tagItem.color}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '0.8px solid #111111', paddingTop: '0.8mm' }}>
+                    <span style={{ fontSize: '7px', color: '#111111' }}>{tagItem.color}</span>
                     <span style={{ fontSize: '10px', fontWeight: 900 }}>{formatINR(tagItem.price)}</span>
                   </div>
                 </div>
@@ -1019,17 +1019,17 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   style={{
                     width: '90mm',
                     height: '55mm',
-                    border: '1.5px solid #000000',
+                    border: '1.5px solid #111111',
                     padding: '3mm',
                     boxSizing: 'border-box',
-                    background: '#ffffff',
-                    color: '#000000',
+                    background: '#E2E2E4',
+                    color: '#111111',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #000000', paddingBottom: '1mm' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #111111', paddingBottom: '1mm' }}>
                     <div>
                       <div style={{ fontSize: '11px', fontWeight: 900 }}>{brandName} FOOTWEAR</div>
                       <div style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase' }}>{productName}</div>
@@ -1038,25 +1038,25 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'flex', gap: '2mm', margin: '1mm 0' }}>
-                    <div style={{ background: '#000000', color: '#ffffff', padding: '1mm 2mm', textAlign: 'center' }}>
+                    <div style={{ background: '#111111', color: '#E2E2E4', padding: '1mm 2mm', textAlign: 'center' }}>
                       <div style={{ fontSize: '6px' }}>SIZE</div>
                       <div style={{ fontSize: '11px', fontWeight: 900 }}>{tagItem.size}</div>
                     </div>
-                    <div style={{ border: '1px solid #000000', padding: '1mm 2mm', flex: 1 }}>
-                      <div style={{ fontSize: '6px', color: '#444444' }}>COLORWAY</div>
+                    <div style={{ border: '1px solid #111111', padding: '1mm 2mm', flex: 1 }}>
+                      <div style={{ fontSize: '6px', color: '#111111' }}>COLORWAY</div>
                       <div style={{ fontSize: '8px', fontWeight: 700 }}>{tagItem.color}</div>
                     </div>
-                    <div style={{ border: '1px solid #000000', padding: '1mm 2mm' }}>
-                      <div style={{ fontSize: '6px', color: '#444444' }}>ORIGIN</div>
+                    <div style={{ border: '1px solid #111111', padding: '1mm 2mm' }}>
+                      <div style={{ fontSize: '6px', color: '#111111' }}>ORIGIN</div>
                       <div style={{ fontSize: '8px', fontWeight: 700 }}>IND</div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #000000', paddingTop: '1mm' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #111111', paddingTop: '1mm' }}>
                     <BarcodeSvg value={tagItem.sku} width={130} height={18} />
                     <div style={{ textAlign: 'right' }}>
                       {tagItem.mrp > tagItem.price && (
-                        <div style={{ fontSize: '7px', color: '#666666', textDecoration: 'line-through' }}>
+                        <div style={{ fontSize: '7px', color: '#4A4844', textDecoration: 'line-through' }}>
                           MRP {formatINR(tagItem.mrp)}
                         </div>
                       )}

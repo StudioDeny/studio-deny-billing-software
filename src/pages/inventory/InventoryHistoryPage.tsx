@@ -70,19 +70,19 @@ export const InventoryHistoryPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             <Button variant="ghost" size="sm" onClick={() => navigate('/inventory')} className="p-0 h-auto">
               <ArrowLeft size={12} className="mr-1" /> INVENTORY
             </Button>
             <span>/</span>
             <span>IMMUTABLE AUDIT TRAIL</span>
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             STOCK AUDIT LOGS
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Historical ledger recording every stock decrement, restock batch, and physical warehouse audit
           </div>
         </div>
@@ -120,23 +120,23 @@ export const InventoryHistoryPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Search Bar */}
-      <div className="flex items-center gap-3 bg-white p-3 border border-[#CFCFD2]">
-        <Search size={15} className="text-[#888888]" />
+      <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
+        <Search size={15} className="text-[#4A4844]" />
         <input
           type="text"
           placeholder="Filter audit entries by SKU, product name, or staff operator..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
         />
       </div>
 
       {/* Audit Log Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">TIMESTAMP</th>
                 <th className="py-3 px-4 font-medium">GARMENT SILHOUETTE</th>
                 <th className="py-3 px-4 font-medium">VARIANT SKU</th>
@@ -146,12 +146,12 @@ export const InventoryHistoryPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium">AUTHORIZED OPERATOR</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredLogs.map((log) => (
-                <tr key={log.id} className="hover:bg-[#FAFAFA] transition-colors">
-                  <td className="py-3 px-4 text-[#666666]">{log.date}</td>
-                  <td className="py-3 px-4 font-semibold text-[#0A0A0A]">{log.productName}</td>
-                  <td className="py-3 px-4 font-bold text-[#0A0A0A]">{log.variantSku}</td>
+                <tr key={log.id} className="hover:bg-[#E2E2E4] transition-colors">
+                  <td className="py-3 px-4 text-[#4A4844]">{log.date}</td>
+                  <td className="py-3 px-4 font-semibold text-[#111111]">{log.productName}</td>
+                  <td className="py-3 px-4 font-bold text-[#111111]">{log.variantSku}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`inline-flex items-center gap-1 font-bold text-xs px-2 py-0.5 ${
@@ -168,14 +168,14 @@ export const InventoryHistoryPage: React.FC = () => {
                       {log.changeQty > 0 ? `+${log.changeQty}` : log.changeQty} pcs
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-bold text-[#0A0A0A]">{log.newStock} units</td>
+                  <td className="py-3 px-4 font-bold text-[#111111]">{log.newStock} units</td>
                   <td className="py-3 px-4">
-                    <span className="px-2 py-0.5 bg-[#F1F1F3] text-[10px] text-[#444444] border border-[#CFCFD2] font-semibold">
+                    <span className="px-2 py-0.5 bg-[#D5D5D8] text-[10px] text-[#111111] border border-[rgba(0,0,0,0.18)] font-semibold">
                       {log.reason}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-[#666666] flex items-center gap-1.5">
-                    <ShieldCheck size={13} className="text-[#888888]" />
+                  <td className="py-3 px-4 text-[#4A4844] flex items-center gap-1.5">
+                    <ShieldCheck size={13} className="text-[#4A4844]" />
                     {log.user}
                   </td>
                 </tr>

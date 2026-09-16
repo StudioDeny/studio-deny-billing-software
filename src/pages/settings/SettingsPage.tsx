@@ -199,15 +199,15 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[10px] font-mono uppercase tracking-widest text-[#888888]">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844]">
             TERMINAL CONFIGURATION
           </div>
-          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             SETTINGS
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-1">
+          <div className="text-xs font-mono text-[#4A4844] mt-1">
             Configure Studio Deny store profile, GSTIN, thermal printer & terminal staff roles
           </div>
         </div>
@@ -218,15 +218,15 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Tabs Bar */}
-      <div className="flex border-b border-[#CFCFD2] overflow-x-auto gap-1 font-mono text-xs">
+      <div className="flex border-b border-[rgba(0,0,0,0.18)] overflow-x-auto gap-1 font-mono text-xs">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2.5 font-bold flex items-center gap-2 uppercase tracking-wider shrink-0 transition-colors ${
               activeTab === tab.id
-                ? 'bg-[#0A0A0A] text-white'
-                : 'bg-white text-[#666666] hover:text-[#0A0A0A]'
+                ? 'bg-[#111111] text-[#E2E2E4]'
+                : 'bg-[#D5D5D8] text-[#4A4844] hover:text-[#111111]'
             }`}
           >
             {tab.icon}
@@ -238,23 +238,23 @@ export const SettingsPage: React.FC = () => {
       <form onSubmit={handleSaveAll} className="space-y-6 font-mono text-xs">
         {/* 1. BUSINESS PROFILE TAB */}
         {activeTab === 'BUSINESS' && (
-          <div className="bg-white border border-[#CFCFD2] p-6 space-y-5 shadow-subtle">
-            <div className="border-b border-[#E5E5E7] pb-3 flex items-center gap-2">
-              <Building2 size={16} className="text-[#0A0A0A]" />
-              <h3 className="font-bold text-xs uppercase tracking-wider text-[#0A0A0A]">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-6 space-y-5 shadow-subtle">
+            <div className="border-b border-[rgba(0,0,0,0.1)] pb-3 flex items-center gap-2">
+              <Building2 size={16} className="text-[#111111]" />
+              <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111]">
                 STUDIO BRAND & FLAGSHIP STORE PROFILE
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Brand Title
                 </label>
                 <Input value={brand} onChange={(e) => setBrand(e.target.value)} required />
               </div>
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Tagline
                 </label>
                 <Input value={tagline} onChange={(e) => setTagline(e.target.value)} />
@@ -263,13 +263,13 @@ export const SettingsPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Store Street Address
                 </label>
                 <Input value={address} onChange={(e) => setAddress(e.target.value)} />
               </div>
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   City & State
                 </label>
                 <Input value={cityState} onChange={(e) => setCityState(e.target.value)} />
@@ -278,28 +278,28 @@ export const SettingsPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Contact Phone
                 </label>
                 <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Support Email
                 </label>
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#E5E5E7]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[rgba(0,0,0,0.1)]">
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   GSTIN (Apparel & Retail)
                 </label>
                 <Input value={gstin} onChange={(e) => setGstin(e.target.value)} required />
               </div>
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Income Tax PAN
                 </label>
                 <Input value={pan} onChange={(e) => setPan(e.target.value)} />
@@ -310,17 +310,17 @@ export const SettingsPage: React.FC = () => {
 
         {/* 2. BILLING & TAX TAB */}
         {activeTab === 'BILLING' && (
-          <div className="bg-white border border-[#CFCFD2] p-6 space-y-5 shadow-subtle">
-            <div className="border-b border-[#E5E5E7] pb-3 flex items-center gap-2">
-              <Receipt size={16} className="text-[#0A0A0A]" />
-              <h3 className="font-bold text-xs uppercase tracking-wider text-[#0A0A0A]">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-6 space-y-5 shadow-subtle">
+            <div className="border-b border-[rgba(0,0,0,0.1)] pb-3 flex items-center gap-2">
+              <Receipt size={16} className="text-[#111111]" />
+              <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111]">
                 INVOICE NUMBERING & TAX ENGINE
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Invoice Prefix
                 </label>
                 <Input
@@ -331,7 +331,7 @@ export const SettingsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Apparel GST Rate (%)
                 </label>
                 <Input
@@ -343,7 +343,7 @@ export const SettingsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Default Discount (%)
                 </label>
                 <Input
@@ -355,9 +355,9 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-4 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1">
-              <div className="font-bold text-xs text-[#0A0A0A]">TAX CONFIGURATION NOTE</div>
-              <p className="text-[11px] text-[#666666]">
+            <div className="p-4 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
+              <div className="font-bold text-xs text-[#111111]">TAX CONFIGURATION NOTE</div>
+              <p className="text-[11px] text-[#4A4844]">
                 Studio Deny operates under GST Rate schedule for branded streetwear garments.
                 All POS calculations apply {taxRate}% GST on taxable subtotal after discounts.
               </p>
@@ -367,23 +367,23 @@ export const SettingsPage: React.FC = () => {
 
         {/* 3. PRINTER CONFIGURATION TAB */}
         {activeTab === 'PRINTER' && (
-          <div className="bg-white border border-[#CFCFD2] p-6 space-y-5 shadow-subtle">
-            <div className="border-b border-[#E5E5E7] pb-3 flex items-center justify-between">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-6 space-y-5 shadow-subtle">
+            <div className="border-b border-[rgba(0,0,0,0.1)] pb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Printer size={16} className="text-[#0A0A0A]" />
-                <h3 className="font-bold text-xs uppercase tracking-wider text-[#0A0A0A]">
+                <Printer size={16} className="text-[#111111]" />
+                <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111]">
                   THERMAL RECEIPT HARDWARE
                 </h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${settings.printer?.lastTestPrint ? 'bg-emerald-500' : 'bg-[#CFCFD2]'}`} />
-                <span className={`text-[10px] font-bold uppercase ${settings.printer?.lastTestPrint ? 'text-emerald-700' : 'text-[#888888]'}`}>
+                <span className={`w-2 h-2 rounded-full ${settings.printer?.lastTestPrint ? 'bg-emerald-500' : 'bg-[rgba(0,0,0,0.18)]'}`} />
+                <span className={`text-[10px] font-bold uppercase ${settings.printer?.lastTestPrint ? 'text-emerald-700' : 'text-[#4A4844]'}`}>
                   {settings.printer?.lastTestPrint ? `TESTED ${settings.printer.lastTestPrint}` : 'NOT TESTED YET'}
                 </span>
               </div>
             </div>
 
-            <div className="text-[11px] text-[#666666] bg-[#F1F1F3] border border-[#CFCFD2] p-3">
+            <div className="text-[11px] text-[#4A4844] bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-3">
               A browser can't detect a physical printer on its own. Printing works through your OS: connect the
               thermal printer to this till's computer (USB, or Bluetooth/WiFi if the printer supports it) and
               install its printer driver so Windows/macOS lists it as a normal printer - then "Test Thermal
@@ -393,7 +393,7 @@ export const SettingsPage: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Printer Hardware Model
                 </label>
                 <Input
@@ -403,7 +403,7 @@ export const SettingsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Thermal Paper Width
                 </label>
                 <div className="flex gap-2">
@@ -412,8 +412,8 @@ export const SettingsPage: React.FC = () => {
                     onClick={() => setPaperWidth('80MM')}
                     className={`flex-1 py-2 px-3 border font-bold text-xs ${
                       paperWidth === '80MM'
-                        ? 'bg-[#0A0A0A] text-white border-[#0A0A0A]'
-                        : 'bg-white text-[#666666] border-[#CFCFD2]'
+                        ? 'bg-[#111111] text-[#E2E2E4] border-[#111111]'
+                        : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)]'
                     }`}
                   >
                     80MM (STANDARD POS)
@@ -423,8 +423,8 @@ export const SettingsPage: React.FC = () => {
                     onClick={() => setPaperWidth('58MM')}
                     className={`flex-1 py-2 px-3 border font-bold text-xs ${
                       paperWidth === '58MM'
-                        ? 'bg-[#0A0A0A] text-white border-[#0A0A0A]'
-                        : 'bg-white text-[#666666] border-[#CFCFD2]'
+                        ? 'bg-[#111111] text-[#E2E2E4] border-[#111111]'
+                        : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)]'
                     }`}
                   >
                     58MM (COMPACT)
@@ -433,10 +433,10 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-[#F1F1F3] border border-[#CFCFD2]">
+            <div className="flex items-center justify-between p-4 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)]">
               <div>
-                <div className="font-bold text-xs text-[#0A0A0A]">AUTO-PRINT ON SETTLEMENT</div>
-                <div className="text-[11px] text-[#666666]">
+                <div className="font-bold text-xs text-[#111111]">AUTO-PRINT ON SETTLEMENT</div>
+                <div className="text-[11px] text-[#4A4844]">
                   Automatically trigger thermal slip print when staff taps [PAY & PRINT]
                 </div>
               </div>
@@ -444,7 +444,7 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={autoPrint}
                 onChange={(e) => setAutoPrint(e.target.checked)}
-                className="w-4 h-4 accent-[#0A0A0A] cursor-pointer"
+                className="w-4 h-4 accent-[#111111] cursor-pointer"
               />
             </div>
 
@@ -458,11 +458,11 @@ export const SettingsPage: React.FC = () => {
 
         {/* 4. STAFF & ROLES TAB */}
         {activeTab === 'STAFF' && (
-          <div className="bg-white border border-[#CFCFD2] p-6 space-y-5 shadow-subtle">
-            <div className="border-b border-[#E5E5E7] pb-3 flex items-center justify-between">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-6 space-y-5 shadow-subtle">
+            <div className="border-b border-[rgba(0,0,0,0.1)] pb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck size={16} className="text-[#0A0A0A]" />
-                <h3 className="font-bold text-xs uppercase tracking-wider text-[#0A0A0A]">
+                <ShieldCheck size={16} className="text-[#111111]" />
+                <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111]">
                   TERMINAL STAFF & ACCESS ROLES
                 </h3>
               </div>
@@ -479,31 +479,31 @@ export const SettingsPage: React.FC = () => {
             </div>
 
             {!canManageStaff && (
-              <div className="text-[11px] text-[#666666] bg-[#F1F1F3] border border-[#CFCFD2] p-3">
+              <div className="text-[11px] text-[#4A4844] bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-3">
                 Only the OWNER account can create or edit staff logins and permissions.
               </div>
             )}
 
             {/* Roles Description Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
-              <div className="p-3 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1">
-                <div className="font-bold text-[#0A0A0A]">OWNER</div>
-                <div className="text-[#666666]">Full access to billing, settings, reports, overrides</div>
+              <div className="p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
+                <div className="font-bold text-[#111111]">OWNER</div>
+                <div className="text-[#4A4844]">Full access to billing, settings, reports, overrides</div>
               </div>
-              <div className="p-3 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1">
-                <div className="font-bold text-[#0A0A0A]">MANAGER</div>
-                <div className="text-[#666666]">Billing, Bills history, Products catalog, Customers</div>
+              <div className="p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
+                <div className="font-bold text-[#111111]">MANAGER</div>
+                <div className="text-[#4A4844]">Billing, Bills history, Products catalog, Customers</div>
               </div>
-              <div className="p-3 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1">
-                <div className="font-bold text-[#0A0A0A]">BILLING STAFF</div>
-                <div className="text-[#666666]">Dashboard overview, New Bill (POS), Customers</div>
+              <div className="p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
+                <div className="font-bold text-[#111111]">BILLING STAFF</div>
+                <div className="text-[#4A4844]">Dashboard overview, New Bill (POS), Customers</div>
               </div>
             </div>
 
             {/* Staff Table */}
             <table className="w-full text-left border-collapse font-mono text-xs">
               <thead>
-                <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+                <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                   <th className="py-2.5 px-3">STAFF MEMBER</th>
                   <th className="py-2.5 px-3">ROLE</th>
                   <th className="py-2.5 px-3">CAN SEE</th>
@@ -511,16 +511,16 @@ export const SettingsPage: React.FC = () => {
                   {canManageStaff && <th className="py-2.5 px-3 text-right">ACCESS</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E5E7]">
+              <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
                 {staff.map((s) => (
                   <tr key={s.id}>
-                    <td className="py-3 px-3 font-bold text-[#0A0A0A]">{s.name}</td>
+                    <td className="py-3 px-3 font-bold text-[#111111]">{s.name}</td>
                     <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 bg-[#0A0A0A] text-white text-[10px] font-bold">
+                      <span className="px-2 py-0.5 bg-[#111111] text-[#E2E2E4] text-[10px] font-bold">
                         {s.role}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-[#666666] text-[10px]">
+                    <td className="py-3 px-3 text-[#4A4844] text-[10px]">
                       {s.permissions.length === ALL_PERMISSIONS.length
                         ? 'Everything'
                         : s.permissions.length === 0
@@ -530,12 +530,12 @@ export const SettingsPage: React.FC = () => {
                     <td className="py-3 px-3">
                       <span
                         className={`inline-flex items-center gap-1 text-[10px] font-semibold ${
-                          s.status === 'ACTIVE' ? 'text-emerald-700' : 'text-[#888888]'
+                          s.status === 'ACTIVE' ? 'text-emerald-700' : 'text-[#4A4844]'
                         }`}
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${
-                            s.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-[#CFCFD2]'
+                            s.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-[rgba(0,0,0,0.18)]'
                           }`}
                         />
                         {s.status}
@@ -544,7 +544,7 @@ export const SettingsPage: React.FC = () => {
                     {canManageStaff && (
                       <td className="py-3 px-3 text-right">
                         {s.id === currentStaff?.id ? (
-                          <span className="text-[10px] text-[#888888]" title="You can't edit your own access - ask another OWNER, or use the database directly.">
+                          <span className="text-[10px] text-[#4A4844]" title="You can't edit your own access - ask another OWNER, or use the database directly.">
                             (you)
                           </span>
                         ) : (
@@ -591,21 +591,21 @@ export const SettingsPage: React.FC = () => {
           onClick={() => setIsInvoiceEditorOpen(true)}
           title="."
           aria-label="Edit invoices"
-          className="fixed bottom-3 right-3 w-2 h-2 rounded-full bg-[#E5E5E7] hover:bg-[#0A0A0A] transition-colors z-10"
+          className="fixed bottom-3 right-3 w-2 h-2 rounded-full bg-[rgba(0,0,0,0.1)] hover:bg-[#111111] transition-colors z-10"
         />
       )}
 
       {isInvoiceEditorOpen && (
-        <div className="fixed inset-0 z-50 bg-[#0A0A0A]/50 flex items-center justify-center p-4">
-          <div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
-            <div className="p-4 border-b border-[#CFCFD2] flex items-center justify-between sticky top-0 bg-white">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[#888888]">
+        <div className="fixed inset-0 z-50 bg-[#111111]/50 flex items-center justify-center p-4">
+          <div className="bg-[#D5D5D8] max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="p-4 border-b border-[rgba(0,0,0,0.18)] flex items-center justify-between sticky top-0 bg-[#D5D5D8]">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#4A4844]">
                 Owner-only
               </span>
               <button
                 type="button"
                 onClick={() => setIsInvoiceEditorOpen(false)}
-                className="text-[#666666] hover:text-[#0A0A0A] font-mono text-xs"
+                className="text-[#4A4844] hover:text-[#111111] font-mono text-xs"
               >
                 CLOSE ✕
               </button>
@@ -619,14 +619,14 @@ export const SettingsPage: React.FC = () => {
 
       {/* Quick Add Staff Modal */}
       {isStaffModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[#0A0A0A]/50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#0A0A0A] p-6 max-w-md w-full font-mono text-xs space-y-4 shadow-xl">
-            <h3 className="font-display font-bold text-base text-[#0A0A0A]">
+        <div className="fixed inset-0 z-50 bg-[#111111]/50 flex items-center justify-center p-4">
+          <div className="bg-[#D5D5D8] border border-[#111111] p-6 max-w-md w-full font-mono text-xs space-y-4 shadow-xl">
+            <h3 className="font-display font-bold text-base text-[#111111]">
               REGISTER TERMINAL OPERATOR
             </h3>
             <form onSubmit={handleCreateStaff} className="space-y-3">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Full Name *
                 </label>
                 <Input
@@ -637,7 +637,7 @@ export const SettingsPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Email Address *
                 </label>
                 <Input
@@ -649,7 +649,7 @@ export const SettingsPage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Temporary Password * (min 6 characters)
                 </label>
                 <div className="relative flex items-center">
@@ -664,7 +664,7 @@ export const SettingsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowNewStaffPassword((v) => !v)}
-                    className="absolute right-3 text-[#888888] hover:text-[#0A0A0A]"
+                    className="absolute right-3 text-[#4A4844] hover:text-[#111111]"
                     title={showNewStaffPassword ? 'Hide password' : 'Show password to relay it to the new hire'}
                   >
                     {showNewStaffPassword ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -672,13 +672,13 @@ export const SettingsPage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Role Permission
                 </label>
                 <select
                   value={newDbStaffRole}
                   onChange={(e) => handleDbStaffRoleChange(e.target.value as DbStaffRole)}
-                  className="w-full bg-white border border-[#CFCFD2] p-2 text-xs font-mono focus:outline-none"
+                  className="w-full bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-2 text-xs font-mono focus:outline-none"
                 >
                   <option value="BILLING">BILLING STAFF (Dashboard, POS, Bills)</option>
                   <option value="FULFILLMENT">FULFILLMENT (Dashboard, Bills only)</option>
@@ -687,17 +687,17 @@ export const SettingsPage: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">
+                <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">
                   Can See (toggle per section)
                 </label>
-                <div className="grid grid-cols-2 gap-1.5 border border-[#CFCFD2] p-2.5 bg-[#FAFAFA]">
+                <div className="grid grid-cols-2 gap-1.5 border border-[rgba(0,0,0,0.18)] p-2.5 bg-[#E2E2E4]">
                   {ALL_PERMISSIONS.map((key) => (
-                    <label key={key} className="flex items-center gap-1.5 text-[10px] text-[#333333] cursor-pointer">
+                    <label key={key} className="flex items-center gap-1.5 text-[10px] text-[#111111] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={newStaffPermissions.includes(key)}
                         onChange={() => toggleNewStaffPermission(key)}
-                        className="accent-[#0A0A0A]"
+                        className="accent-[#111111]"
                       />
                       {PERMISSION_LABELS[key]}
                     </label>
@@ -749,15 +749,15 @@ const StaffAccessEditor: React.FC<{
   };
 
   return (
-    <div className="border border-[#0A0A0A] p-4 space-y-3 bg-[#FAFAFA] font-mono text-xs">
-      <div className="font-bold text-[#0A0A0A]">EDIT ACCESS — {staffMember.name}</div>
+    <div className="border border-[#111111] p-4 space-y-3 bg-[#E2E2E4] font-mono text-xs">
+      <div className="font-bold text-[#111111]">EDIT ACCESS — {staffMember.name}</div>
 
       <div>
-        <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">Role</label>
+        <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">Role</label>
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as DbStaffRole)}
-          className="w-full bg-white border border-[#CFCFD2] p-2 text-xs font-mono focus:outline-none"
+          className="w-full bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-2 text-xs font-mono focus:outline-none"
         >
           <option value="BILLING">BILLING STAFF</option>
           <option value="FULFILLMENT">FULFILLMENT</option>
@@ -767,22 +767,22 @@ const StaffAccessEditor: React.FC<{
       </div>
 
       <div>
-        <label className="flex items-center gap-1.5 text-[10px] text-[#333333] cursor-pointer w-fit">
-          <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="accent-[#0A0A0A]" />
+        <label className="flex items-center gap-1.5 text-[10px] text-[#111111] cursor-pointer w-fit">
+          <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="accent-[#111111]" />
           Account Active (unchecking blocks login)
         </label>
       </div>
 
       <div>
-        <label className="block text-[10px] uppercase tracking-widest text-[#666666] mb-1">Can See</label>
-        <div className="grid grid-cols-2 gap-1.5 border border-[#CFCFD2] p-2.5 bg-white">
+        <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">Can See</label>
+        <div className="grid grid-cols-2 gap-1.5 border border-[rgba(0,0,0,0.18)] p-2.5 bg-[#D5D5D8]">
           {ALL_PERMISSIONS.map((key) => (
-            <label key={key} className="flex items-center gap-1.5 text-[10px] text-[#333333] cursor-pointer">
+            <label key={key} className="flex items-center gap-1.5 text-[10px] text-[#111111] cursor-pointer">
               <input
                 type="checkbox"
                 checked={permissions.includes(key)}
                 onChange={() => togglePermission(key)}
-                className="accent-[#0A0A0A]"
+                className="accent-[#111111]"
               />
               {PERMISSION_LABELS[key]}
             </label>

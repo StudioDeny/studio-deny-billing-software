@@ -34,7 +34,7 @@ export const AppLayout: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] flex flex-col font-sans antialiased text-[#111111]">
+    <div className="min-h-screen bg-[#E2E2E4] flex flex-col font-sans antialiased text-[#111111]">
       {/* Sidebar Navigation */}
       <Sidebar
         isOpen={sidebarOpen}

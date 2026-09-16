@@ -29,20 +29,20 @@ export const MetricBlock: React.FC<MetricBlockProps> = ({
     <div
       className={twMerge(
         clsx(
-          'p-5 md:p-6 bg-white border border-[#CFCFD2] flex flex-col justify-between transition-colors hover:border-[#0A0A0A]',
+          'p-5 md:p-6 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] flex flex-col justify-between transition-colors hover:border-[#111111]',
           className
         )
       )}
     >
       <div className="flex items-start justify-between gap-2 mb-3">
-        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest-editorial text-[#666666]">
+        <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
           {label}
         </span>
         {action && <div>{action}</div>}
       </div>
 
       <div>
-        <div className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#0A0A0A]">
+        <div className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#111111]">
           {value}
         </div>
 
@@ -60,7 +60,7 @@ export const MetricBlock: React.FC<MetricBlockProps> = ({
                 {trend.value}
               </span>
             )}
-            {displaySub && <span className="text-[#888888] font-mono text-[11px]">{displaySub}</span>}
+            {displaySub && <span className="text-[#4A4844] font-mono text-[11px]">{displaySub}</span>}
           </div>
         )}
       </div>

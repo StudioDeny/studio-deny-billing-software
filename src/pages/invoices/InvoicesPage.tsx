@@ -65,15 +65,15 @@ export const InvoicesPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             FINANCIAL AUDIT & GST COMPLIANCE
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             TAX INVOICES & REGISTER
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             GSTIN: {settings.gstin || '27AABCD1234E1Z5'} · Registered Streetwear Sales Ledger
           </div>
         </div>
@@ -125,23 +125,23 @@ export const InvoicesPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Search Bar */}
-      <div className="flex items-center gap-3 bg-white p-3 border border-[#CFCFD2]">
-        <Search size={15} className="text-[#888888]" />
+      <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
+        <Search size={15} className="text-[#4A4844]" />
         <input
           type="text"
           placeholder="Search by Invoice Number, Order ID, or Patron name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
         />
       </div>
 
       {/* Invoices Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">INVOICE SERIAL</th>
                 <th className="py-3 px-4 font-medium">ORDER REF</th>
                 <th className="py-3 px-4 font-medium">PATRON</th>
@@ -153,23 +153,23 @@ export const InvoicesPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredInvoices.map((inv) => (
                 <tr
                   key={inv.id}
                   onClick={() => navigate(`/invoices/${inv.id}`)}
-                  className="hover:bg-[#FAFAFA] transition-colors cursor-pointer group"
+                  className="hover:bg-[#E2E2E4] transition-colors cursor-pointer group"
                 >
-                  <td className="py-3.5 px-4 font-bold text-[#0A0A0A] group-hover:underline">
+                  <td className="py-3.5 px-4 font-bold text-[#111111] group-hover:underline">
                     {inv.invoiceNumber}
                   </td>
-                  <td className="py-3 px-4 font-semibold text-[#666666]">{inv.orderNumber}</td>
-                  <td className="py-3 px-4 text-[#0A0A0A]">{inv.customerName}</td>
-                  <td className="py-3 px-4 text-[#666666]">{inv.date}</td>
-                  <td className="py-3 px-4 text-[#666666]">{formatINR(inv.taxAmount)}</td>
-                  <td className="py-3 px-4 font-black text-[#0A0A0A]">{formatINR(inv.grandTotal)}</td>
+                  <td className="py-3 px-4 font-semibold text-[#4A4844]">{inv.orderNumber}</td>
+                  <td className="py-3 px-4 text-[#111111]">{inv.customerName}</td>
+                  <td className="py-3 px-4 text-[#4A4844]">{inv.date}</td>
+                  <td className="py-3 px-4 text-[#4A4844]">{formatINR(inv.taxAmount)}</td>
+                  <td className="py-3 px-4 font-black text-[#111111]">{formatINR(inv.grandTotal)}</td>
                   <td className="py-3 px-4">
-                    <span className="px-1.5 py-0.5 bg-[#F1F1F3] text-[10px] text-[#444444] border border-[#CFCFD2] font-semibold">
+                    <span className="px-1.5 py-0.5 bg-[#D5D5D8] text-[10px] text-[#111111] border border-[rgba(0,0,0,0.18)] font-semibold">
                       {inv.paymentMethod}
                     </span>
                   </td>

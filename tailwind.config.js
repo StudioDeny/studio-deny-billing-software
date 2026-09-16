@@ -8,16 +8,17 @@ export default {
     extend: {
       colors: {
         deny: {
-          black: '#0A0A0A',
-          white: '#FFFFFF',
-          light: '#F1F1F3',
-          soft: '#E7E7E9',
-          border: '#CFCFD2',
+          black: '#111111',
+          white: '#E2E2E4',
+          light: '#D5D5D8',
+          soft: '#D5D5D8',
+          border: 'rgba(0,0,0,0.18)',
           text: '#111111',
-          secondary: '#666666',
-          muted: '#888888',
-          subtle: '#FAFAFA',
+          secondary: '#4A4844',
+          muted: '#4A4844',
+          subtle: '#E2E2E4',
         },
+        accent: '#E0202A',
         status: {
           green: '#15803D',
           greenBg: '#F0FDF4',
@@ -34,9 +35,9 @@ export default {
         }
       },
       fontFamily: {
-        display: ['Syne', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        display: ['Anton', 'Bebas Neue', 'system-ui', 'sans-serif'],
+        sans: ['Barlow', 'system-ui', 'sans-serif'],
+        mono: ['Barlow', 'system-ui', 'sans-serif'],
       },
       letterSpacing: {
         'tightest': '-0.035em',
@@ -46,8 +47,8 @@ export default {
       },
       boxShadow: {
         'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.04)',
-        'float': '0 12px 36px -8px rgba(10, 10, 10, 0.12)',
-        'modal': '0 24px 48px -12px rgba(10, 10, 10, 0.2)',
+        'float': '0 12px 36px -8px rgba(17, 17, 17, 0.12)',
+        'modal': '0 24px 48px -12px rgba(17, 17, 17, 0.2)',
       }
     },
   },

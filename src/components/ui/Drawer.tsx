@@ -45,7 +45,7 @@ export const Drawer: React.FC<DrawerProps> = ({
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#0A0A0A]/50 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-[#111111]/50 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
 
@@ -53,24 +53,24 @@ export const Drawer: React.FC<DrawerProps> = ({
         <div
           className={twMerge(
             clsx(
-              'w-screen bg-white border-l border-[#0A0A0A] shadow-modal flex flex-col animate-in slide-in-from-right duration-200',
+              'w-screen bg-[#D5D5D8] border-l border-[#111111] shadow-modal flex flex-col animate-in slide-in-from-right duration-200',
               widthStyles[width]
             )
           )}
         >
           {/* Header */}
-          <div className="flex items-start justify-between p-5 md:p-6 border-b border-[#CFCFD2] bg-white">
+          <div className="flex items-start justify-between p-5 md:p-6 border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8]">
             <div>
-              <h3 className="font-display text-lg md:text-xl font-bold uppercase tracking-tight text-[#0A0A0A]">
+              <h3 className="font-display text-lg md:text-xl font-bold uppercase tracking-tight text-[#111111]">
                 {title}
               </h3>
               {subtitle && (
-                <p className="text-xs text-[#666666] font-mono tracking-wide mt-1">{subtitle}</p>
+                <p className="text-xs text-[#4A4844] font-mono tracking-wide mt-1">{subtitle}</p>
               )}
             </div>
             <button
               onClick={onClose}
-              className="p-1 text-[#666666] hover:text-[#0A0A0A] hover:bg-[#F1F1F3] transition-colors focus:outline-none"
+              className="p-1 text-[#4A4844] hover:text-[#111111] hover:bg-[#D5D5D8] transition-colors focus:outline-none"
               aria-label="Close drawer"
             >
               <X size={20} />
@@ -82,7 +82,7 @@ export const Drawer: React.FC<DrawerProps> = ({
 
           {/* Footer */}
           {footer && (
-            <div className="p-4 md:p-5 border-t border-[#CFCFD2] bg-[#F1F1F3] flex items-center justify-end gap-3">
+            <div className="p-4 md:p-5 border-t border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] flex items-center justify-end gap-3">
               {footer}
             </div>
           )}

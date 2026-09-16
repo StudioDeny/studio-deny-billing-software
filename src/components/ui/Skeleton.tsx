@@ -13,7 +13,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className, count = 1 }) => {
         <div
           key={index}
           className={clsx(
-            'bg-[#F1F1F3] animate-pulse rounded-none border border-[#E7E7E9]',
+            'bg-[#D5D5D8] animate-pulse rounded-none border border-[#D5D5D8]',
             className || 'h-6 w-full'
           )}
         />

@@ -37,7 +37,7 @@ export const BarcodeSvg: React.FC<BarcodeSvgProps> = ({
     <div className={`flex flex-col items-center select-none ${className}`}>
       <svg ref={svgRef} width={numericWidth} height={height} className="block" />
       {value && (
-        <span className="font-mono text-[10px] tracking-[3px] font-bold text-[#0A0A0A] mt-1">
+        <span className="font-mono text-[10px] tracking-[3px] font-bold text-[#111111] mt-1">
           {value}
         </span>
       )}

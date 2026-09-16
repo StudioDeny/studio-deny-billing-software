@@ -46,26 +46,26 @@ export const Dashboard: React.FC = () => {
   const getMethodIcon = (method: string) => {
     switch (method) {
       case 'UPI':
-        return <QrCode size={13} className="text-[#0A0A0A]" />;
+        return <QrCode size={13} className="text-[#111111]" />;
       case 'CARD':
-        return <CreditCard size={13} className="text-[#0A0A0A]" />;
+        return <CreditCard size={13} className="text-[#111111]" />;
       case 'CASH':
       case 'COD':
-        return <Banknote size={13} className="text-[#0A0A0A]" />;
+        return <Banknote size={13} className="text-[#111111]" />;
       case 'SPLIT':
-        return <Split size={13} className="text-[#0A0A0A]" />;
+        return <Split size={13} className="text-[#111111]" />;
       default:
-        return <Receipt size={13} className="text-[#0A0A0A]" />;
+        return <Receipt size={13} className="text-[#111111]" />;
     }
   };
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
       {/* DOMINANT HERO ACTION: START NEW BILL */}
-      <div className="bg-[#0A0A0A] text-white p-6 sm:p-8 border border-[#0A0A0A] shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-[#111111] text-[#E2E2E4] p-6 sm:p-8 border border-[#111111] shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-bold tracking-widest px-2 py-0.5 bg-white text-[#0A0A0A]">
+            <span className="text-[10px] font-mono font-bold tracking-widest px-2 py-0.5 bg-[#D5D5D8] text-[#111111]">
               BILLING TERMINAL #01
             </span>
             <span className="text-xs font-mono text-neutral-400">
@@ -83,9 +83,9 @@ export const Dashboard: React.FC = () => {
         <div className="shrink-0 flex items-center">
           <button
             onClick={() => navigate('/billing/new')}
-            className="w-full sm:w-auto bg-white text-[#0A0A0A] hover:bg-neutral-100 px-6 py-4 sm:px-8 sm:py-5 flex items-center justify-center gap-3 font-mono font-black text-sm sm:text-base tracking-widest uppercase shadow-lg active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full sm:w-auto bg-[#D5D5D8] text-[#111111] hover:bg-neutral-100 px-6 py-4 sm:px-8 sm:py-5 flex items-center justify-center gap-3 font-mono font-black text-sm sm:text-base tracking-widest uppercase shadow-lg active:scale-[0.98] transition-all cursor-pointer"
           >
-            <PlusCircle size={22} className="text-[#0A0A0A]" />
+            <PlusCircle size={22} className="text-[#111111]" />
             <span>START NEW BILL</span>
           </button>
         </div>
@@ -113,20 +113,20 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* CHANNEL SALES RECONCILIATION & QUICK TOOLS */}
-      <div className="bg-white border border-[#CFCFD2] p-5 shadow-subtle">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E5E5E7]">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-5 shadow-subtle">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[rgba(0,0,0,0.1)]">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-widest text-[#888888]">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844]">
               SALES CHANNELS & STATUTORY AUDIT
             </div>
-            <h2 className="font-display font-bold text-base text-[#0A0A0A]">
+            <h2 className="font-display font-bold text-base text-[#111111]">
               OFFLINE POS vs ONLINE STORE RECONCILIATION
             </h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => navigate('/audit')}
-              className="bg-[#0A0A0A] text-white hover:bg-neutral-800 px-3 py-2 text-xs font-mono font-bold tracking-editorial flex items-center gap-2 transition-colors cursor-pointer"
+              className="bg-[#111111] text-[#E2E2E4] hover:bg-neutral-800 px-3 py-2 text-xs font-mono font-bold tracking-editorial flex items-center gap-2 transition-colors cursor-pointer"
             >
               <FileCheck size={14} />
               <span>SALES AUDIT REPORT</span>
@@ -134,7 +134,7 @@ export const Dashboard: React.FC = () => {
             </button>
             <button
               onClick={() => navigate('/tags')}
-              className="bg-[#F1F1F3] border border-[#CFCFD2] text-[#111111] hover:border-[#0A0A0A] px-3 py-2 text-xs font-mono font-bold tracking-editorial flex items-center gap-2 transition-colors cursor-pointer"
+              className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-[#111111] hover:border-[#111111] px-3 py-2 text-xs font-mono font-bold tracking-editorial flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Tag size={14} />
               <span>PRICE TAG GENERATOR</span>
@@ -144,48 +144,48 @@ export const Dashboard: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {/* OFFLINE POS SUMMARY */}
-          <div className="p-4 bg-[#FAFAFA] border border-[#CFCFD2] flex items-center justify-between">
+          <div className="p-4 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                <span className="text-[11px] font-mono font-bold tracking-widest text-[#0A0A0A] uppercase flex items-center gap-1.5">
+                <span className="text-[11px] font-mono font-bold tracking-widest text-[#111111] uppercase flex items-center gap-1.5">
                   <Store size={13} /> OFFLINE IN-STORE POS
                 </span>
               </div>
-              <div className="text-xl font-mono font-black text-[#0A0A0A]">
+              <div className="text-xl font-mono font-black text-[#111111]">
                 {formatINR(offlineTotal)}
               </div>
-              <div className="text-[11px] font-mono text-[#666666]">
+              <div className="text-[11px] font-mono text-[#4A4844]">
                 {offlineOrders.length} physical register bills settled
               </div>
             </div>
             <button
               onClick={() => navigate('/bills?channel=OFFLINE')}
-              className="text-[11px] font-mono text-[#0A0A0A] underline font-semibold hover:opacity-75 cursor-pointer"
+              className="text-[11px] font-mono text-[#111111] underline font-semibold hover:opacity-75 cursor-pointer"
             >
               VIEW POS BILLS →
             </button>
           </div>
 
           {/* ONLINE STORE DTC SUMMARY */}
-          <div className="p-4 bg-[#FAFAFA] border border-[#CFCFD2] flex items-center justify-between">
+          <div className="p-4 bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-sky-500 inline-block" />
-                <span className="text-[11px] font-mono font-bold tracking-widest text-[#0A0A0A] uppercase flex items-center gap-1.5">
+                <span className="text-[11px] font-mono font-bold tracking-widest text-[#111111] uppercase flex items-center gap-1.5">
                   <Globe size={13} /> ONLINE STOREFRONT (DTC)
                 </span>
               </div>
-              <div className="text-xl font-mono font-black text-[#0A0A0A]">
+              <div className="text-xl font-mono font-black text-[#111111]">
                 {formatINR(onlineTotal)}
               </div>
-              <div className="text-[11px] font-mono text-[#666666]">
+              <div className="text-[11px] font-mono text-[#4A4844]">
                 {onlineOrders.length} web/courier orders dispatched
               </div>
             </div>
             <button
               onClick={() => navigate('/bills?channel=ONLINE')}
-              className="text-[11px] font-mono text-[#0A0A0A] underline font-semibold hover:opacity-75 cursor-pointer"
+              className="text-[11px] font-mono text-[#111111] underline font-semibold hover:opacity-75 cursor-pointer"
             >
               VIEW ONLINE ORDERS →
             </button>
@@ -194,13 +194,13 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* RECENT BILLS TABLE - DIRECT ACTIONS */}
-      <div className="bg-white border border-[#CFCFD2] shadow-subtle overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-[#CFCFD2] flex items-center justify-between bg-[#FAFAFA]">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] shadow-subtle overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-[rgba(0,0,0,0.18)] flex items-center justify-between bg-[#E2E2E4]">
           <div>
-            <div className="text-[10px] font-mono uppercase tracking-widest text-[#888888]">
+            <div className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844]">
               TRANSACTION LOG
             </div>
-            <h2 className="font-display font-bold text-base sm:text-lg text-[#0A0A0A]">
+            <h2 className="font-display font-bold text-base sm:text-lg text-[#111111]">
               RECENT TERMINAL BILLS
             </h2>
           </div>
@@ -218,7 +218,7 @@ export const Dashboard: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">INVOICE / BILL #</th>
                 <th className="py-3 px-4 font-medium">DATE & TIME</th>
                 <th className="py-3 px-4 font-medium">PATRON</th>
@@ -228,7 +228,7 @@ export const Dashboard: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {recentBills.map((bill) => {
                 const totalItems = bill.items.reduce((sum, i) => sum + i.quantity, 0);
                 const hasSplits = bill.paymentSplits && bill.paymentSplits.length > 1;
@@ -237,30 +237,30 @@ export const Dashboard: React.FC = () => {
                   <tr
                     key={bill.id}
                     onClick={() => navigate(`/bills/${bill.id}`)}
-                    className="hover:bg-[#FAFAFA] transition-colors cursor-pointer group"
+                    className="hover:bg-[#E2E2E4] transition-colors cursor-pointer group"
                   >
-                    <td className="py-3.5 px-4 font-bold text-[#0A0A0A] group-hover:underline">
+                    <td className="py-3.5 px-4 font-bold text-[#111111] group-hover:underline">
                       {bill.orderNumber}
                     </td>
-                    <td className="py-3 px-4 text-[#666666]">
+                    <td className="py-3 px-4 text-[#4A4844]">
                       {bill.createdAt}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-semibold text-[#0A0A0A]">{bill.customerName}</div>
-                      <div className="text-[10px] text-[#888888]">{bill.customerPhone}</div>
+                      <div className="font-semibold text-[#111111]">{bill.customerName}</div>
+                      <div className="text-[10px] text-[#4A4844]">{bill.customerPhone}</div>
                     </td>
-                    <td className="py-3 px-4 text-[#444444]">
+                    <td className="py-3 px-4 text-[#111111]">
                       {totalItems} pcs
                     </td>
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#F1F1F3] border border-[#CFCFD2] text-[10px] font-semibold text-[#111111]">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-[10px] font-semibold text-[#111111]">
                         {getMethodIcon(hasSplits ? 'SPLIT' : bill.paymentMethod)}
                         <span>
                           {hasSplits ? `SPLIT (${bill.paymentSplits?.length})` : bill.paymentMethod}
                         </span>
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-black text-sm text-[#0A0A0A]">
+                    <td className="py-3 px-4 font-black text-sm text-[#111111]">
                       {formatINR(bill.grandTotal)}
                     </td>
                     <td className="py-3 px-4 text-right space-x-2">

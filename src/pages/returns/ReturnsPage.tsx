@@ -67,15 +67,15 @@ export const ReturnsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             REVERSE LOGISTICS & QUALITY CONTROL
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             RETURNS & EXCHANGES
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Managing Streetwear Garment Exchanges, Size Adjustments, and Inspection Restocking
           </div>
         </div>
@@ -109,23 +109,23 @@ export const ReturnsPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Search Bar */}
-      <div className="flex items-center gap-3 bg-white p-3 border border-[#CFCFD2]">
-        <Search size={15} className="text-[#888888]" />
+      <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
+        <Search size={15} className="text-[#4A4844]" />
         <input
           type="text"
           placeholder="Filter by return RMA, order number, patron name, or silhouette..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
         />
       </div>
 
       {/* Returns Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">RETURN RMA</th>
                 <th className="py-3 px-4 font-medium">ORIGINAL ORDER</th>
                 <th className="py-3 px-4 font-medium">PATRON</th>
@@ -136,18 +136,18 @@ export const ReturnsPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredReturns.map((ret) => (
-                <tr key={ret.id} className="hover:bg-[#FAFAFA] transition-colors">
-                  <td className="py-3 px-4 font-bold text-[#0A0A0A]">{ret.returnNumber}</td>
-                  <td className="py-3 px-4 font-semibold text-[#666666]">{ret.orderNumber}</td>
-                  <td className="py-3 px-4 text-[#0A0A0A]">{ret.customerName}</td>
-                  <td className="py-3 px-4 text-[#444444]">
+                <tr key={ret.id} className="hover:bg-[#E2E2E4] transition-colors">
+                  <td className="py-3 px-4 font-bold text-[#111111]">{ret.returnNumber}</td>
+                  <td className="py-3 px-4 font-semibold text-[#4A4844]">{ret.orderNumber}</td>
+                  <td className="py-3 px-4 text-[#111111]">{ret.customerName}</td>
+                  <td className="py-3 px-4 text-[#111111]">
                     <div>{ret.productTitle}</div>
-                    <span className="text-[10px] text-[#888888]">{ret.variantName}</span>
+                    <span className="text-[10px] text-[#4A4844]">{ret.variantName}</span>
                   </td>
-                  <td className="py-3 px-4 text-[#666666]">{ret.reason}</td>
-                  <td className="py-3 px-4 font-bold text-[#0A0A0A]">
+                  <td className="py-3 px-4 text-[#4A4844]">{ret.reason}</td>
+                  <td className="py-3 px-4 font-bold text-[#111111]">
                     {formatINR(ret.refundAmount)}
                   </td>
                   <td className="py-3 px-4">
@@ -177,49 +177,49 @@ export const ReturnsPage: React.FC = () => {
           title={`INSPECTION & RESOLUTION — ${activeReturn.returnNumber}`}
         >
           <div className="space-y-4 font-mono text-xs">
-            <div className="p-4 bg-[#F1F1F3] border border-[#CFCFD2] space-y-2">
+            <div className="p-4 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-2">
               <div className="flex justify-between">
-                <span className="text-[#666666]">PATRON:</span>
-                <span className="font-bold text-[#0A0A0A]">{activeReturn.customerName}</span>
+                <span className="text-[#4A4844]">PATRON:</span>
+                <span className="font-bold text-[#111111]">{activeReturn.customerName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">ORIGINAL ORDER:</span>
-                <span className="font-bold text-[#0A0A0A]">{activeReturn.orderNumber}</span>
+                <span className="text-[#4A4844]">ORIGINAL ORDER:</span>
+                <span className="font-bold text-[#111111]">{activeReturn.orderNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">GARMENT:</span>
-                <span className="font-bold text-[#0A0A0A]">
+                <span className="text-[#4A4844]">GARMENT:</span>
+                <span className="font-bold text-[#111111]">
                   {activeReturn.productTitle} ({activeReturn.variantName})
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">REPORTED REASON:</span>
-                <span className="text-[#0A0A0A]">{activeReturn.reason}</span>
+                <span className="text-[#4A4844]">REPORTED REASON:</span>
+                <span className="text-[#111111]">{activeReturn.reason}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">INSPECTION CONDITION:</span>
+                <span className="text-[#4A4844]">INSPECTION CONDITION:</span>
                 <span className="font-bold text-emerald-800">{activeReturn.condition}</span>
               </div>
-              <div className="flex justify-between border-t border-[#CFCFD2] pt-2">
-                <span className="text-[#666666]">REFUNDABLE TOTAL:</span>
-                <span className="font-black text-sm text-[#0A0A0A]">
+              <div className="flex justify-between border-t border-[rgba(0,0,0,0.18)] pt-2">
+                <span className="text-[#4A4844]">REFUNDABLE TOTAL:</span>
+                <span className="font-black text-sm text-[#111111]">
                   {formatINR(activeReturn.refundAmount)}
                 </span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <span className="text-[10px] uppercase tracking-widest text-[#888888] block">
+              <span className="text-[10px] uppercase tracking-widest text-[#4A4844] block">
                 EXECUTE RESOLUTION ACTIONS
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => handleUpdateStatus(activeReturn.id, 'INSPECTED')}
-                  className="p-2.5 bg-white border border-[#CFCFD2] hover:border-[#0A0A0A] text-left text-xs font-mono transition-colors"
+                  className="p-2.5 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] hover:border-[#111111] text-left text-xs font-mono transition-colors"
                 >
-                  <div className="font-bold text-[#0A0A0A]">1. MARK INSPECTED</div>
-                  <div className="text-[10px] text-[#888888] mt-0.5">QC passed & tagged</div>
+                  <div className="font-bold text-[#111111]">1. MARK INSPECTED</div>
+                  <div className="text-[10px] text-[#4A4844] mt-0.5">QC passed & tagged</div>
                 </button>
 
                 <button
@@ -228,10 +228,10 @@ export const ReturnsPage: React.FC = () => {
                     handleUpdateStatus(activeReturn.id, 'EXCHANGED');
                     store.addToast('Exchange Approved', `Size exchange approved for ${activeReturn.customerName}.`, 'success');
                   }}
-                  className="p-2.5 bg-white border border-[#CFCFD2] hover:border-[#0A0A0A] text-left text-xs font-mono transition-colors"
+                  className="p-2.5 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] hover:border-[#111111] text-left text-xs font-mono transition-colors"
                 >
-                  <div className="font-bold text-[#0A0A0A]">2. APPROVE EXCHANGE</div>
-                  <div className="text-[10px] text-[#888888] mt-0.5">Size replacement order</div>
+                  <div className="font-bold text-[#111111]">2. APPROVE EXCHANGE</div>
+                  <div className="text-[10px] text-[#4A4844] mt-0.5">Size replacement order</div>
                 </button>
 
                 <button
@@ -239,15 +239,15 @@ export const ReturnsPage: React.FC = () => {
                   onClick={() => {
                     handleUpdateStatus(activeReturn.id, 'REFUNDED');
                   }}
-                  className="p-2.5 bg-[#0A0A0A] text-white text-left text-xs font-mono hover:bg-neutral-800 transition-colors"
+                  className="p-2.5 bg-[#111111] text-[#E2E2E4] text-left text-xs font-mono hover:bg-neutral-800 transition-colors"
                 >
-                  <div className="font-bold text-white">3. ISSUE REFUND</div>
+                  <div className="font-bold text-[#E2E2E4]">3. ISSUE REFUND</div>
                   <div className="text-[10px] text-neutral-400 mt-0.5">Instant UPI / Card settle</div>
                 </button>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#CFCFD2] flex justify-end">
+            <div className="pt-3 border-t border-[rgba(0,0,0,0.18)] flex justify-end">
               <Button variant="secondary" onClick={() => setActiveReturn(null)}>
                 Close
               </Button>

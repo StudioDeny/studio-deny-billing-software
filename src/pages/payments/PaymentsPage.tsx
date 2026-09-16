@@ -71,15 +71,15 @@ export const PaymentsPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             COMMERCE TREASURY & SETTLEMENTS
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             PAYMENT TRANSACTIONS
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Real-time Gateway Settlements, UPI QR Clearing, and POS Card Reconciliation
           </div>
         </div>
@@ -131,23 +131,23 @@ export const PaymentsPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={methodFilter} onChange={setMethodFilter} />
 
       {/* Search Bar */}
-      <div className="flex items-center gap-3 bg-white p-3 border border-[#CFCFD2]">
-        <Search size={15} className="text-[#888888]" />
+      <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
+        <Search size={15} className="text-[#4A4844]" />
         <input
           type="text"
           placeholder="Filter by transaction ref, order number, or patron..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
         />
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">TRANSACTION REF</th>
                 <th className="py-3 px-4 font-medium">ORDER REF</th>
                 <th className="py-3 px-4 font-medium">PATRON</th>
@@ -158,23 +158,23 @@ export const PaymentsPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">INVOICE</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredPayments.map((pay) => (
-                <tr key={pay.id} className="hover:bg-[#FAFAFA] transition-colors">
-                  <td className="py-3.5 px-4 font-bold text-[#0A0A0A]">{pay.transactionRef}</td>
-                  <td className="py-3 px-4 font-semibold text-[#666666]">{pay.orderNumber}</td>
-                  <td className="py-3 px-4 text-[#0A0A0A]">{pay.customerName}</td>
-                  <td className="py-3 px-4 text-[#666666]">{pay.date}</td>
+                <tr key={pay.id} className="hover:bg-[#E2E2E4] transition-colors">
+                  <td className="py-3.5 px-4 font-bold text-[#111111]">{pay.transactionRef}</td>
+                  <td className="py-3 px-4 font-semibold text-[#4A4844]">{pay.orderNumber}</td>
+                  <td className="py-3 px-4 text-[#111111]">{pay.customerName}</td>
+                  <td className="py-3 px-4 text-[#4A4844]">{pay.date}</td>
                   <td className="py-3 px-4">
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#F1F1F3] text-[#0A0A0A] border border-[#CFCFD2] font-semibold text-[10px]">
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#D5D5D8] text-[#111111] border border-[rgba(0,0,0,0.18)] font-semibold text-[10px]">
                       {pay.method === 'UPI' && <QrCode size={11} />}
                       {pay.method === 'CARD' && <CreditCard size={11} />}
                       {pay.method === 'COD' && <Banknote size={11} />}
                       {pay.method}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-black text-[#0A0A0A]">
-                    <span className={pay.status === 'REFUNDED' ? 'text-red-700' : 'text-[#0A0A0A]'}>
+                  <td className="py-3 px-4 font-black text-[#111111]">
+                    <span className={pay.status === 'REFUNDED' ? 'text-red-700' : 'text-[#111111]'}>
                       {pay.status === 'REFUNDED' ? `-${formatINR(pay.amount)}` : formatINR(pay.amount)}
                     </span>
                   </td>

@@ -45,15 +45,15 @@ export const OrdersPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             COMMERCE LEDGER
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             ORDERS MANAGEMENT
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Managing {totalOrders} Direct-to-Consumer & POS Customer Orders
           </div>
         </div>
@@ -106,27 +106,27 @@ export const OrdersPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={statusFilter} onChange={setStatusFilter} />
 
       {/* Search Bar */}
-      <div className="flex items-center justify-between gap-4 p-3 bg-[#F1F1F3] border border-[#CFCFD2]">
+      <div className="flex items-center justify-between gap-4 p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)]">
         <div className="relative flex-1 max-w-md">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#888888]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4A4844]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search order number (SD-1000248), customer name, or AWB..."
-            className="w-full bg-white text-xs font-mono pl-9 pr-3 py-2 border border-[#CFCFD2] focus:border-[#0A0A0A] focus:outline-none"
+            className="w-full bg-[#D5D5D8] text-xs font-mono pl-9 pr-3 py-2 border border-[rgba(0,0,0,0.18)] focus:border-[#111111] focus:outline-none"
           />
         </div>
 
-        <div className="text-xs font-mono text-[#666666]">
+        <div className="text-xs font-mono text-[#4A4844]">
           SHOWING {filteredOrders.length} OF {orders.length}
         </div>
       </div>
 
       {/* Orders Table (Requirement 6) */}
-      <div className="border border-[#CFCFD2] bg-white overflow-x-auto">
+      <div className="border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b-2 border-[#0A0A0A] bg-[#F1F1F3] text-[10px] font-mono uppercase tracking-widest-editorial text-[#0A0A0A]">
+            <tr className="border-b-2 border-[#111111] bg-[#D5D5D8] text-[10px] font-mono uppercase tracking-widest-editorial text-[#111111]">
               <th className="py-3 px-4 font-bold">ORDER</th>
               <th className="py-3 px-4 font-bold">CUSTOMER</th>
               <th className="py-3 px-4 font-bold">ITEMS</th>
@@ -137,43 +137,43 @@ export const OrdersPage: React.FC = () => {
               <th className="py-3 px-4 text-right font-bold">ACTION</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E7E7E9] text-xs">
+          <tbody className="divide-y divide-[#D5D5D8] text-xs">
             {filteredOrders.map((ord) => (
               <tr
                 key={ord.id}
                 onClick={() => navigate(`/orders/${ord.id}`)}
-                className="hover:bg-[#F1F1F3] transition-colors cursor-pointer group"
+                className="hover:bg-[#D5D5D8] transition-colors cursor-pointer group"
               >
-                <td className="py-4 px-4 font-mono font-bold text-[#0A0A0A]">
+                <td className="py-4 px-4 font-mono font-bold text-[#111111]">
                   {ord.orderNumber}
                 </td>
 
                 <td className="py-4 px-4">
-                  <div className="font-display font-bold text-sm text-[#0A0A0A]">
+                  <div className="font-display font-bold text-sm text-[#111111]">
                     {ord.customerName}
                   </div>
-                  <div className="text-xs font-mono text-[#666666] mt-0.5">
+                  <div className="text-xs font-mono text-[#4A4844] mt-0.5">
                     {ord.shippingAddress.city}
                   </div>
                 </td>
 
                 <td className="py-4 px-4 font-mono text-[#111111]">
                   <span className="font-bold">{ord.items.reduce((s, i) => s + i.quantity, 0)} ITEMS</span>
-                  <div className="text-[11px] text-[#888888] truncate max-w-xs">
+                  <div className="text-[11px] text-[#4A4844] truncate max-w-xs">
                     {ord.items.map((i) => i.name).join(', ')}
                   </div>
                 </td>
 
-                <td className="py-4 px-4 font-mono text-[#666666]">
+                <td className="py-4 px-4 font-mono text-[#4A4844]">
                   {formatDate(ord.createdAt)}
                 </td>
 
-                <td className="py-4 px-4 text-right font-mono font-bold text-[#0A0A0A] text-sm">
+                <td className="py-4 px-4 text-right font-mono font-bold text-[#111111] text-sm">
                   {formatINR(ord.grandTotal)}
                 </td>
 
                 <td className="py-4 px-4">
-                  <span className="font-mono text-[11px] px-2 py-0.5 border border-[#CFCFD2] bg-white font-semibold text-[#0A0A0A] uppercase">
+                  <span className="font-mono text-[11px] px-2 py-0.5 border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] font-semibold text-[#111111] uppercase">
                     {ord.paymentStatus} ({ord.paymentMethod})
                   </span>
                 </td>
@@ -183,7 +183,7 @@ export const OrdersPage: React.FC = () => {
                 </td>
 
                 <td className="py-4 px-4 text-right">
-                  <span className="inline-flex items-center gap-1 text-xs font-mono text-[#0A0A0A] group-hover:underline">
+                  <span className="inline-flex items-center gap-1 text-xs font-mono text-[#111111] group-hover:underline">
                     <span>VIEW</span>
                     <ArrowRight size={13} />
                   </span>

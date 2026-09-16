@@ -555,9 +555,9 @@ export const PosBillingPage: React.FC = () => {
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       {/* POS Screen Header Bar */}
-      <div className="bg-[#0A0A0A] text-white p-3.5 sm:p-4 border border-[#0A0A0A] flex flex-wrap items-center justify-between gap-3 shadow-md">
+      <div className="bg-[#111111] text-[#E2E2E4] p-3.5 sm:p-4 border border-[#111111] flex flex-wrap items-center justify-between gap-3 shadow-md">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white text-[#0A0A0A] flex items-center justify-center font-black text-xs font-display">
+          <div className="w-8 h-8 bg-[#D5D5D8] text-[#111111] flex items-center justify-center font-black text-xs font-display">
             SD
           </div>
           <div>
@@ -588,7 +588,7 @@ export const PosBillingPage: React.FC = () => {
           {/* iPad Portrait Cart Opener */}
           <button
             onClick={() => setMobileCartOpen(true)}
-            className="lg:hidden bg-white text-[#0A0A0A] px-3.5 py-1.5 text-xs font-mono font-bold flex items-center gap-2 shadow-sm"
+            className="lg:hidden bg-[#D5D5D8] text-[#111111] px-3.5 py-1.5 text-xs font-mono font-bold flex items-center gap-2 shadow-sm"
           >
             <ShoppingBag size={14} />
             <span>BILL ({totalItemCount}) · {formatINR(grandTotal)}</span>
@@ -598,7 +598,7 @@ export const PosBillingPage: React.FC = () => {
             variant="secondary"
             size="sm"
             onClick={() => navigate('/bills')}
-            className="text-xs bg-neutral-800 text-white border-neutral-700 hover:bg-neutral-700"
+            className="text-xs bg-neutral-800 text-[#E2E2E4] border-neutral-700 hover:bg-neutral-700"
           >
             BILLS HISTORY
           </Button>
@@ -613,12 +613,12 @@ export const PosBillingPage: React.FC = () => {
         <div className="lg:col-span-7 space-y-4">
           {/* Category Filter - a dropdown since the live catalog has too many
               categories for a row of tabs to scale */}
-          <div className="flex items-center gap-2 font-mono text-xs pb-1 border-b border-[#CFCFD2]">
-            <span className="text-[10px] uppercase tracking-widest text-[#888888] shrink-0">Category</span>
+          <div className="flex items-center gap-2 font-mono text-xs pb-1 border-b border-[rgba(0,0,0,0.18)]">
+            <span className="text-[10px] uppercase tracking-widest text-[#4A4844] shrink-0">Category</span>
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="flex-1 sm:flex-none sm:min-w-[220px] bg-white border border-[#CFCFD2] px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider focus:outline-none focus:border-[#0A0A0A]"
+              className="flex-1 sm:flex-none sm:min-w-[220px] bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider focus:outline-none focus:border-[#111111]"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -629,17 +629,17 @@ export const PosBillingPage: React.FC = () => {
           </div>
 
           {/* Fast Search Input */}
-          <div className="flex items-center gap-3 bg-white p-3 border border-[#CFCFD2]">
-            <Search size={16} className="text-[#888888]" />
+          <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
+            <Search size={16} className="text-[#4A4844]" />
             <input
               type="text"
               placeholder="Search by silhouette, SKU, or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+              className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="text-[#888888] hover:text-[#0A0A0A]">
+              <button onClick={() => setSearch('')} className="text-[#4A4844] hover:text-[#111111]">
                 <X size={15} />
               </button>
             )}
@@ -651,29 +651,29 @@ export const PosBillingPage: React.FC = () => {
               <div
                 key={prod.id}
                 onClick={() => handleProductTap(prod)}
-                className="bg-white border border-[#CFCFD2] hover:border-[#0A0A0A] p-2.5 flex flex-col justify-between cursor-pointer group transition-all shadow-xs select-none active:scale-[0.99]"
+                className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] hover:border-[#111111] p-2.5 flex flex-col justify-between cursor-pointer group transition-all shadow-xs select-none active:scale-[0.99]"
               >
-                <div className="aspect-square bg-[#F1F1F3] overflow-hidden border border-[#E5E5E7] relative">
+                <div className="aspect-square bg-[#D5D5D8] overflow-hidden border border-[rgba(0,0,0,0.1)] relative">
                   <img
                     src={prod.image}
                     alt={prod.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute bottom-1.5 right-1.5 bg-[#0A0A0A]/90 text-white text-[9px] font-mono px-1.5 py-0.5">
+                  <div className="absolute bottom-1.5 right-1.5 bg-[#111111]/90 text-[#E2E2E4] text-[9px] font-mono px-1.5 py-0.5">
                     {prod.totalStock} in stock
                   </div>
                 </div>
 
                 <div className="mt-2.5 space-y-1">
-                  <div className="text-[9px] font-mono text-[#888888] uppercase tracking-wider truncate">
+                  <div className="text-[9px] font-mono text-[#4A4844] uppercase tracking-wider truncate">
                     {prod.sku}
                   </div>
-                  <h4 className="font-bold text-xs text-[#0A0A0A] group-hover:underline line-clamp-1">
+                  <h4 className="font-bold text-xs text-[#111111] group-hover:underline line-clamp-1">
                     {prod.name}
                   </h4>
                   <div className="flex items-center justify-between font-mono text-xs pt-0.5">
-                    <span className="font-black text-[#0A0A0A]">{formatINR(prod.price)}</span>
-                    <span className="text-[10px] text-[#666666] bg-[#F1F1F3] px-1.5 py-0.5 border border-[#E5E5E7]">
+                    <span className="font-black text-[#111111]">{formatINR(prod.price)}</span>
+                    <span className="text-[10px] text-[#4A4844] bg-[#D5D5D8] px-1.5 py-0.5 border border-[rgba(0,0,0,0.1)]">
                       {prod.variants.length} {prod.variants.length === 1 ? 'size' : 'sizes'}
                     </span>
                   </div>
@@ -686,7 +686,7 @@ export const PosBillingPage: React.FC = () => {
                           key={v.id}
                           disabled={v.stock <= 0}
                           onClick={() => handleAddVariantToCart(prod, v)}
-                          className="px-2 py-1 bg-[#F1F1F3] hover:bg-[#0A0A0A] hover:text-white border border-[#CFCFD2] text-[10px] font-bold disabled:opacity-30 transition-colors"
+                          className="px-2 py-1 bg-[#D5D5D8] hover:bg-[#111111] hover:text-[#E2E2E4] border border-[rgba(0,0,0,0.18)] text-[10px] font-bold disabled:opacity-30 transition-colors"
                           title={`${v.color} - ${v.stock} in stock`}
                         >
                           {v.size}
@@ -704,39 +704,39 @@ export const PosBillingPage: React.FC = () => {
             RIGHT AREA (COL 5): STICKY CART & MULTI-TENDER PAYMENT REGISTER
         ========================================================================= */}
         <div
-          className={`lg:col-span-5 bg-white border border-[#CFCFD2] flex flex-col shadow-subtle lg:sticky lg:top-20 max-h-[calc(100vh-100px)] overflow-hidden ${
+          className={`lg:col-span-5 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] flex flex-col shadow-subtle lg:sticky lg:top-20 max-h-[calc(100vh-100px)] overflow-hidden ${
             mobileCartOpen
-              ? 'fixed inset-0 z-50 p-4 bg-white overflow-y-auto'
+              ? 'fixed inset-0 z-50 p-4 bg-[#D5D5D8] overflow-y-auto'
               : 'hidden lg:flex'
           }`}
         >
           {/* Mobile Close Cart Header */}
-          <div className="lg:hidden flex items-center justify-between pb-3 mb-2 border-b border-[#CFCFD2]">
+          <div className="lg:hidden flex items-center justify-between pb-3 mb-2 border-b border-[rgba(0,0,0,0.18)]">
             <span className="font-display font-extrabold text-sm uppercase">CURRENT BILL REGISTER</span>
             <button
               onClick={() => setMobileCartOpen(false)}
-              className="p-2 border border-[#CFCFD2]"
+              className="p-2 border border-[rgba(0,0,0,0.18)]"
             >
               <X size={18} />
             </button>
           </div>
 
           {/* 1. COMPACT CUSTOMER SELECTOR */}
-          <div className="p-3.5 border-b border-[#CFCFD2] bg-[#FAFAFA] space-y-2 select-none">
+          <div className="p-3.5 border-b border-[rgba(0,0,0,0.18)] bg-[#E2E2E4] space-y-2 select-none">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#888888] flex items-center gap-1.5">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844] flex items-center gap-1.5">
                 <User size={12} /> PATRON PROFILE
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsGuest(!isGuest)}
-                  className="text-[10px] font-mono uppercase underline text-[#666666] hover:text-[#0A0A0A]"
+                  className="text-[10px] font-mono uppercase underline text-[#4A4844] hover:text-[#111111]"
                 >
                   {isGuest ? 'SELECT REGISTERED' : 'WALK-IN GUEST'}
                 </button>
                 <button
                   onClick={() => setIsAddingCustomer(!isAddingCustomer)}
-                  className="text-[10px] font-mono uppercase bg-white border border-[#CFCFD2] px-2 py-0.5 hover:border-[#0A0A0A] flex items-center gap-1"
+                  className="text-[10px] font-mono uppercase bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] px-2 py-0.5 hover:border-[#111111] flex items-center gap-1"
                 >
                   <UserPlus size={10} /> + ADD
                 </button>
@@ -745,7 +745,7 @@ export const PosBillingPage: React.FC = () => {
 
             {/* Quick Add Customer Inline Drawer */}
             {isAddingCustomer && (
-              <form onSubmit={handleQuickAddCustomer} className="p-2.5 bg-white border border-[#0A0A0A] space-y-2">
+              <form onSubmit={handleQuickAddCustomer} className="p-2.5 bg-[#D5D5D8] border border-[#111111] space-y-2">
                 <div className="text-[10px] font-mono font-bold uppercase">QUICK REGISTER PATRON</div>
                 <div className="grid grid-cols-2 gap-2">
                   <input
@@ -754,7 +754,7 @@ export const PosBillingPage: React.FC = () => {
                     placeholder="Full Name *"
                     value={newCustName}
                     onChange={(e) => setNewCustName(e.target.value)}
-                    className="p-1.5 border border-[#CFCFD2] font-mono text-xs focus:outline-none"
+                    className="p-1.5 border border-[rgba(0,0,0,0.18)] font-mono text-xs focus:outline-none"
                   />
                   <input
                     type="text"
@@ -762,20 +762,20 @@ export const PosBillingPage: React.FC = () => {
                     placeholder="Phone (e.g. 98200...)"
                     value={newCustPhone}
                     onChange={(e) => setNewCustPhone(e.target.value)}
-                    className="p-1.5 border border-[#CFCFD2] font-mono text-xs focus:outline-none"
+                    className="p-1.5 border border-[rgba(0,0,0,0.18)] font-mono text-xs focus:outline-none"
                   />
                 </div>
                 <div className="flex justify-end gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setIsAddingCustomer(false)}
-                    className="px-2 py-1 text-[10px] font-mono border border-[#CFCFD2]"
+                    className="px-2 py-1 text-[10px] font-mono border border-[rgba(0,0,0,0.18)]"
                   >
                     CANCEL
                   </button>
                   <button
                     type="submit"
-                    className="px-3 py-1 text-[10px] font-mono bg-[#0A0A0A] text-white font-bold"
+                    className="px-3 py-1 text-[10px] font-mono bg-[#111111] text-[#E2E2E4] font-bold"
                   >
                     SAVE & SELECT
                   </button>
@@ -790,21 +790,21 @@ export const PosBillingPage: React.FC = () => {
                   placeholder="Guest Name"
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  className="p-2 bg-white border border-[#CFCFD2] text-xs font-mono focus:outline-none"
+                  className="p-2 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-xs font-mono focus:outline-none"
                 />
                 <input
                   type="text"
                   placeholder="Guest Phone"
                   value={guestPhone}
                   onChange={(e) => setGuestPhone(e.target.value)}
-                  className="p-2 bg-white border border-[#CFCFD2] text-xs font-mono focus:outline-none"
+                  className="p-2 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-xs font-mono focus:outline-none"
                 />
               </div>
             ) : (
               <select
                 value={selectedCustomerId}
                 onChange={(e) => setSelectedCustomerId(e.target.value)}
-                className="w-full bg-white border border-[#CFCFD2] p-2 text-xs font-mono focus:outline-none"
+                className="w-full bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-2 text-xs font-mono focus:outline-none"
               >
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -816,11 +816,11 @@ export const PosBillingPage: React.FC = () => {
           </div>
 
           {/* 2. CART ITEMS LIST */}
-          <div className="p-3.5 flex-1 overflow-y-auto max-h-[220px] divide-y divide-[#E5E5E7]">
+          <div className="p-3.5 flex-1 overflow-y-auto max-h-[220px] divide-y divide-[rgba(0,0,0,0.1)]">
             {cart.length === 0 ? (
-              <div className="py-10 text-center font-mono text-[#888888] space-y-1.5">
-                <ShoppingBag size={24} className="mx-auto text-[#CFCFD2]" />
-                <div className="text-xs font-bold text-[#0A0A0A]">BILL REGISTER IS EMPTY</div>
+              <div className="py-10 text-center font-mono text-[#4A4844] space-y-1.5">
+                <ShoppingBag size={24} className="mx-auto text-[rgba(0,0,0,0.18)]" />
+                <div className="text-xs font-bold text-[#111111]">BILL REGISTER IS EMPTY</div>
                 <div className="text-[11px]">Tap garments from the left catalog to add to bill</div>
               </div>
             ) : (
@@ -828,9 +828,9 @@ export const PosBillingPage: React.FC = () => {
                 <div key={item.variant.id} className="py-2.5 space-y-1.5 font-mono text-xs">
                   <div className="flex items-start justify-between gap-2.5">
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-[#0A0A0A] truncate">{item.product.name}</div>
-                      <div className="text-[10px] text-[#666666] flex items-center gap-1.5 mt-0.5">
-                        <span className="font-bold bg-[#0A0A0A] text-white px-1">
+                      <div className="font-bold text-[#111111] truncate">{item.product.name}</div>
+                      <div className="text-[10px] text-[#4A4844] flex items-center gap-1.5 mt-0.5">
+                        <span className="font-bold bg-[#111111] text-[#E2E2E4] px-1">
                           {item.variant.size}
                         </span>
                         <span>{item.variant.color}</span>
@@ -843,7 +843,7 @@ export const PosBillingPage: React.FC = () => {
                     <div className="flex items-center gap-1 shrink-0">
                       <button
                         onClick={() => handleUpdateQuantity(item.variant.id, -1)}
-                        className="w-7 h-7 border border-[#CFCFD2] hover:bg-[#F1F1F3] active:bg-[#0A0A0A] active:text-white flex items-center justify-center text-[#0A0A0A] font-bold text-sm"
+                        className="w-7 h-7 border border-[rgba(0,0,0,0.18)] hover:bg-[#D5D5D8] active:bg-[#111111] active:text-[#E2E2E4] flex items-center justify-center text-[#111111] font-bold text-sm"
                         aria-label="Decrease quantity"
                       >
                         <Minus size={12} />
@@ -851,7 +851,7 @@ export const PosBillingPage: React.FC = () => {
                       <span className="w-6 text-center font-bold text-xs">{item.quantity}</span>
                       <button
                         onClick={() => handleUpdateQuantity(item.variant.id, 1)}
-                        className="w-7 h-7 border border-[#CFCFD2] hover:bg-[#F1F1F3] active:bg-[#0A0A0A] active:text-white flex items-center justify-center text-[#0A0A0A] font-bold text-sm"
+                        className="w-7 h-7 border border-[rgba(0,0,0,0.18)] hover:bg-[#D5D5D8] active:bg-[#111111] active:text-[#E2E2E4] flex items-center justify-center text-[#111111] font-bold text-sm"
                         aria-label="Increase quantity"
                       >
                         <Plus size={12} />
@@ -863,7 +863,7 @@ export const PosBillingPage: React.FC = () => {
                       <div>
                         {item.itemDiscount && item.itemDiscount > 0 ? (
                           <div>
-                            <div className="text-[10px] text-[#888888] line-through">
+                            <div className="text-[10px] text-[#4A4844] line-through">
                               {formatINR(item.variant.price * item.quantity)}
                             </div>
                             <div className="font-bold text-emerald-700">
@@ -871,14 +871,14 @@ export const PosBillingPage: React.FC = () => {
                             </div>
                           </div>
                         ) : (
-                          <span className="font-bold text-[#0A0A0A]">
+                          <span className="font-bold text-[#111111]">
                             {formatINR(item.variant.price * item.quantity)}
                           </span>
                         )}
                       </div>
                       <button
                         onClick={() => handleRemoveItem(item.variant.id)}
-                        className="text-[#888888] hover:text-red-600 p-1"
+                        className="text-[#4A4844] hover:text-red-600 p-1"
                         aria-label="Remove item"
                       >
                         <Trash2 size={13} />
@@ -902,15 +902,15 @@ export const PosBillingPage: React.FC = () => {
                         </button>
                       </div>
                     ) : (
-                      <span className="text-[9px] text-[#888888]">NO ITEM DISCOUNT</span>
+                      <span className="text-[9px] text-[#4A4844]">NO ITEM DISCOUNT</span>
                     )}
 
                     <button
                       onClick={() => handleOpenItemDiscount(item)}
                       className={`px-1.5 py-0.5 border text-[9px] font-bold uppercase transition-colors ${
                         item.itemDiscount
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-white text-[#555555] border-[#CFCFD2] hover:border-[#0A0A0A] hover:text-[#0A0A0A]'
+                          ? 'bg-emerald-600 text-[#E2E2E4] border-emerald-600'
+                          : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:text-[#111111]'
                       }`}
                     >
                       <Percent size={9} className="inline mr-0.5" />
@@ -923,15 +923,15 @@ export const PosBillingPage: React.FC = () => {
           </div>
 
           {/* 3. ADVANCED CUSTOM DISCOUNT & LEDGER SUMMARY */}
-          <div className="p-3.5 border-t border-[#CFCFD2] bg-[#FAFAFA] space-y-3 font-mono text-xs">
+          <div className="p-3.5 border-t border-[rgba(0,0,0,0.18)] bg-[#E2E2E4] space-y-3 font-mono text-xs">
             {/* Discount Engine Header & Mode Switch */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-[#0A0A0A] font-bold text-[11px] uppercase tracking-wide">
+                <div className="flex items-center gap-1.5 text-[#111111] font-bold text-[11px] uppercase tracking-wide">
                   <Tag size={12} />
                   <span>CUSTOM BILL DISCOUNT</span>
                 </div>
-                <div className="flex items-center border border-[#CFCFD2] bg-white text-[10px] font-bold">
+                <div className="flex items-center border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] font-bold">
                   <button
                     type="button"
                     onClick={() => {
@@ -940,8 +940,8 @@ export const PosBillingPage: React.FC = () => {
                     }}
                     className={`px-2 py-0.5 transition-colors ${
                       discountType === 'PERCENT'
-                        ? 'bg-[#0A0A0A] text-white'
-                        : 'text-[#666666] hover:text-[#0A0A0A]'
+                        ? 'bg-[#111111] text-[#E2E2E4]'
+                        : 'text-[#4A4844] hover:text-[#111111]'
                     }`}
                   >
                     % PERCENT
@@ -954,8 +954,8 @@ export const PosBillingPage: React.FC = () => {
                     }}
                     className={`px-2 py-0.5 transition-colors ${
                       discountType === 'FIXED'
-                        ? 'bg-[#0A0A0A] text-white'
-                        : 'text-[#666666] hover:text-[#0A0A0A]'
+                        ? 'bg-[#111111] text-[#E2E2E4]'
+                        : 'text-[#4A4844] hover:text-[#111111]'
                     }`}
                   >
                     ₹ FLAT CASH
@@ -974,15 +974,15 @@ export const PosBillingPage: React.FC = () => {
                         onClick={() => setDiscountValue(pct)}
                         className={`px-1.5 py-0.5 border text-[10px] transition-colors ${
                           discountValue === pct
-                            ? 'bg-[#0A0A0A] text-white border-[#0A0A0A] font-bold'
-                            : 'bg-white text-[#666666] border-[#CFCFD2] hover:border-[#0A0A0A]'
+                            ? 'bg-[#111111] text-[#E2E2E4] border-[#111111] font-bold'
+                            : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
                         }`}
                       >
                         {pct === 0 ? '0%' : `${pct}%`}
                       </button>
                     ))}
-                    <div className="flex items-center ml-auto border border-[#CFCFD2] bg-white px-1.5 py-0.5">
-                      <span className="text-[10px] text-[#888888] mr-1">CUSTOM:</span>
+                    <div className="flex items-center ml-auto border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] px-1.5 py-0.5">
+                      <span className="text-[10px] text-[#4A4844] mr-1">CUSTOM:</span>
                       <input
                         type="number"
                         step="0.5"
@@ -993,7 +993,7 @@ export const PosBillingPage: React.FC = () => {
                         onChange={(e) => setDiscountValue(Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
                         className="w-10 text-[10px] font-mono font-bold text-right focus:outline-none"
                       />
-                      <span className="text-[10px] font-bold text-[#0A0A0A] ml-0.5">%</span>
+                      <span className="text-[10px] font-bold text-[#111111] ml-0.5">%</span>
                     </div>
                   </>
                 ) : (
@@ -1005,16 +1005,16 @@ export const PosBillingPage: React.FC = () => {
                         onClick={() => setDiscountValue(flat)}
                         className={`px-1.5 py-0.5 border text-[10px] transition-colors ${
                           discountValue === flat
-                            ? 'bg-[#0A0A0A] text-white border-[#0A0A0A] font-bold'
-                            : 'bg-white text-[#666666] border-[#CFCFD2] hover:border-[#0A0A0A]'
+                            ? 'bg-[#111111] text-[#E2E2E4] border-[#111111] font-bold'
+                            : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
                         }`}
                       >
                         {flat === 0 ? '₹0' : `₹${flat}`}
                       </button>
                     ))}
-                    <div className="flex items-center ml-auto border border-[#CFCFD2] bg-white px-1.5 py-0.5">
-                      <span className="text-[10px] text-[#888888] mr-1">CUSTOM:</span>
-                      <span className="text-[10px] font-bold text-[#0A0A0A] mr-0.5">₹</span>
+                    <div className="flex items-center ml-auto border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] px-1.5 py-0.5">
+                      <span className="text-[10px] text-[#4A4844] mr-1">CUSTOM:</span>
+                      <span className="text-[10px] font-bold text-[#111111] mr-0.5">₹</span>
                       <input
                         type="number"
                         step="1"
@@ -1032,13 +1032,13 @@ export const PosBillingPage: React.FC = () => {
 
               {/* Discount Reason & Authorization Code */}
               {(discountValue > 0 || totalDiscountAmount > 0) && (
-                <div className="pt-1 space-y-1.5 border-t border-[#E5E5E7]">
+                <div className="pt-1 space-y-1.5 border-t border-[rgba(0,0,0,0.1)]">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-[#666666] font-bold uppercase shrink-0">REASON:</span>
+                    <span className="text-[10px] text-[#4A4844] font-bold uppercase shrink-0">REASON:</span>
                     <select
                       value={discountReason}
                       onChange={(e) => setDiscountReason(e.target.value)}
-                      className="w-full bg-white border border-[#CFCFD2] p-1 text-[10px] font-mono focus:outline-none"
+                      className="w-full bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-1 text-[10px] font-mono focus:outline-none"
                     >
                       {DISCOUNT_REASONS.map((reason) => (
                         <option key={reason} value={reason}>
@@ -1054,7 +1054,7 @@ export const PosBillingPage: React.FC = () => {
                       placeholder="Write authorization remark / promo code (e.g. VIP-FLAGSHIP-20)..."
                       value={customDiscountReason}
                       onChange={(e) => setCustomDiscountReason(e.target.value)}
-                      className="w-full p-1 bg-white border border-[#0A0A0A] text-[10px] font-mono focus:outline-none"
+                      className="w-full p-1 bg-[#D5D5D8] border border-[#111111] text-[10px] font-mono focus:outline-none"
                     />
                   )}
                 </div>
@@ -1062,10 +1062,10 @@ export const PosBillingPage: React.FC = () => {
             </div>
 
             {/* Calculations Ledger */}
-            <div className="space-y-1 pt-2 border-t border-[#E5E5E7] text-[11px]">
-              <div className="flex justify-between text-[#666666]">
+            <div className="space-y-1 pt-2 border-t border-[rgba(0,0,0,0.1)] text-[11px]">
+              <div className="flex justify-between text-[#4A4844]">
                 <span>GROSS SUBTOTAL ({totalItemCount} ITEMS):</span>
-                <span className="font-semibold text-[#0A0A0A]">{formatINR(grossSubtotal)}</span>
+                <span className="font-semibold text-[#111111]">{formatINR(grossSubtotal)}</span>
               </div>
 
               {itemDiscountsTotal > 0 && (
@@ -1096,37 +1096,37 @@ export const PosBillingPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex justify-between text-[#666666]">
+              <div className="flex justify-between text-[#4A4844]">
                 <span>NET TAXABLE VALUE:</span>
                 <span>{formatINR(taxableAmount)}</span>
               </div>
 
-              <div className="flex justify-between text-[#666666]">
+              <div className="flex justify-between text-[#4A4844]">
                 <span>GST APPAREL TAX ({taxRate}%):</span>
                 <span>{formatINR(taxAmount)}</span>
               </div>
 
               {/* DOMINANT GRAND TOTAL */}
-              <div className="flex justify-between items-baseline pt-2 border-t-2 border-[#0A0A0A]">
-                <span className="font-bold text-sm text-[#0A0A0A] uppercase tracking-wider">
+              <div className="flex justify-between items-baseline pt-2 border-t-2 border-[#111111]">
+                <span className="font-bold text-sm text-[#111111] uppercase tracking-wider">
                   TOTAL DUE:
                 </span>
-                <span className="font-black text-2xl sm:text-3xl text-[#0A0A0A] tracking-tight">
+                <span className="font-black text-2xl sm:text-3xl text-[#111111] tracking-tight">
                   {formatINR(grandTotal)}
                 </span>
               </div>
             </div>
 
             {/* 4. MULTI-TENDER PAYMENT SECTION */}
-            <div className="pt-2 border-t border-[#CFCFD2] space-y-2">
+            <div className="pt-2 border-t border-[rgba(0,0,0,0.18)] space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-widest text-[#888888] font-bold">
+                <span className="text-[10px] uppercase tracking-widest text-[#4A4844] font-bold">
                   PAYMENT TENDER
                 </span>
                 <button
                   type="button"
                   onClick={handleAddPaymentSplit}
-                  className="text-[10px] uppercase font-bold text-[#0A0A0A] underline hover:text-neutral-700 flex items-center gap-1"
+                  className="text-[10px] uppercase font-bold text-[#111111] underline hover:text-neutral-700 flex items-center gap-1"
                 >
                   <Plus size={11} /> ADD PAYMENT METHOD
                 </button>
@@ -1142,8 +1142,8 @@ export const PosBillingPage: React.FC = () => {
                       onClick={() => handleSetSinglePaymentMethod(m)}
                       className={`py-1.5 px-1 border text-center font-bold text-[10px] transition-colors ${
                         paymentSplits[0].method === m
-                          ? 'bg-[#0A0A0A] text-white border-[#0A0A0A]'
-                          : 'bg-white text-[#555555] border-[#CFCFD2] hover:border-[#0A0A0A]'
+                          ? 'bg-[#111111] text-[#E2E2E4] border-[#111111]'
+                          : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
                       }`}
                     >
                       {m}
@@ -1155,7 +1155,7 @@ export const PosBillingPage: React.FC = () => {
               {/* Payment Splits Rows */}
               <div className="space-y-1.5 max-h-[140px] overflow-y-auto">
                 {paymentSplits.map((split) => (
-                  <div key={split.id} className="flex items-center gap-2 bg-white p-1.5 border border-[#CFCFD2]">
+                  <div key={split.id} className="flex items-center gap-2 bg-[#D5D5D8] p-1.5 border border-[rgba(0,0,0,0.18)]">
                     <select
                       value={split.method}
                       onChange={(e) =>
@@ -1163,7 +1163,7 @@ export const PosBillingPage: React.FC = () => {
                           method: e.target.value as any,
                         })
                       }
-                      className="bg-[#F1F1F3] border border-[#CFCFD2] text-[10px] font-bold p-1 focus:outline-none"
+                      className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-[10px] font-bold p-1 focus:outline-none"
                     >
                       <option value="UPI">UPI / QR</option>
                       <option value="CASH">CASH</option>
@@ -1172,7 +1172,7 @@ export const PosBillingPage: React.FC = () => {
                     </select>
 
                     <div className="flex-1 flex items-center gap-1 font-mono text-xs">
-                      <span className="text-[#888888]">₹</span>
+                      <span className="text-[#4A4844]">₹</span>
                       <input
                         type="number"
                         min="0"
@@ -1191,7 +1191,7 @@ export const PosBillingPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleRemovePaymentSplit(split.id)}
-                        className="text-[#888888] hover:text-red-600 p-1"
+                        className="text-[#4A4844] hover:text-red-600 p-1"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -1202,9 +1202,9 @@ export const PosBillingPage: React.FC = () => {
 
               {/* Cash Change Tender Calculation (When Cash is selected) */}
               {cashSplit && (
-                <div className="p-2 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1 text-[11px]">
+                <div className="p-2 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1 text-[11px]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[#666666]">CASH RECEIVED:</span>
+                    <span className="text-[#4A4844]">CASH RECEIVED:</span>
                     <div className="flex items-center gap-1">
                       <span>₹</span>
                       <input
@@ -1212,12 +1212,12 @@ export const PosBillingPage: React.FC = () => {
                         placeholder={String(cashAmountExpected)}
                         value={cashTendered}
                         onChange={(e) => setCashTendered(e.target.value)}
-                        className="w-24 p-1 bg-white border border-[#CFCFD2] text-right font-bold focus:outline-none"
+                        className="w-24 p-1 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-right font-bold focus:outline-none"
                       />
                     </div>
                   </div>
                   {numCashTendered > 0 && (
-                    <div className="flex items-center justify-between font-bold text-emerald-800 pt-1 border-t border-[#E5E5E7]">
+                    <div className="flex items-center justify-between font-bold text-emerald-800 pt-1 border-t border-[rgba(0,0,0,0.1)]">
                       <span>CHANGE TO RETURN:</span>
                       <span className="text-sm font-black">{formatINR(changeToReturn)}</span>
                     </div>
@@ -1227,7 +1227,7 @@ export const PosBillingPage: React.FC = () => {
 
               {/* Dynamic Status: Paid vs Remaining Due */}
               <div className="pt-1 flex items-center justify-between text-[11px] font-bold">
-                <span className="text-[#666666]">TOTAL TENDERED:</span>
+                <span className="text-[#4A4844]">TOTAL TENDERED:</span>
                 <span>{formatINR(amountPaid)}</span>
               </div>
 
@@ -1249,7 +1249,7 @@ export const PosBillingPage: React.FC = () => {
                 type="button"
                 disabled={cart.length === 0 || remainingDue > 0 || isProcessingPayment}
                 onClick={() => handleCompletePayment(true)}
-                className="w-full py-3.5 bg-[#0A0A0A] text-white font-mono font-bold text-sm tracking-widest uppercase hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2.5 shadow-md active:scale-[0.99] cursor-pointer"
+                className="w-full py-3.5 bg-[#111111] text-[#E2E2E4] font-mono font-bold text-sm tracking-widest uppercase hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2.5 shadow-md active:scale-[0.99] cursor-pointer"
               >
                 {isProcessingPayment ? (
                   <>
@@ -1269,7 +1269,7 @@ export const PosBillingPage: React.FC = () => {
                 type="button"
                 disabled={cart.length === 0 || remainingDue > 0 || isProcessingPayment}
                 onClick={() => handleCompletePayment(false)}
-                className="w-full py-2 bg-white text-[#0A0A0A] border border-[#CFCFD2] hover:border-[#0A0A0A] font-mono font-bold text-xs uppercase disabled:opacity-30 transition-colors"
+                className="w-full py-2 bg-[#D5D5D8] text-[#111111] border border-[rgba(0,0,0,0.18)] hover:border-[#111111] font-mono font-bold text-xs uppercase disabled:opacity-30 transition-colors"
               >
                 PAY WITHOUT PRINT
               </button>
@@ -1294,25 +1294,25 @@ export const PosBillingPage: React.FC = () => {
           title={`CHOOSE SIZE — ${activeVariantProduct.name}`}
         >
           <div className="space-y-4 font-mono text-xs">
-            <div className="flex items-center gap-3 p-3 bg-[#F1F1F3] border border-[#CFCFD2]">
+            <div className="flex items-center gap-3 p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)]">
               <img
                 src={activeVariantProduct.image}
                 alt={activeVariantProduct.name}
-                className="w-14 h-14 object-cover border border-[#CFCFD2]"
+                className="w-14 h-14 object-cover border border-[rgba(0,0,0,0.18)]"
               />
               <div>
-                <div className="font-bold text-sm text-[#0A0A0A]">{activeVariantProduct.name}</div>
-                <div className="text-[11px] text-[#666666]">
+                <div className="font-bold text-sm text-[#111111]">{activeVariantProduct.name}</div>
+                <div className="text-[11px] text-[#4A4844]">
                   SKU: {activeVariantProduct.sku} · {formatINR(activeVariantProduct.price)}
                 </div>
-                <div className="text-[10px] text-[#888888] mt-0.5">
+                <div className="text-[10px] text-[#4A4844] mt-0.5">
                   Collection: {activeVariantProduct.collection}
                 </div>
               </div>
             </div>
 
             <div>
-              <span className="text-[10px] uppercase tracking-widest text-[#888888] block mb-2 font-bold">
+              <span className="text-[10px] uppercase tracking-widest text-[#4A4844] block mb-2 font-bold">
                 SELECT SIZE TO ADD TO CURRENT BILL:
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -1321,7 +1321,7 @@ export const PosBillingPage: React.FC = () => {
                     key={v.id}
                     disabled={v.stock <= 0}
                     onClick={() => handleAddVariantToCart(activeVariantProduct, v)}
-                    className="p-3 border border-[#CFCFD2] hover:border-[#0A0A0A] hover:bg-[#FAFAFA] active:bg-[#0A0A0A] active:text-white disabled:opacity-30 disabled:bg-neutral-100 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer"
+                    className="p-3 border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#E2E2E4] active:bg-[#111111] active:text-[#E2E2E4] disabled:opacity-30 disabled:bg-neutral-100 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer"
                   >
                     <span className="font-display font-black text-xl">
                       {v.size}
@@ -1333,7 +1333,7 @@ export const PosBillingPage: React.FC = () => {
                           ? 'bg-red-100 text-red-700'
                           : v.stock < 5
                           ? 'bg-amber-100 text-amber-800'
-                          : 'bg-[#F1F1F3] text-[#0A0A0A]'
+                          : 'bg-[#D5D5D8] text-[#111111]'
                       }`}
                     >
                       {v.stock <= 0 ? 'SOLD OUT' : `${v.stock} in stock`}
@@ -1367,7 +1367,7 @@ export const PosBillingPage: React.FC = () => {
                   size="sm"
                   variant="secondary"
                   onClick={triggerThermalPrint}
-                  className="bg-white text-xs"
+                  className="bg-[#D5D5D8] text-xs"
                 >
                   <RefreshCw size={12} className="mr-1" /> Retry Print
                 </Button>
@@ -1375,48 +1375,48 @@ export const PosBillingPage: React.FC = () => {
             )}
 
             {/* 80mm Stylized Thermal Paper Slip Preview */}
-            <div className="thermal-receipt-print p-6 bg-white border border-dashed border-[#0A0A0A] shadow-md max-w-sm mx-auto text-center space-y-3 animate-in slide-in-from-top-4 duration-300">
-              <div className="border-b border-[#CFCFD2] pb-3">
+            <div className="thermal-receipt-print p-6 bg-[#D5D5D8] border border-dashed border-[#111111] shadow-md max-w-sm mx-auto text-center space-y-3 animate-in slide-in-from-top-4 duration-300">
+              <div className="border-b border-[rgba(0,0,0,0.18)] pb-3">
                 <div className="font-display font-black text-2xl tracking-tighter">
                   STUDIO DENY
                 </div>
-                <div className="text-[10px] tracking-widest text-[#666666] uppercase mt-0.5">
+                <div className="text-[10px] tracking-widest text-[#4A4844] uppercase mt-0.5">
                   HIGH-CLASS STREETWEAR FLAGSHIP
                 </div>
-                <div className="text-[9px] text-[#888888] mt-0.5">
+                <div className="text-[9px] text-[#4A4844] mt-0.5">
                   {settings.address || 'Flagship Store, Bandra West, Mumbai'}
                 </div>
-                <div className="text-[9px] text-[#888888]">
+                <div className="text-[9px] text-[#4A4844]">
                   GSTIN: {settings.gstin || '27AAACS1429B1ZX'}
                 </div>
               </div>
 
               <div className="text-left text-[11px] space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-[#666666]">INVOICE #:</span>
+                  <span className="text-[#4A4844]">INVOICE #:</span>
                   <span className="font-bold">{receiptOrder.orderNumber}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#666666]">TIMESTAMP:</span>
+                  <span className="text-[#4A4844]">TIMESTAMP:</span>
                   <span>{receiptOrder.createdAt}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#666666]">PATRON:</span>
+                  <span className="text-[#4A4844]">PATRON:</span>
                   <span className="font-semibold">{receiptOrder.customerName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#666666]">PHONE:</span>
+                  <span className="text-[#4A4844]">PHONE:</span>
                   <span>{receiptOrder.customerPhone}</span>
                 </div>
               </div>
 
               {/* Items List */}
-              <div className="border-t border-b border-[#CFCFD2] py-2 text-left space-y-2 text-[11px]">
+              <div className="border-t border-b border-[rgba(0,0,0,0.18)] py-2 text-left space-y-2 text-[11px]">
                 {receiptOrder.items.map((i: any, idx: number) => (
                   <div key={idx} className="flex justify-between items-start">
                     <div>
                       <div className="font-bold">{i.name}</div>
-                      <div className="text-[10px] text-[#666666]">
+                      <div className="text-[10px] text-[#4A4844]">
                         {i.variantName} × {i.quantity} @ {formatINR(i.unitPrice)}
                       </div>
                     </div>
@@ -1427,7 +1427,7 @@ export const PosBillingPage: React.FC = () => {
 
               {/* Totals */}
               <div className="text-right text-[11px] space-y-1">
-                <div className="flex justify-between text-[#666666]">
+                <div className="flex justify-between text-[#4A4844]">
                   <span>SUBTOTAL:</span>
                   <span>{formatINR(receiptOrder.subtotal)}</span>
                 </div>
@@ -1437,28 +1437,28 @@ export const PosBillingPage: React.FC = () => {
                     <span>-{formatINR(receiptOrder.discount)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-[#666666]">
+                <div className="flex justify-between text-[#4A4844]">
                   <span>GST ({settings.taxRate ?? 0}%):</span>
                   <span>{formatINR(receiptOrder.taxAmount)}</span>
                 </div>
-                <div className="flex justify-between font-black text-base border-t border-[#0A0A0A] pt-1 text-[#0A0A0A]">
+                <div className="flex justify-between font-black text-base border-t border-[#111111] pt-1 text-[#111111]">
                   <span>TOTAL PAID:</span>
                   <span>{formatINR(receiptOrder.grandTotal)}</span>
                 </div>
               </div>
 
               {/* Split Tender Breakdown */}
-              <div className="border-t border-[#E5E5E7] pt-2 text-left text-[10px] space-y-0.5">
-                <div className="font-bold uppercase text-[#444444]">SETTLEMENT TENDER:</div>
+              <div className="border-t border-[rgba(0,0,0,0.1)] pt-2 text-left text-[10px] space-y-0.5">
+                <div className="font-bold uppercase text-[#111111]">SETTLEMENT TENDER:</div>
                 {receiptOrder.paymentSplits && receiptOrder.paymentSplits.length > 0 ? (
                   receiptOrder.paymentSplits.map((s: any, idx: number) => (
-                    <div key={idx} className="flex justify-between text-[#666666]">
+                    <div key={idx} className="flex justify-between text-[#4A4844]">
                       <span>{s.method}:</span>
                       <span className="font-semibold">{formatINR(s.amount)}</span>
                     </div>
                   ))
                 ) : (
-                  <div className="flex justify-between text-[#666666]">
+                  <div className="flex justify-between text-[#4A4844]">
                     <span>{receiptOrder.paymentMethod}:</span>
                     <span className="font-semibold">{formatINR(receiptOrder.grandTotal)}</span>
                   </div>
@@ -1472,9 +1472,9 @@ export const PosBillingPage: React.FC = () => {
               </div>
 
               {/* Vector Barcode & Policy */}
-              <div className="pt-2 border-t border-[#E5E5E7] space-y-1 text-center">
+              <div className="pt-2 border-t border-[rgba(0,0,0,0.1)] space-y-1 text-center">
                 <BarcodeSvg value={receiptOrder.orderNumber} width={180} height={28} />
-                <div className="text-[9px] text-[#888888] uppercase mt-1">
+                <div className="text-[9px] text-[#4A4844] uppercase mt-1">
                   ALL SALES FINAL ON CAPSULE RELEASES · DENY TERMINAL #01
                 </div>
               </div>
@@ -1522,17 +1522,17 @@ export const PosBillingPage: React.FC = () => {
           title="ITEM-LEVEL CUSTOM DISCOUNT"
         >
           <div className="space-y-4 font-mono text-xs">
-            <div className="p-3 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1">
-              <div className="font-display font-bold text-sm text-[#0A0A0A]">
+            <div className="p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
+              <div className="font-display font-bold text-sm text-[#111111]">
                 {itemDiscountTarget.product.name}
               </div>
-              <div className="text-[11px] text-[#666666]">
-                Size: <span className="font-bold text-[#0A0A0A]">{itemDiscountTarget.variant.size}</span> · Color:{' '}
-                <span className="font-bold text-[#0A0A0A]">{itemDiscountTarget.variant.color}</span>
+              <div className="text-[11px] text-[#4A4844]">
+                Size: <span className="font-bold text-[#111111]">{itemDiscountTarget.variant.size}</span> · Color:{' '}
+                <span className="font-bold text-[#111111]">{itemDiscountTarget.variant.color}</span>
               </div>
-              <div className="text-[11px] text-[#666666]">
+              <div className="text-[11px] text-[#4A4844]">
                 Qty: {itemDiscountTarget.quantity} × {formatINR(itemDiscountTarget.variant.price)} ={' '}
-                <span className="font-bold text-[#0A0A0A]">
+                <span className="font-bold text-[#111111]">
                   {formatINR(itemDiscountTarget.variant.price * itemDiscountTarget.quantity)}
                 </span>
               </div>
@@ -1540,15 +1540,15 @@ export const PosBillingPage: React.FC = () => {
 
             {/* Mode Switch */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#666666]">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#4A4844]">
                 DISCOUNT TYPE:
               </label>
-              <div className="flex border border-[#0A0A0A]">
+              <div className="flex border border-[#111111]">
                 <button
                   type="button"
                   onClick={() => setItemDiscType('PERCENT')}
                   className={`flex-1 py-1.5 text-center font-bold transition-colors ${
-                    itemDiscType === 'PERCENT' ? 'bg-[#0A0A0A] text-white' : 'bg-white text-[#666666]'
+                    itemDiscType === 'PERCENT' ? 'bg-[#111111] text-[#E2E2E4]' : 'bg-[#D5D5D8] text-[#4A4844]'
                   }`}
                 >
                   % PERCENTAGE
@@ -1557,7 +1557,7 @@ export const PosBillingPage: React.FC = () => {
                   type="button"
                   onClick={() => setItemDiscType('FIXED')}
                   className={`flex-1 py-1.5 text-center font-bold transition-colors ${
-                    itemDiscType === 'FIXED' ? 'bg-[#0A0A0A] text-white' : 'bg-white text-[#666666]'
+                    itemDiscType === 'FIXED' ? 'bg-[#111111] text-[#E2E2E4]' : 'bg-[#D5D5D8] text-[#4A4844]'
                   }`}
                 >
                   ₹ FLAT AMOUNT
@@ -1567,7 +1567,7 @@ export const PosBillingPage: React.FC = () => {
 
             {/* Discount Value */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#666666]">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#4A4844]">
                 DISCOUNT VALUE ({itemDiscType === 'PERCENT' ? '%' : '₹'}):
               </label>
               <input
@@ -1581,13 +1581,13 @@ export const PosBillingPage: React.FC = () => {
                 value={itemDiscVal || ''}
                 onChange={(e) => setItemDiscVal(Number(e.target.value) || 0)}
                 placeholder={itemDiscType === 'PERCENT' ? 'e.g. 15%' : 'e.g. ₹300'}
-                className="w-full p-2 bg-white border border-[#CFCFD2] text-sm font-mono focus:outline-none focus:border-[#0A0A0A]"
+                className="w-full p-2 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-sm font-mono focus:outline-none focus:border-[#111111]"
               />
             </div>
 
             {/* Discount Reason */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[#666666]">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[#4A4844]">
                 REASON / REMARK:
               </label>
               <input
@@ -1595,7 +1595,7 @@ export const PosBillingPage: React.FC = () => {
                 value={itemDiscReason}
                 onChange={(e) => setItemDiscReason(e.target.value)}
                 placeholder="e.g. Floor display unit, Manager special, Sample piece..."
-                className="w-full p-2 bg-white border border-[#CFCFD2] text-xs font-mono focus:outline-none focus:border-[#0A0A0A]"
+                className="w-full p-2 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-xs font-mono focus:outline-none focus:border-[#111111]"
               />
             </div>
 

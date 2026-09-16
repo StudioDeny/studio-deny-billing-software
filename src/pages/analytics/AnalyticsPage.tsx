@@ -64,15 +64,15 @@ export const AnalyticsPage: React.FC = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             EXECUTIVE INTELLIGENCE
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             COMMERCE ANALYTICS
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Performance Metrics, Capsule Sell-through Velocity, and Silhouette Sizing Demand
           </div>
         </div>
@@ -84,8 +84,8 @@ export const AnalyticsPage: React.FC = () => {
               onClick={() => setTimeRange(range)}
               className={`px-3 py-1.5 font-mono text-xs uppercase font-semibold border transition-all ${
                 timeRange === range
-                  ? 'bg-[#0A0A0A] text-white border-[#0A0A0A]'
-                  : 'bg-white text-[#666666] border-[#CFCFD2] hover:text-[#0A0A0A]'
+                  ? 'bg-[#111111] text-[#E2E2E4] border-[#111111]'
+                  : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)] hover:text-[#111111]'
               }`}
             >
               {range}
@@ -121,17 +121,17 @@ export const AnalyticsPage: React.FC = () => {
       {/* Main Grid: Sell-through Velocity + Size Demand */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Drop Capsule Sell-Through Table */}
-        <div className="lg:col-span-8 bg-white border border-[#CFCFD2] p-6 space-y-6">
-          <div className="flex items-center justify-between border-b border-[#E5E5E7] pb-4">
+        <div className="lg:col-span-8 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.1)] pb-4">
             <div>
-              <h3 className="font-display text-xl font-bold tracking-tight text-[#0A0A0A]">
+              <h3 className="font-display text-xl font-bold tracking-tight text-[#111111]">
                 CAPSULE DROP PERFORMANCE
               </h3>
-              <p className="text-xs font-mono text-[#666666] mt-0.5">
+              <p className="text-xs font-mono text-[#4A4844] mt-0.5">
                 Gross sales and unit velocity across curated collections
               </p>
             </div>
-            <span className="text-xs font-mono text-[#888888]">
+            <span className="text-xs font-mono text-[#4A4844]">
               {collections.length} Collections Active
             </span>
           </div>
@@ -139,7 +139,7 @@ export const AnalyticsPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">
               <thead>
-                <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+                <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                   <th className="py-2.5 px-3">CAPSULE CODE</th>
                   <th className="py-2.5 px-3">COLLECTION</th>
                   <th className="py-2.5 px-3">UNITS DISPATCHED</th>
@@ -147,20 +147,20 @@ export const AnalyticsPage: React.FC = () => {
                   <th className="py-2.5 px-3">SELL-THROUGH %</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E5E7]">
+              <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
                 {collections.map((col) => {
                   const sellThrough = col.unitsSold > 0 ? Math.min(98, 55 + col.unitsSold * 3) : 60;
                   return (
-                    <tr key={col.id} className="hover:bg-[#FAFAFA]">
-                      <td className="py-3 px-3 font-bold text-[#0A0A0A]">{col.code}</td>
-                      <td className="py-3 px-3 font-semibold text-[#0A0A0A]">{col.name}</td>
-                      <td className="py-3 px-3 text-[#444444]">{col.unitsSold} pcs</td>
-                      <td className="py-3 px-3 font-bold text-[#0A0A0A]">{formatINR(col.revenue)}</td>
+                    <tr key={col.id} className="hover:bg-[#E2E2E4]">
+                      <td className="py-3 px-3 font-bold text-[#111111]">{col.code}</td>
+                      <td className="py-3 px-3 font-semibold text-[#111111]">{col.name}</td>
+                      <td className="py-3 px-3 text-[#111111]">{col.unitsSold} pcs</td>
+                      <td className="py-3 px-3 font-bold text-[#111111]">{formatINR(col.revenue)}</td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-neutral-200 h-2 max-w-[80px]">
                             <div
-                              className="bg-[#0A0A0A] h-2"
+                              className="bg-[#111111] h-2"
                               style={{ width: `${sellThrough}%` }}
                             />
                           </div>
@@ -175,23 +175,23 @@ export const AnalyticsPage: React.FC = () => {
           </div>
 
           {/* Top Selling Streetwear Silhouettes */}
-          <div className="pt-4 border-t border-[#E5E5E7] space-y-3">
-            <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-[#888888]">
+          <div className="pt-4 border-t border-[rgba(0,0,0,0.1)] space-y-3">
+            <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-[#4A4844]">
               TOP SELLING STREETWEAR SILHOUETTES
             </h4>
             <div className="space-y-2">
               {topProducts.map((p, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-3 bg-[#F1F1F3] border border-[#CFCFD2] font-mono text-xs"
+                  className="flex items-center justify-between p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] font-mono text-xs"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-5 font-bold text-[#888888]">#{idx + 1}</span>
-                    <span className="font-bold text-[#0A0A0A]">{p.name}</span>
+                    <span className="w-5 font-bold text-[#4A4844]">#{idx + 1}</span>
+                    <span className="font-bold text-[#111111]">{p.name}</span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-[#666666]">{p.units} units sold</span>
-                    <span className="font-bold text-[#0A0A0A]">{formatINR(p.revenue)}</span>
+                    <span className="text-[#4A4844]">{p.units} units sold</span>
+                    <span className="font-bold text-[#111111]">{formatINR(p.revenue)}</span>
                   </div>
                 </div>
               ))}
@@ -201,12 +201,12 @@ export const AnalyticsPage: React.FC = () => {
 
         {/* Right: Sizing Demand Distribution */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white border border-[#CFCFD2] p-6 space-y-4">
-            <div className="border-b border-[#E5E5E7] pb-3">
-              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">
+          <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-6 space-y-4">
+            <div className="border-b border-[rgba(0,0,0,0.1)] pb-3">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#111111]">
                 SIZING DEMAND DISTRIBUTION
               </h3>
-              <p className="text-[11px] font-mono text-[#666666] mt-0.5">
+              <p className="text-[11px] font-mono text-[#4A4844] mt-0.5">
                 Unit breakdown per garment size
               </p>
             </div>
@@ -222,13 +222,13 @@ export const AnalyticsPage: React.FC = () => {
                   <div key={size} className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span className="font-bold">SIZE {size}</span>
-                      <span className="text-[#666666]">
+                      <span className="text-[#4A4844]">
                         {count} units ({percentage}%)
                       </span>
                     </div>
-                    <div className="bg-neutral-100 h-2.5 border border-[#CFCFD2] overflow-hidden">
+                    <div className="bg-neutral-100 h-2.5 border border-[rgba(0,0,0,0.18)] overflow-hidden">
                       <div
-                        className="bg-[#0A0A0A] h-full transition-all duration-500"
+                        className="bg-[#111111] h-full transition-all duration-500"
                         style={{ width: `${Math.max(percentage, 5)}%` }}
                       />
                     </div>
@@ -237,14 +237,14 @@ export const AnalyticsPage: React.FC = () => {
               })}
             </div>
 
-            <div className="p-3 bg-[#F1F1F3] border border-[#CFCFD2] text-[11px] font-mono text-[#666666] mt-4">
-              <span className="font-bold text-[#0A0A0A] block mb-1">STREETWEAR SIZING INSIGHT:</span>
+            <div className="p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] text-[11px] font-mono text-[#4A4844] mt-4">
+              <span className="font-bold text-[#111111] block mb-1">STREETWEAR SIZING INSIGHT:</span>
               Size Large (L) and Extra Large (XL) represent {Math.round((((sizeCounts.L || 0) + (sizeCounts.XL || 0)) / (totalGarmentsSold || 1)) * 100)}% of total demand due to oversize boxy silhouette preference.
             </div>
           </div>
 
           {/* Customer Retention Snapshot */}
-          <div className="bg-[#0A0A0A] text-white p-6 border border-[#0A0A0A] space-y-3 font-mono">
+          <div className="bg-[#111111] text-[#E2E2E4] p-6 border border-[#111111] space-y-3 font-mono">
             <div className="flex items-center gap-2 text-amber-400">
               <Sparkles size={16} />
               <span className="text-xs font-bold uppercase tracking-wider">

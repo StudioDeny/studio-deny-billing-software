@@ -29,32 +29,32 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] flex flex-col justify-between p-6 md:p-12 text-[#111111]">
+    <div className="min-h-screen bg-[#E2E2E4] flex flex-col justify-between p-6 md:p-12 text-[#111111]">
       {/* Top Header */}
-      <div className="flex items-center justify-between border-b border-[#CFCFD2] pb-6">
+      <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.18)] pb-6">
         <div>
-          <span className="font-display font-black text-2xl tracking-tight text-[#0A0A0A]">
+          <span className="font-display font-black text-2xl tracking-tight text-[#111111]">
             STUDIO DENY
           </span>
-          <span className="ml-2 text-[10px] font-mono px-2 py-0.5 bg-[#0A0A0A] text-white">
+          <span className="ml-2 text-[10px] font-mono px-2 py-0.5 bg-[#111111] text-[#E2E2E4]">
             DENY OS
           </span>
         </div>
-        <div className="text-xs font-mono text-[#666666] uppercase">
+        <div className="text-xs font-mono text-[#4A4844] uppercase">
           INTERNAL ACCESS ONLY
         </div>
       </div>
 
       {/* Center Sign In Box */}
-      <div className="max-w-md w-full mx-auto my-12 border border-[#0A0A0A] p-8 sm:p-10 shadow-modal bg-white">
+      <div className="max-w-md w-full mx-auto my-12 border border-[#111111] p-8 sm:p-10 shadow-modal bg-[#D5D5D8]">
         <div className="mb-8">
-          <div className="text-[10px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[10px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             OPERATING SYSTEM ACCESS
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#111111] mt-1">
             SIGN IN
           </h1>
-          <p className="text-xs text-[#666666] font-sans mt-2">
+          <p className="text-xs text-[#4A4844] font-sans mt-2">
             Authenticate to access client production, financial ledgers, and editorial assets.
           </p>
         </div>
@@ -99,15 +99,15 @@ export const Login: React.FC = () => {
           </div>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-[#CFCFD2] text-center">
-          <div className="text-[11px] font-mono text-[#888888]">
+        <div className="mt-6 pt-6 border-t border-[rgba(0,0,0,0.18)] text-center">
+          <div className="text-[11px] font-mono text-[#4A4844]">
             AUTHORIZED STUDIO PERSONNEL ONLY • 256-BIT ENCRYPTION
           </div>
         </div>
       </div>
 
       {/* Footer Note */}
-      <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[#CFCFD2] pt-6 text-[11px] font-mono text-[#666666] gap-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[rgba(0,0,0,0.18)] pt-6 text-[11px] font-mono text-[#4A4844] gap-2">
         <div>© 2026 STUDIO DENY CREATIVE LABS PVT LTD</div>
         <div>MUMBAI • NEW DELHI • BENGALURU</div>
       </div>

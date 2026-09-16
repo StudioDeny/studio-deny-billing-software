@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto print:p-0 print:m-0 print:static print:block">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#0A0A0A]/60 backdrop-blur-xs transition-opacity no-print"
+        className="fixed inset-0 bg-[#111111]/60 backdrop-blur-xs transition-opacity no-print"
         onClick={onClose}
       />
 
@@ -56,24 +56,24 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         className={twMerge(
           clsx(
-            'relative w-full bg-white border border-[#0A0A0A] shadow-modal z-10 my-8 flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150 print:border-none print:shadow-none print:m-0 print:p-0 print:max-h-none print:bg-transparent',
+            'relative w-full bg-[#D5D5D8] border border-[#111111] shadow-modal z-10 my-8 flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150 print:border-none print:shadow-none print:m-0 print:p-0 print:max-h-none print:bg-transparent',
             maxWidthStyles[maxWidth]
           )
         )}
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-5 md:p-6 border-b border-[#CFCFD2] bg-[#FFFFFF] no-print">
+        <div className="flex items-start justify-between p-5 md:p-6 border-b border-[rgba(0,0,0,0.18)] bg-[#E2E2E4] no-print">
           <div>
-            <h3 className="font-display text-lg md:text-xl font-bold uppercase tracking-tight text-[#0A0A0A]">
+            <h3 className="font-display text-lg md:text-xl font-bold uppercase tracking-tight text-[#111111]">
               {title}
             </h3>
             {subtitle && (
-              <p className="text-xs text-[#666666] font-mono tracking-wide mt-1">{subtitle}</p>
+              <p className="text-xs text-[#4A4844] font-mono tracking-wide mt-1">{subtitle}</p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-[#666666] hover:text-[#0A0A0A] hover:bg-[#F1F1F3] transition-colors focus:outline-none"
+            className="p-1 text-[#4A4844] hover:text-[#111111] hover:bg-[#D5D5D8] transition-colors focus:outline-none"
             aria-label="Close modal"
           >
             <X size={18} />
@@ -85,7 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* Footer */}
         {footer && (
-          <div className="p-4 md:p-5 border-t border-[#CFCFD2] bg-[#F1F1F3] flex items-center justify-end gap-3 no-print">
+          <div className="p-4 md:p-5 border-t border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] flex items-center justify-end gap-3 no-print">
             {footer}
           </div>
         )}

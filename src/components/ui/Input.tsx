@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-[11px] font-mono uppercase tracking-editorial text-[#666666] font-medium"
+            className="text-[11px] font-mono uppercase tracking-editorial text-[#4A4844] font-medium"
           >
             {label}
           </label>
@@ -27,7 +27,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative flex items-center">
           {prefix && (
-            <div className="absolute left-3 flex items-center pointer-events-none text-[#888888]">
+            <div className="absolute left-3 flex items-center pointer-events-none text-[#4A4844]">
               {prefix}
             </div>
           )}
@@ -37,7 +37,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             className={twMerge(
               clsx(
-                'w-full bg-white text-[#111111] placeholder:text-[#888888] text-sm px-3.5 py-2.5 border border-[#CFCFD2] focus:border-[#0A0A0A] focus:outline-none focus:ring-1 focus:ring-[#0A0A0A] transition-colors rounded-none',
+                'w-full bg-[#D5D5D8] text-[#111111] placeholder:text-[#4A4844] text-sm px-3.5 py-2.5 border border-[rgba(0,0,0,0.18)] focus:border-[#111111] focus:outline-none focus:ring-1 focus:ring-[#111111] transition-colors rounded-none',
                 prefix && 'pl-9',
                 suffix && 'pr-9',
                 error && 'border-rose-500 focus:border-rose-500 focus:ring-rose-500',
@@ -48,7 +48,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
 
           {suffix && (
-            <div className="absolute right-3 flex items-center pointer-events-none text-[#888888]">
+            <div className="absolute right-3 flex items-center pointer-events-none text-[#4A4844]">
               {suffix}
             </div>
           )}
@@ -57,7 +57,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <span className="text-[11px] text-rose-600 font-medium">{error}</span>
         ) : helperText ? (
-          <span className="text-[11px] text-[#888888]">{helperText}</span>
+          <span className="text-[11px] text-[#4A4844]">{helperText}</span>
         ) : null}
       </div>
     );

@@ -152,66 +152,66 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
               handleClose();
               navigate('/billing/new');
             }}
-            className="p-3.5 border border-[#0A0A0A] bg-[#0A0A0A] text-white hover:bg-neutral-800 cursor-pointer flex items-center justify-between transition-colors group shadow-sm"
+            className="p-3.5 border border-[#111111] bg-[#111111] text-[#E2E2E4] hover:bg-neutral-800 cursor-pointer flex items-center justify-between transition-colors group shadow-sm"
           >
             <div className="flex items-center gap-3">
-              <span className="p-2 bg-white/10 text-white border border-white/20">
+              <span className="p-2 bg-[#D5D5D8]/10 text-[#E2E2E4] border border-[#E2E2E4]/20">
                 <Receipt size={16} />
               </span>
               <div>
-                <div className="font-display font-bold text-sm text-white">START NEW BILL</div>
+                <div className="font-display font-bold text-sm text-[#E2E2E4]">START NEW BILL</div>
                 <div className="text-xs text-neutral-300">Open touch POS billing terminal to scan, tender, & print</div>
               </div>
             </div>
-            <ArrowRight size={14} className="text-white" />
+            <ArrowRight size={14} className="text-[#E2E2E4]" />
           </div>
 
           <div
             onClick={() => setActiveAction('NEW_CUSTOMER')}
-            className="p-3.5 border border-[#CFCFD2] hover:border-[#0A0A0A] hover:bg-[#F1F1F3] cursor-pointer flex items-center justify-between transition-colors group"
+            className="p-3.5 border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#D5D5D8] cursor-pointer flex items-center justify-between transition-colors group"
           >
             <div className="flex items-center gap-3">
-              <span className="p-2 bg-[#F1F1F3] group-hover:bg-white border border-[#CFCFD2]">
+              <span className="p-2 bg-[#D5D5D8] group-hover:bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)]">
                 <UserPlus size={16} />
               </span>
               <div>
-                <div className="font-display font-bold text-sm text-[#0A0A0A]">REGISTER NEW PATRON</div>
-                <div className="text-xs text-[#666666]">Add customer name, phone number, and city</div>
+                <div className="font-display font-bold text-sm text-[#111111]">REGISTER NEW PATRON</div>
+                <div className="text-xs text-[#4A4844]">Add customer name, phone number, and city</div>
               </div>
             </div>
-            <ArrowRight size={14} className="text-[#888888] group-hover:text-[#0A0A0A]" />
+            <ArrowRight size={14} className="text-[#4A4844] group-hover:text-[#111111]" />
           </div>
 
           <div
             onClick={() => setActiveAction('NEW_PRODUCT')}
-            className="p-3.5 border border-[#CFCFD2] hover:border-[#0A0A0A] hover:bg-[#F1F1F3] cursor-pointer flex items-center justify-between transition-colors group"
+            className="p-3.5 border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#D5D5D8] cursor-pointer flex items-center justify-between transition-colors group"
           >
             <div className="flex items-center gap-3">
-              <span className="p-2 bg-[#F1F1F3] group-hover:bg-white border border-[#CFCFD2]">
+              <span className="p-2 bg-[#D5D5D8] group-hover:bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)]">
                 <Shirt size={16} />
               </span>
               <div>
-                <div className="font-display font-bold text-sm text-[#0A0A0A]">ADD NEW PRODUCT</div>
-                <div className="text-xs text-[#666666]">Create streetwear SKU with size variants and price</div>
+                <div className="font-display font-bold text-sm text-[#111111]">ADD NEW PRODUCT</div>
+                <div className="text-xs text-[#4A4844]">Create streetwear SKU with size variants and price</div>
               </div>
             </div>
-            <ArrowRight size={14} className="text-[#888888] group-hover:text-[#0A0A0A]" />
+            <ArrowRight size={14} className="text-[#4A4844] group-hover:text-[#111111]" />
           </div>
 
           <div
             onClick={() => setActiveAction('ADJUST_STOCK')}
-            className="p-3.5 border border-[#CFCFD2] hover:border-[#0A0A0A] hover:bg-[#F1F1F3] cursor-pointer flex items-center justify-between transition-colors group"
+            className="p-3.5 border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#D5D5D8] cursor-pointer flex items-center justify-between transition-colors group"
           >
             <div className="flex items-center gap-3">
-              <span className="p-2 bg-[#F1F1F3] group-hover:bg-white border border-[#CFCFD2]">
+              <span className="p-2 bg-[#D5D5D8] group-hover:bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)]">
                 <Boxes size={16} />
               </span>
               <div>
-                <div className="font-display font-bold text-sm text-[#0A0A0A]">ADJUST STOCK</div>
-                <div className="text-xs text-[#666666]">Quick stock increment or count reconciliation</div>
+                <div className="font-display font-bold text-sm text-[#111111]">ADJUST STOCK</div>
+                <div className="text-xs text-[#4A4844]">Quick stock increment or count reconciliation</div>
               </div>
             </div>
-            <ArrowRight size={14} className="text-[#888888] group-hover:text-[#0A0A0A]" />
+            <ArrowRight size={14} className="text-[#4A4844] group-hover:text-[#111111]" />
           </div>
         </div>
       )}
@@ -275,7 +275,7 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
             />
           </div>
 
-          <div className="pt-3 flex justify-between border-t border-[#CFCFD2]">
+          <div className="pt-3 flex justify-between border-t border-[rgba(0,0,0,0.18)]">
             <Button type="button" variant="outline" onClick={() => setActiveAction('MENU')}>
               Back
             </Button>
@@ -328,7 +328,7 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
             onChange={(e) => setCustomerAddress(e.target.value)}
           />
 
-          <div className="pt-3 flex justify-between border-t border-[#CFCFD2]">
+          <div className="pt-3 flex justify-between border-t border-[rgba(0,0,0,0.18)]">
             <Button type="button" variant="outline" onClick={() => setActiveAction('MENU')}>
               Back
             </Button>
@@ -385,7 +385,7 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
             />
           </div>
 
-          <div className="pt-3 flex justify-between border-t border-[#CFCFD2]">
+          <div className="pt-3 flex justify-between border-t border-[rgba(0,0,0,0.18)]">
             <Button type="button" variant="outline" onClick={() => setActiveAction('MENU')}>
               Back
             </Button>

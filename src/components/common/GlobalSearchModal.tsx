@@ -153,16 +153,16 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#0A0A0A]/60 backdrop-blur-xs flex items-start justify-center p-4 sm:p-6 md:p-12 animate-in fade-in duration-150 cursor-pointer"
+      className="fixed inset-0 z-50 bg-[#111111]/60 backdrop-blur-xs flex items-start justify-center p-4 sm:p-6 md:p-12 animate-in fade-in duration-150 cursor-pointer"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-white border border-[#0A0A0A] shadow-2xl flex flex-col overflow-hidden max-h-[80vh] cursor-default"
+        className="w-full max-w-2xl bg-[#D5D5D8] border border-[#111111] shadow-2xl flex flex-col overflow-hidden max-h-[80vh] cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div className="p-4 border-b border-[#CFCFD2] flex items-center gap-3 bg-[#FAFAFA]">
-          <Search size={18} className="text-[#666666] shrink-0" />
+        <div className="p-4 border-b border-[rgba(0,0,0,0.18)] flex items-center gap-3 bg-[#E2E2E4]">
+          <Search size={18} className="text-[#4A4844] shrink-0" />
           <input
             autoFocus
             type="text"
@@ -170,25 +170,25 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full bg-transparent font-mono text-xs sm:text-sm focus:outline-none placeholder:text-[#888888]"
+            className="w-full bg-transparent font-mono text-xs sm:text-sm focus:outline-none placeholder:text-[#4A4844]"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="text-[#888888] hover:text-[#0A0A0A] p-1 shrink-0"
+              className="text-[#4A4844] hover:text-[#111111] p-1 shrink-0"
               title="Clear input"
             >
               <X size={14} />
             </button>
           )}
-          <span className="hidden sm:inline-block text-[10px] font-mono text-[#888888] border border-[#CFCFD2] px-1.5 py-0.5 bg-white shrink-0">
+          <span className="hidden sm:inline-block text-[10px] font-mono text-[#4A4844] border border-[rgba(0,0,0,0.18)] px-1.5 py-0.5 bg-[#D5D5D8] shrink-0">
             ESC
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-[#666666] hover:text-[#0A0A0A] hover:bg-[#E5E5E7] transition-colors border border-[#CFCFD2] bg-white flex items-center justify-center cursor-pointer shrink-0"
+            className="p-1.5 text-[#4A4844] hover:text-[#111111] hover:bg-[rgba(0,0,0,0.1)] transition-colors border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] flex items-center justify-center cursor-pointer shrink-0"
             aria-label="Close search"
             title="Close"
           >
@@ -199,7 +199,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
         {/* Results List */}
         <div className="overflow-y-auto flex-1 p-2 space-y-1">
           {results.length === 0 ? (
-            <div className="py-12 text-center font-mono text-xs text-[#888888]">
+            <div className="py-12 text-center font-mono text-xs text-[#4A4844]">
               No records found matching "{query}"
             </div>
           ) : (
@@ -211,13 +211,13 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                   onClick={() => handleSelect(item)}
                   onMouseEnter={() => setSelectedIndex(idx)}
                   className={`p-3 flex items-center justify-between cursor-pointer font-mono transition-colors ${
-                    isSelected ? 'bg-[#0A0A0A] text-white' : 'hover:bg-[#F1F1F3] text-[#111111]'
+                    isSelected ? 'bg-[#111111] text-[#E2E2E4]' : 'hover:bg-[#D5D5D8] text-[#111111]'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`p-2 shrink-0 ${
-                        isSelected ? 'bg-white/10 text-white' : 'bg-[#F1F1F3] text-[#444444]'
+                        isSelected ? 'bg-[#D5D5D8]/10 text-[#E2E2E4]' : 'bg-[#D5D5D8] text-[#111111]'
                       }`}
                     >
                       {item.type === 'BILL' && <Receipt size={15} />}
@@ -231,8 +231,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                           <span
                             className={`text-[9px] px-1.5 py-0.2 uppercase ${
                               isSelected
-                                ? 'bg-white text-[#0A0A0A]'
-                                : 'bg-[#E5E5E7] text-[#555555]'
+                                ? 'bg-[#D5D5D8] text-[#111111]'
+                                : 'bg-[rgba(0,0,0,0.1)] text-[#4A4844]'
                             }`}
                           >
                             {item.badge}
@@ -241,7 +241,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                       </div>
                       <div
                         className={`text-[11px] truncate mt-0.5 ${
-                          isSelected ? 'text-neutral-300' : 'text-[#666666]'
+                          isSelected ? 'text-neutral-300' : 'text-[#4A4844]'
                         }`}
                       >
                         {item.subtitle}
@@ -252,7 +252,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                   <ArrowRight
                     size={14}
                     className={`shrink-0 ml-2 ${
-                      isSelected ? 'text-white' : 'text-[#888888]'
+                      isSelected ? 'text-[#E2E2E4]' : 'text-[#4A4844]'
                     }`}
                   />
                 </div>
@@ -262,13 +262,13 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3 border-t border-[#CFCFD2] bg-[#F1F1F3] flex items-center justify-between text-[10px] font-mono text-[#666666]">
+        <div className="p-3 border-t border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] flex items-center justify-between text-[10px] font-mono text-[#4A4844]">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>
             <span>ESC Close</span>
           </div>
-          <span className="font-semibold text-[#0A0A0A]">DENY TERMINAL DISPATCH</span>
+          <span className="font-semibold text-[#111111]">DENY TERMINAL DISPATCH</span>
         </div>
       </div>
     </div>

@@ -83,15 +83,15 @@ export const ShippingPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             LOGISTICS & CARRIER INTEGRATIONS
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             SHIPPING TRACKER
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Managing Carrier Dispatch, Waybills, and Blue Dart / Delhivery Express Live Status
           </div>
         </div>
@@ -129,23 +129,23 @@ export const ShippingPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Search Bar */}
-      <div className="flex items-center gap-3 bg-white p-3 border border-[#CFCFD2]">
-        <Search size={15} className="text-[#888888]" />
+      <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
+        <Search size={15} className="text-[#4A4844]" />
         <input
           type="text"
           placeholder="Search by order number, patron name, or carrier AWB tracking number..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+          className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
         />
       </div>
 
       {/* Shipments Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">ORDER NUMBER</th>
                 <th className="py-3 px-4 font-medium">PATRON & DESTINATION</th>
                 <th className="py-3 px-4 font-medium">CARRIER & AWB TRACKING</th>
@@ -154,23 +154,23 @@ export const ShippingPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">DISPATCH ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-[#FAFAFA] transition-colors">
+                <tr key={order.id} className="hover:bg-[#E2E2E4] transition-colors">
                   {/* Order */}
-                  <td className="py-3.5 px-4 font-bold text-[#0A0A0A]">
+                  <td className="py-3.5 px-4 font-bold text-[#111111]">
                     <button
                       onClick={() => navigate(`/orders/${order.id}`)}
-                      className="hover:underline font-bold text-[#0A0A0A]"
+                      className="hover:underline font-bold text-[#111111]"
                     >
                       {order.orderNumber}
                     </button>
                   </td>
 
                   {/* Destination */}
-                  <td className="py-3 px-4 text-[#444444]">
-                    <div className="font-semibold text-[#0A0A0A]">{order.customerName}</div>
-                    <div className="text-[11px] text-[#666666]">
+                  <td className="py-3 px-4 text-[#111111]">
+                    <div className="font-semibold text-[#111111]">{order.customerName}</div>
+                    <div className="text-[11px] text-[#4A4844]">
                       {order.shippingAddress.city}, {order.shippingAddress.state}
                     </div>
                   </td>
@@ -179,23 +179,23 @@ export const ShippingPage: React.FC = () => {
                   <td className="py-3 px-4">
                     {order.trackingNumber ? (
                       <div>
-                        <div className="font-bold text-[#0A0A0A] flex items-center gap-1.5">
-                          <Truck size={12} className="text-[#888888]" />
+                        <div className="font-bold text-[#111111] flex items-center gap-1.5">
+                          <Truck size={12} className="text-[#4A4844]" />
                           {order.trackingNumber}
                         </div>
-                        <div className="text-[10px] text-[#666666] uppercase">
+                        <div className="text-[10px] text-[#4A4844] uppercase">
                           {order.courierName || 'Blue Dart Air Express'}
                         </div>
                       </div>
                     ) : (
-                      <span className="text-[#888888] text-[11px] italic">
+                      <span className="text-[#4A4844] text-[11px] italic">
                         Not dispatched yet
                       </span>
                     )}
                   </td>
 
                   {/* Items */}
-                  <td className="py-3 px-4 text-[#666666]">
+                  <td className="py-3 px-4 text-[#4A4844]">
                     {order.items.reduce((s, i) => s + i.quantity, 0)} garments (
                     {order.items.map((i) => i.size).join(', ')})
                   </td>
@@ -250,29 +250,29 @@ export const ShippingPage: React.FC = () => {
           title={`DISPATCH TO COURIER — ${dispatchOrder.orderNumber}`}
         >
           <form onSubmit={handleConfirmDispatch} className="space-y-4 font-mono text-xs">
-            <div className="p-3 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1">
+            <div className="p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
               <div className="flex justify-between">
-                <span className="text-[#666666]">ORDER:</span>
-                <span className="font-bold text-[#0A0A0A]">{dispatchOrder.orderNumber}</span>
+                <span className="text-[#4A4844]">ORDER:</span>
+                <span className="font-bold text-[#111111]">{dispatchOrder.orderNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">PATRON:</span>
-                <span className="font-bold text-[#0A0A0A]">{dispatchOrder.customerName}</span>
+                <span className="text-[#4A4844]">PATRON:</span>
+                <span className="font-bold text-[#111111]">{dispatchOrder.customerName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">DESTINATION:</span>
+                <span className="text-[#4A4844]">DESTINATION:</span>
                 <span>{dispatchOrder.shippingAddress.city}, {dispatchOrder.shippingAddress.pincode}</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 Logistics Partner
               </label>
               <select
                 value={courierName}
                 onChange={(e) => setCourierName(e.target.value)}
-                className="w-full bg-[#FAFAFA] border border-[#CFCFD2] p-2.5 text-xs font-mono focus:bg-white focus:outline-none"
+                className="w-full bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] p-2.5 text-xs font-mono focus:bg-[#D5D5D8] focus:outline-none"
               >
                 <option value="Blue Dart Air Express">Blue Dart Air Express (Priority Air)</option>
                 <option value="Delhivery Express">Delhivery Express Surface & Air</option>
@@ -282,7 +282,7 @@ export const ShippingPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 AWB Tracking Waybill Number
               </label>
               <Input
@@ -293,7 +293,7 @@ export const ShippingPage: React.FC = () => {
               />
             </div>
 
-            <div className="pt-3 border-t border-[#CFCFD2] flex justify-end gap-3">
+            <div className="pt-3 border-t border-[rgba(0,0,0,0.18)] flex justify-end gap-3">
               <Button type="button" variant="secondary" onClick={() => setDispatchOrder(null)}>
                 Cancel
               </Button>

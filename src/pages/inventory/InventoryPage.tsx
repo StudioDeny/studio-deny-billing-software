@@ -107,15 +107,15 @@ export const InventoryPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-[#CFCFD2] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="border-b border-[rgba(0,0,0,0.18)] pb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#888888]">
+          <div className="text-[11px] font-mono uppercase tracking-widest-editorial text-[#4A4844]">
             WAREHOUSE & SUPPLY CHAIN
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0A0A0A] mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mt-1">
             INVENTORY LEDGER
           </h1>
-          <div className="text-xs font-mono text-[#666666] mt-2">
+          <div className="text-xs font-mono text-[#4A4844] mt-2">
             Real-time variant tracking across {allVariants.length} distinct streetwear garment SKUs
           </div>
         </div>
@@ -165,29 +165,29 @@ export const InventoryPage: React.FC = () => {
       <Tabs tabs={filterTabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Search & Actions Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3 border border-[#CFCFD2]">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
         <div className="flex items-center gap-2 w-full sm:w-80">
-          <Search size={15} className="text-[#888888]" />
+          <Search size={15} className="text-[#4A4844]" />
           <input
             type="text"
             placeholder="Search SKU, garment silhouette, size..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+            className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
           />
         </div>
 
-        <div className="text-xs font-mono text-[#888888] flex items-center gap-2">
+        <div className="text-xs font-mono text-[#4A4844] flex items-center gap-2">
           <span>Showing {filteredVariants.length} of {allVariants.length} SKUs</span>
         </div>
       </div>
 
       {/* Inventory Matrix Table */}
-      <div className="bg-white border border-[#CFCFD2] overflow-hidden">
+      <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse font-mono text-xs">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-3 px-4 font-medium">GARMENT SILHOUETTE</th>
                 <th className="py-3 px-4 font-medium">VARIANT SKU</th>
                 <th className="py-3 px-4 font-medium">COLOR</th>
@@ -198,25 +198,25 @@ export const InventoryPage: React.FC = () => {
                 <th className="py-3 px-4 font-medium text-right">STOCK ADJUSTMENT</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {filteredVariants.map((item) => (
-                <tr key={item.sku} className="hover:bg-[#FAFAFA] transition-colors">
+                <tr key={item.sku} className="hover:bg-[#E2E2E4] transition-colors">
                   {/* Garment Title & Image */}
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <img
                         src={item.image}
                         alt={item.productName}
-                        className="w-9 h-9 object-cover border border-[#CFCFD2] bg-neutral-100 shrink-0"
+                        className="w-9 h-9 object-cover border border-[rgba(0,0,0,0.18)] bg-neutral-100 shrink-0"
                       />
                       <div>
                         <Link
                           to={`/products/${item.productId}`}
-                          className="font-semibold text-[#0A0A0A] hover:underline"
+                          className="font-semibold text-[#111111] hover:underline"
                         >
                           {item.productName}
                         </Link>
-                        <span className="text-[10px] text-[#888888] block">
+                        <span className="text-[10px] text-[#4A4844] block">
                           {item.collection} · {item.category}
                         </span>
                       </div>
@@ -224,20 +224,20 @@ export const InventoryPage: React.FC = () => {
                   </td>
 
                   {/* SKU */}
-                  <td className="py-3 px-4 font-bold text-[#0A0A0A]">{item.sku}</td>
+                  <td className="py-3 px-4 font-bold text-[#111111]">{item.sku}</td>
 
                   {/* Color */}
-                  <td className="py-3 px-4 text-[#444444]">{item.color}</td>
+                  <td className="py-3 px-4 text-[#111111]">{item.color}</td>
 
                   {/* Size */}
                   <td className="py-3 px-4">
-                    <span className="inline-block w-7 h-7 leading-7 text-center bg-[#0A0A0A] text-white text-[11px] font-bold">
+                    <span className="inline-block w-7 h-7 leading-7 text-center bg-[#111111] text-[#E2E2E4] text-[11px] font-bold">
                       {item.size}
                     </span>
                   </td>
 
                   {/* Price */}
-                  <td className="py-3 px-4 font-medium text-[#0A0A0A]">{formatINR(item.price)}</td>
+                  <td className="py-3 px-4 font-medium text-[#111111]">{formatINR(item.price)}</td>
 
                   {/* Current Stock */}
                   <td className="py-3 px-4 text-center">
@@ -247,7 +247,7 @@ export const InventoryPage: React.FC = () => {
                           ? 'bg-red-100 text-red-700'
                           : item.stock < 10
                           ? 'bg-amber-100 text-amber-800'
-                          : 'text-[#0A0A0A]'
+                          : 'text-[#111111]'
                       }`}
                     >
                       {item.stock} pcs
@@ -274,14 +274,14 @@ export const InventoryPage: React.FC = () => {
                         title="Decrement 1 unit"
                         disabled={item.stock <= 0}
                         onClick={() => store.adjustStock(item.productId, item.variantId, -1, 'ADJUSTMENT')}
-                        className="w-7 h-7 border border-[#CFCFD2] hover:bg-[#F1F1F3] disabled:opacity-30 flex items-center justify-center text-[#0A0A0A] transition-colors"
+                        className="w-7 h-7 border border-[rgba(0,0,0,0.18)] hover:bg-[#D5D5D8] disabled:opacity-30 flex items-center justify-center text-[#111111] transition-colors"
                       >
                         <Minus size={12} />
                       </button>
                       <button
                         title="Increment 1 unit"
                         onClick={() => store.adjustStock(item.productId, item.variantId, 1, 'RESTOCK')}
-                        className="w-7 h-7 border border-[#CFCFD2] hover:bg-[#F1F1F3] flex items-center justify-center text-[#0A0A0A] transition-colors"
+                        className="w-7 h-7 border border-[rgba(0,0,0,0.18)] hover:bg-[#D5D5D8] flex items-center justify-center text-[#111111] transition-colors"
                       >
                         <Plus size={12} />
                       </button>
@@ -312,31 +312,31 @@ export const InventoryPage: React.FC = () => {
           title={`ADJUST STOCK — ${adjustingItem.sku}`}
         >
           <form onSubmit={handleAdjustStock} className="space-y-4 font-mono text-xs">
-            <div className="p-3 bg-[#F1F1F3] border border-[#CFCFD2] space-y-1">
+            <div className="p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
               <div className="flex justify-between">
-                <span className="text-[#666666]">PRODUCT:</span>
-                <span className="font-bold text-[#0A0A0A]">{adjustingItem.productName}</span>
+                <span className="text-[#4A4844]">PRODUCT:</span>
+                <span className="font-bold text-[#111111]">{adjustingItem.productName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">VARIANT:</span>
-                <span className="font-bold text-[#0A0A0A]">
+                <span className="text-[#4A4844]">VARIANT:</span>
+                <span className="font-bold text-[#111111]">
                   {adjustingItem.color} / SIZE {adjustingItem.size}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#666666]">CURRENT ON HAND:</span>
-                <span className="font-bold text-[#0A0A0A]">{adjustingItem.stock} units</span>
+                <span className="text-[#4A4844]">CURRENT ON HAND:</span>
+                <span className="font-bold text-[#111111]">{adjustingItem.stock} units</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 Reason for Adjustment
               </label>
               <select
                 value={adjustReason}
                 onChange={(e) => setAdjustReason(e.target.value as any)}
-                className="w-full bg-[#FAFAFA] border border-[#CFCFD2] p-2.5 text-xs font-mono focus:bg-white focus:outline-none"
+                className="w-full bg-[#E2E2E4] border border-[rgba(0,0,0,0.18)] p-2.5 text-xs font-mono focus:bg-[#D5D5D8] focus:outline-none"
               >
                 <option value="RESTOCK">RESTOCK (Warehouse inbound shipment)</option>
                 <option value="ADJUSTMENT">MANUAL INVENTORY AUDIT / RECONCILIATION</option>
@@ -345,7 +345,7 @@ export const InventoryPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#666666] mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-widest text-[#4A4844] mb-1">
                 Quantity Units {adjustReason === 'DAMAGED' ? '(to deduct)' : '(to add)'}
               </label>
               <Input
@@ -357,7 +357,7 @@ export const InventoryPage: React.FC = () => {
               />
             </div>
 
-            <div className="pt-3 border-t border-[#CFCFD2] flex justify-end gap-3">
+            <div className="pt-3 border-t border-[rgba(0,0,0,0.18)] flex justify-end gap-3">
               <Button type="button" variant="secondary" onClick={() => setAdjustingItem(null)}>
                 Cancel
               </Button>

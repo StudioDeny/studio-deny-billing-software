@@ -99,10 +99,10 @@ export const EditInvoicePanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-white border border-[#CFCFD2] p-6 space-y-5 shadow-subtle font-mono text-xs">
-      <div className="border-b border-[#E5E5E7] pb-3 flex items-center gap-2">
+    <div className="bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-6 space-y-5 shadow-subtle font-mono text-xs">
+      <div className="border-b border-[rgba(0,0,0,0.1)] pb-3 flex items-center gap-2">
         <AlertTriangle size={16} className="text-red-600" />
-        <h3 className="font-bold text-xs uppercase tracking-wider text-[#0A0A0A]">
+        <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111]">
           EDIT SETTLED INVOICE
         </h3>
       </div>
@@ -115,25 +115,25 @@ export const EditInvoicePanel: React.FC = () => {
 
       {!selectedBill ? (
         <>
-          <div className="flex items-center gap-2 bg-white px-3 py-2 border border-[#CFCFD2]">
-            <Search size={14} className="text-[#888888]" />
+          <div className="flex items-center gap-2 bg-[#D5D5D8] px-3 py-2 border border-[rgba(0,0,0,0.18)]">
+            <Search size={14} className="text-[#4A4844]" />
             <input
               placeholder="Search bill number (e.g. SD-1000250)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#888888]"
+              className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
             />
           </div>
           {matchingBills.length > 0 && (
-            <div className="border border-[#CFCFD2] divide-y divide-[#E5E5E7]">
+            <div className="border border-[rgba(0,0,0,0.18)] divide-y divide-[rgba(0,0,0,0.1)]">
               {matchingBills.map((b) => (
                 <button
                   key={b.id}
                   onClick={() => selectBill(b.id)}
-                  className="w-full text-left px-3 py-2.5 hover:bg-[#F1F1F3] flex items-center justify-between"
+                  className="w-full text-left px-3 py-2.5 hover:bg-[#D5D5D8] flex items-center justify-between"
                 >
-                  <span className="font-bold text-[#0A0A0A]">{b.orderNumber}</span>
-                  <span className="text-[#666666]">{b.customerName} · {formatINR(b.grandTotal)}</span>
+                  <span className="font-bold text-[#111111]">{b.orderNumber}</span>
+                  <span className="text-[#4A4844]">{b.customerName} · {formatINR(b.grandTotal)}</span>
                 </button>
               ))}
             </div>
@@ -142,7 +142,7 @@ export const EditInvoicePanel: React.FC = () => {
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="font-bold text-[#0A0A0A] text-sm">{selectedBill.orderNumber}</div>
+            <div className="font-bold text-[#111111] text-sm">{selectedBill.orderNumber}</div>
             <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedBillId(null); setItems([]); }}>
               CANCEL / SEARCH ANOTHER
             </Button>
@@ -150,7 +150,7 @@ export const EditInvoicePanel: React.FC = () => {
 
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#CFCFD2] bg-[#F1F1F3] text-[10px] uppercase text-[#666666]">
+              <tr className="border-b border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] text-[10px] uppercase text-[#4A4844]">
                 <th className="py-2 px-2">ITEM</th>
                 <th className="py-2 px-2 w-20">QTY</th>
                 <th className="py-2 px-2 w-28">UNIT PRICE</th>
@@ -158,12 +158,12 @@ export const EditInvoicePanel: React.FC = () => {
                 <th className="py-2 px-2 w-10"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E7]">
+            <tbody className="divide-y divide-[rgba(0,0,0,0.1)]">
               {items.map((item, idx) => (
                 <tr key={idx}>
                   <td className="py-2 px-2">
-                    <div className="font-bold text-[#0A0A0A]">{item.name}</div>
-                    <div className="text-[10px] text-[#888888]">{item.variantName}</div>
+                    <div className="font-bold text-[#111111]">{item.name}</div>
+                    <div className="text-[10px] text-[#4A4844]">{item.variantName}</div>
                   </td>
                   <td className="py-2 px-2">
                     <input
@@ -171,7 +171,7 @@ export const EditInvoicePanel: React.FC = () => {
                       min={1}
                       value={item.quantity}
                       onChange={(e) => updateItem(idx, 'quantity', Math.max(1, Number(e.target.value) || 1))}
-                      className="w-full bg-white border border-[#CFCFD2] p-1.5 text-xs font-mono focus:outline-none"
+                      className="w-full bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-1.5 text-xs font-mono focus:outline-none"
                     />
                   </td>
                   <td className="py-2 px-2">
@@ -180,10 +180,10 @@ export const EditInvoicePanel: React.FC = () => {
                       min={0}
                       value={item.unitPrice}
                       onChange={(e) => updateItem(idx, 'unitPrice', Math.max(0, Number(e.target.value) || 0))}
-                      className="w-full bg-white border border-[#CFCFD2] p-1.5 text-xs font-mono focus:outline-none"
+                      className="w-full bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-1.5 text-xs font-mono focus:outline-none"
                     />
                   </td>
-                  <td className="py-2 px-2 text-right font-bold text-[#0A0A0A]">{formatINR(item.total)}</td>
+                  <td className="py-2 px-2 text-right font-bold text-[#111111]">{formatINR(item.total)}</td>
                   <td className="py-2 px-2 text-right">
                     <button type="button" onClick={() => removeItem(idx)} className="text-red-600 hover:text-red-800">
                       <Trash2 size={14} />
@@ -198,7 +198,7 @@ export const EditInvoicePanel: React.FC = () => {
             <select
               value={addProductId}
               onChange={(e) => setAddProductId(e.target.value)}
-              className="flex-1 bg-white border border-[#CFCFD2] p-2 text-xs font-mono focus:outline-none"
+              className="flex-1 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-2 text-xs font-mono focus:outline-none"
             >
               <option value="">Add a product to this bill...</option>
               {products.map((p) => (
@@ -218,10 +218,10 @@ export const EditInvoicePanel: React.FC = () => {
           </div>
           <Input label="NOTES" value={notes} onChange={(e) => setNotes(e.target.value)} />
 
-          <div className="flex items-center justify-between border-t border-[#CFCFD2] pt-3">
+          <div className="flex items-center justify-between border-t border-[rgba(0,0,0,0.18)] pt-3">
             <div className="text-sm">
-              <span className="text-[#666666]">Subtotal: {formatINR(subtotal)} · </span>
-              <span className="font-black text-[#0A0A0A]">New Grand Total: {formatINR(grandTotal)}</span>
+              <span className="text-[#4A4844]">Subtotal: {formatINR(subtotal)} · </span>
+              <span className="font-black text-[#111111]">New Grand Total: {formatINR(grandTotal)}</span>
             </div>
             <Button type="button" variant="primary" size="sm" onClick={handleSave} disabled={isSaving || items.length === 0}>
               <Save size={14} className="mr-1.5" /> {isSaving ? 'SAVING...' : 'SAVE INVOICE CHANGES'}

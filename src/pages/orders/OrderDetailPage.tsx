@@ -44,9 +44,9 @@ export const OrderDetailPage: React.FC = () => {
 
   if (!order) {
     return (
-      <div className="p-12 text-center border border-[#CFCFD2] bg-white">
+      <div className="p-12 text-center border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8]">
         <h2 className="font-display text-xl font-bold uppercase">ORDER NOT FOUND</h2>
-        <p className="text-xs text-[#666666] font-mono mt-2">
+        <p className="text-xs text-[#4A4844] font-mono mt-2">
           The requested order does not exist in Deny OS.
         </p>
         <Button variant="primary" className="mt-4" onClick={() => navigate('/orders')}>
@@ -105,10 +105,10 @@ export const OrderDetailPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 no-print border-b border-[#CFCFD2] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 no-print border-b border-[rgba(0,0,0,0.18)] pb-4">
         <button
           onClick={() => navigate('/orders')}
-          className="flex items-center gap-1.5 text-xs font-mono text-[#666666] hover:text-[#0A0A0A]"
+          className="flex items-center gap-1.5 text-xs font-mono text-[#4A4844] hover:text-[#111111]"
         >
           <ArrowLeft size={14} />
           <span>BACK TO ORDERS</span>
@@ -182,31 +182,31 @@ export const OrderDetailPage: React.FC = () => {
       </div>
 
       {/* Order Header Summary */}
-      <div className="p-6 md:p-8 bg-white border border-[#0A0A0A] shadow-subtle flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <div className="p-6 md:p-8 bg-[#D5D5D8] border border-[#111111] shadow-subtle flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-display font-black text-2xl sm:text-3xl tracking-tight text-[#0A0A0A]">
+            <span className="font-display font-black text-2xl sm:text-3xl tracking-tight text-[#111111]">
               ORDER {order.orderNumber}
             </span>
             <StatusBadge status={order.fulfillmentStatus} />
           </div>
 
-          <div className="mt-2 text-xs font-mono text-[#666666] flex flex-wrap items-center gap-4">
+          <div className="mt-2 text-xs font-mono text-[#4A4844] flex flex-wrap items-center gap-4">
             <div>PLACED: {formatDateTime(order.createdAt)}</div>
             <span>•</span>
-            <div>PAYMENT: <span className="font-bold text-[#0A0A0A] uppercase">{order.paymentStatus} ({order.paymentMethod})</span></div>
+            <div>PAYMENT: <span className="font-bold text-[#111111] uppercase">{order.paymentStatus} ({order.paymentMethod})</span></div>
             {order.trackingNumber && (
               <>
                 <span>•</span>
-                <div>COURIER: <span className="font-bold text-[#0A0A0A]">{order.courierName} ({order.trackingNumber})</span></div>
+                <div>COURIER: <span className="font-bold text-[#111111]">{order.courierName} ({order.trackingNumber})</span></div>
               </>
             )}
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-[10px] font-mono uppercase text-[#888888]">TOTAL SETTLEMENT</div>
-          <div className="font-display font-extrabold text-2xl sm:text-3xl text-[#0A0A0A]">
+          <div className="text-[10px] font-mono uppercase text-[#4A4844]">TOTAL SETTLEMENT</div>
+          <div className="font-display font-extrabold text-2xl sm:text-3xl text-[#111111]">
             {formatINR(order.grandTotal)}
           </div>
         </div>
@@ -217,37 +217,37 @@ export const OrderDetailPage: React.FC = () => {
         {/* Left 2 Cols: Itemized Products & Financial Breakdown */}
         <div className="lg:col-span-2 space-y-6">
           {/* Products List */}
-          <div className="border border-[#CFCFD2] bg-white p-6">
-            <div className="border-b border-[#CFCFD2] pb-3 mb-4 flex justify-between items-center">
-              <h3 className="font-display font-bold text-base text-[#0A0A0A] uppercase">
+          <div className="border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] p-6">
+            <div className="border-b border-[rgba(0,0,0,0.18)] pb-3 mb-4 flex justify-between items-center">
+              <h3 className="font-display font-bold text-base text-[#111111] uppercase">
                 ORDERED STREETWEAR ITEMS ({order.items.length})
               </h3>
-              <span className="text-xs font-mono text-[#666666]">
+              <span className="text-xs font-mono text-[#4A4844]">
                 {order.items.reduce((s, i) => s + i.quantity, 0)} TOTAL PIECES
               </span>
             </div>
 
-            <div className="divide-y divide-[#E7E7E9]">
+            <div className="divide-y divide-[#D5D5D8]">
               {order.items.map((item, idx) => (
                 <div key={idx} className="py-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-14 bg-[#F1F1F3] border border-[#CFCFD2] flex items-center justify-center font-mono text-xs font-bold text-[#0A0A0A]">
+                    <div className="w-12 h-14 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] flex items-center justify-center font-mono text-xs font-bold text-[#111111]">
                       SD
                     </div>
                     <div>
-                      <div className="font-display font-bold text-sm sm:text-base text-[#0A0A0A]">
+                      <div className="font-display font-bold text-sm sm:text-base text-[#111111]">
                         {item.name}
                       </div>
-                      <div className="text-xs font-mono text-[#666666] mt-0.5">
+                      <div className="text-xs font-mono text-[#4A4844] mt-0.5">
                         VARIANT: <span className="font-semibold text-[#111111]">{item.variantName}</span>
                       </div>
-                      <div className="text-[11px] font-mono text-[#888888] mt-0.5">
+                      <div className="text-[11px] font-mono text-[#4A4844] mt-0.5">
                         Rate: {formatINR(item.unitPrice)} × {item.quantity} Qty
                       </div>
                     </div>
                   </div>
 
-                  <div className="font-mono text-sm font-bold text-[#0A0A0A]">
+                  <div className="font-mono text-sm font-bold text-[#111111]">
                     {formatINR(item.total)}
                   </div>
                 </div>
@@ -256,13 +256,13 @@ export const OrderDetailPage: React.FC = () => {
           </div>
 
           {/* Financial Breakdown */}
-          <div className="border border-[#CFCFD2] bg-white p-6">
-            <h3 className="font-display font-bold text-base text-[#0A0A0A] uppercase pb-3 border-b border-[#CFCFD2] mb-4">
+          <div className="border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] p-6">
+            <h3 className="font-display font-bold text-base text-[#111111] uppercase pb-3 border-b border-[rgba(0,0,0,0.18)] mb-4">
               FINANCIAL SETTLEMENT SUMMARY
             </h3>
 
             <div className="max-w-md ml-auto space-y-2.5 font-mono text-xs">
-              <div className="flex justify-between text-[#666666]">
+              <div className="flex justify-between text-[#4A4844]">
                 <span>SUBTOTAL:</span>
                 <span className="font-medium text-[#111111]">{formatINR(order.subtotal)}</span>
               </div>
@@ -272,15 +272,15 @@ export const OrderDetailPage: React.FC = () => {
                   <span>-{formatINR(order.discount)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-[#666666]">
+              <div className="flex justify-between text-[#4A4844]">
                 <span>SHIPPING:</span>
                 <span>{order.shippingFee === 0 ? 'FREE COMPLIMENTARY' : formatINR(order.shippingFee)}</span>
               </div>
-              <div className="flex justify-between text-[#666666]">
+              <div className="flex justify-between text-[#4A4844]">
                 <span>ESTIMATED TAX (GST 18%):</span>
                 <span>{formatINR(order.taxAmount)}</span>
               </div>
-              <div className="flex justify-between text-base font-bold text-[#0A0A0A] pt-3 border-t-2 border-[#0A0A0A] bg-[#F1F1F3] p-2 mt-2">
+              <div className="flex justify-between text-base font-bold text-[#111111] pt-3 border-t-2 border-[#111111] bg-[#D5D5D8] p-2 mt-2">
                 <span>TOTAL PAID:</span>
                 <span>{formatINR(order.grandTotal)}</span>
               </div>
@@ -291,37 +291,37 @@ export const OrderDetailPage: React.FC = () => {
         {/* Right 1 Col: Customer Details & Order Timeline */}
         <div className="space-y-6">
           {/* Customer Information (Requirement 7) */}
-          <div className="border border-[#CFCFD2] bg-white p-6">
-            <div className="border-b border-[#CFCFD2] pb-3 mb-4 flex justify-between items-center">
-              <h3 className="font-display font-bold text-sm text-[#0A0A0A] uppercase">
+          <div className="border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] p-6">
+            <div className="border-b border-[rgba(0,0,0,0.18)] pb-3 mb-4 flex justify-between items-center">
+              <h3 className="font-display font-bold text-sm text-[#111111] uppercase">
                 CUSTOMER & SHIPPING
               </h3>
               <button
                 onClick={() => navigate(`/customers/${order.customerId}`)}
-                className="text-[10px] font-mono text-[#0A0A0A] hover:underline"
+                className="text-[10px] font-mono text-[#111111] hover:underline"
               >
                 VIEW PROFILE →
               </button>
             </div>
 
-            <div className="space-y-3 text-xs font-mono text-[#666666]">
+            <div className="space-y-3 text-xs font-mono text-[#4A4844]">
               <div>
-                <div className="text-[10px] uppercase text-[#888888]">FULL NAME</div>
-                <div className="text-[#0A0A0A] font-bold text-sm mt-0.5">{order.customerName}</div>
+                <div className="text-[10px] uppercase text-[#4A4844]">FULL NAME</div>
+                <div className="text-[#111111] font-bold text-sm mt-0.5">{order.customerName}</div>
               </div>
 
               <div>
-                <div className="text-[10px] uppercase text-[#888888]">EMAIL ADDRESS</div>
+                <div className="text-[10px] uppercase text-[#4A4844]">EMAIL ADDRESS</div>
                 <div className="text-[#111111] mt-0.5">{order.customerEmail}</div>
               </div>
 
               <div>
-                <div className="text-[10px] uppercase text-[#888888]">CONTACT PHONE</div>
+                <div className="text-[10px] uppercase text-[#4A4844]">CONTACT PHONE</div>
                 <div className="text-[#111111] mt-0.5">{order.customerPhone}</div>
               </div>
 
               <div>
-                <div className="text-[10px] uppercase text-[#888888]">DELIVERY ADDRESS</div>
+                <div className="text-[10px] uppercase text-[#4A4844]">DELIVERY ADDRESS</div>
                 <div className="text-[#111111] mt-0.5 leading-relaxed">
                   {order.shippingAddress.street}<br />
                   {order.shippingAddress.city}, {order.shippingAddress.state} — {order.shippingAddress.pincode}<br />
@@ -332,24 +332,24 @@ export const OrderDetailPage: React.FC = () => {
           </div>
 
           {/* Fulfillment Timeline (Requirement 7) */}
-          <div className="border border-[#CFCFD2] bg-white p-6">
-            <h3 className="font-display font-bold text-sm text-[#0A0A0A] uppercase pb-3 border-b border-[#CFCFD2] mb-4">
+          <div className="border border-[rgba(0,0,0,0.18)] bg-[#D5D5D8] p-6">
+            <h3 className="font-display font-bold text-sm text-[#111111] uppercase pb-3 border-b border-[rgba(0,0,0,0.18)] mb-4">
               FULFILLMENT TIMELINE
             </h3>
 
             <div className="space-y-4">
               {order.timeline.map((evt, idx) => (
-                <div key={idx} className="relative pl-4 border-l-2 border-[#0A0A0A]">
-                  <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-[#0A0A0A]" />
-                  <div className="font-mono text-xs font-bold text-[#0A0A0A]">
+                <div key={idx} className="relative pl-4 border-l-2 border-[#111111]">
+                  <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-[#111111]" />
+                  <div className="font-mono text-xs font-bold text-[#111111]">
                     {evt.status}
                   </div>
                   {evt.note && (
-                    <div className="text-xs text-[#666666] mt-0.5 font-sans">
+                    <div className="text-xs text-[#4A4844] mt-0.5 font-sans">
                       {evt.note}
                     </div>
                   )}
-                  <div className="text-[10px] font-mono text-[#888888] mt-1">
+                  <div className="text-[10px] font-mono text-[#4A4844] mt-1">
                     {formatDateTime(evt.time)}
                   </div>
                 </div>
@@ -387,7 +387,7 @@ export const OrderDetailPage: React.FC = () => {
             onChange={(e) => setTrackingNumber(e.target.value)}
           />
 
-          <div className="pt-3 flex justify-end gap-3 border-t border-[#CFCFD2]">
+          <div className="pt-3 flex justify-end gap-3 border-t border-[rgba(0,0,0,0.18)]">
             <Button
               type="button"
               variant="outline"
@@ -435,7 +435,7 @@ export const OrderDetailPage: React.FC = () => {
             onChange={(e) => setReturnCondition(e.target.value)}
           />
 
-          <div className="pt-3 flex justify-end gap-3 border-t border-[#CFCFD2]">
+          <div className="pt-3 flex justify-end gap-3 border-t border-[rgba(0,0,0,0.18)]">
             <Button
               type="button"
               variant="outline"

@@ -16,7 +16,7 @@ interface TabsProps {
 
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className }) => {
   return (
-    <div className={clsx('border-b border-[#CFCFD2] flex items-center overflow-x-auto gap-1 sm:gap-2', className)}>
+    <div className={clsx('border-b border-[rgba(0,0,0,0.18)] flex items-center overflow-x-auto gap-1 sm:gap-2', className)}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
@@ -26,8 +26,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
             className={clsx(
               'px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-mono uppercase tracking-editorial transition-all relative whitespace-nowrap flex items-center gap-2 border-b-2 -mb-[1px]',
               isActive
-                ? 'border-[#0A0A0A] text-[#0A0A0A] font-semibold'
-                : 'border-transparent text-[#666666] hover:text-[#111111] hover:border-[#CFCFD2]'
+                ? 'border-[#111111] text-[#111111] font-semibold'
+                : 'border-transparent text-[#4A4844] hover:text-[#111111] hover:border-[rgba(0,0,0,0.18)]'
             )}
           >
             <span>{tab.label}</span>
@@ -36,8 +36,8 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
                 className={clsx(
                   'px-1.5 py-0.2 text-[10px] font-mono border',
                   isActive
-                    ? 'bg-[#0A0A0A] text-white border-[#0A0A0A]'
-                    : 'bg-[#F1F1F3] text-[#666666] border-[#CFCFD2]'
+                    ? 'bg-[#111111] text-[#E2E2E4] border-[#111111]'
+                    : 'bg-[#D5D5D8] text-[#4A4844] border-[rgba(0,0,0,0.18)]'
                 )}
               >
                 {tab.count}
