@@ -51,14 +51,27 @@ export interface PrintableReceiptData {
  */
 function getVectorBarcodeSvg(code: string): string {
   const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const displayWidth = 180;
+  const displayHeight = 32;
   try {
     JsBarcode(svgEl, code, {
       format: 'CODE128',
       width: 2,
-      height: 32,
+      height: displayHeight,
       displayValue: false,
       margin: 0,
     });
+    // JsBarcode sizes the SVG to the barcode's natural pixel width - for a
+    // long order number that's often wider than the 180px slot on the
+    // receipt, which is what was pushing it out of its box. Pin a viewBox
+    // to that natural size, then force the display width/height back down
+    // so it scales to fit instead of overflowing.
+    const naturalWidth = parseFloat(svgEl.getAttribute('width') || String(displayWidth));
+    const naturalHeight = parseFloat(svgEl.getAttribute('height') || String(displayHeight));
+    svgEl.setAttribute('viewBox', `0 0 ${naturalWidth} ${naturalHeight}`);
+    svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svgEl.setAttribute('width', String(displayWidth));
+    svgEl.setAttribute('height', String(displayHeight));
   } catch {
     return `
       <div style="font-family: monospace; font-size: 10px; letter-spacing: 3px; font-weight: 700; color: #000000; margin-top: 3px; text-align: center;">${code}</div>
@@ -69,7 +82,7 @@ function getVectorBarcodeSvg(code: string): string {
 
   return `
     <div style="text-align: center; margin: 8px 0 4px;">
-      <div style="display: inline-block; width: 180px;">${barcodeMarkup}</div>
+      <div style="display: inline-block; width: ${displayWidth}px; max-width: 100%;">${barcodeMarkup}</div>
       <div style="font-family: monospace; font-size: 10px; letter-spacing: 3px; font-weight: 700; color: #000000; margin-top: 3px;">${code}</div>
     </div>
   `;
