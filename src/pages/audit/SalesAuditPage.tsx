@@ -730,6 +730,68 @@ export const SalesAuditPage: React.FC = () => {
           </table>
         </div>
 
+        {/* Invoice Register - every invoice in the audited period */}
+        <div className="space-y-2">
+          <div className="font-bold text-xs uppercase border-b border-[#111111] pb-1">
+            INVOICE REGISTER ({timeFilteredOrders.length} INVOICES)
+          </div>
+          <table className="w-full text-left border-collapse border border-[#111111] text-[10px]">
+            <thead>
+              <tr className="bg-neutral-100 border-b border-[#111111] uppercase">
+                <th className="p-1.5 border-r border-[#111111]">#</th>
+                <th className="p-1.5 border-r border-[#111111]">INVOICE NO.</th>
+                <th className="p-1.5 border-r border-[#111111]">DATE</th>
+                <th className="p-1.5 border-r border-[#111111]">CHANNEL</th>
+                <th className="p-1.5 border-r border-[#111111]">CUSTOMER</th>
+                <th className="p-1.5 border-r border-[#111111]">STATUS</th>
+                <th className="p-1.5 border-r border-[#111111] text-right">GST</th>
+                <th className="p-1.5 border-r border-[#111111] text-right">TAXABLE</th>
+                <th className="p-1.5 border-r border-[#111111] text-right">TAX</th>
+                <th className="p-1.5 text-right">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#111111]">
+              {timeFilteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={10} className="p-2 text-center">No invoices in this period.</td>
+                </tr>
+              ) : (
+                [...timeFilteredOrders]
+                  .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+                  .map((o, idx) => (
+                    <tr key={o.id} style={{ breakInside: 'avoid' }}>
+                      <td className="p-1.5 border-r border-[#111111]">{idx + 1}</td>
+                      <td className="p-1.5 border-r border-[#111111] font-bold">{o.orderNumber}</td>
+                      <td className="p-1.5 border-r border-[#111111]">{o.createdAt.substring(0, 16)}</td>
+                      <td className="p-1.5 border-r border-[#111111]">{o.channel || '—'}</td>
+                      <td className="p-1.5 border-r border-[#111111]">{o.customerName}</td>
+                      <td className="p-1.5 border-r border-[#111111]">{o.billStatus || o.paymentStatus}</td>
+                      <td className="p-1.5 border-r border-[#111111] text-right">
+                        {o.taxRate !== undefined ? `${o.taxRate}%${o.taxIsCustom ? '*' : ''}` : '—'}
+                      </td>
+                      <td className="p-1.5 border-r border-[#111111] text-right">{formatINR(o.subtotal - (o.discount || 0))}</td>
+                      <td className="p-1.5 border-r border-[#111111] text-right">{formatINR(o.taxAmount)}</td>
+                      <td className="p-1.5 text-right font-bold">{formatINR(o.grandTotal)}</td>
+                    </tr>
+                  ))
+              )}
+              {timeFilteredOrders.length > 0 && (
+                <tr className="bg-neutral-200 font-bold">
+                  <td colSpan={7} className="p-1.5 border-r border-[#111111]">TOTAL</td>
+                  <td className="p-1.5 border-r border-[#111111] text-right">
+                    {formatINR(timeFilteredOrders.reduce((s, o) => s + o.subtotal - (o.discount || 0), 0))}
+                  </td>
+                  <td className="p-1.5 border-r border-[#111111] text-right">{formatINR(totalTaxCollected)}</td>
+                  <td className="p-1.5 text-right">{formatINR(totalNetRevenue)}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          {timeFilteredOrders.some((o) => o.taxIsCustom) && (
+            <div className="text-[9px] text-neutral-600">* Custom tax rate applied by the owner on that bill.</div>
+          )}
+        </div>
+
         {/* Counter Cash Drawer Reconciled Ledger */}
         <div className="grid grid-cols-2 gap-4 border border-[#111111] p-4">
           <div>
