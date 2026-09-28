@@ -6,6 +6,7 @@ import { Modal } from '../../components/ui/Modal';
 import { formatINR } from '../../utils/formatters';
 import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter';
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
+import { BillQr } from '../../components/common/BillQr';
 import { slabTaxRate, taxFor, splitCgstSgst, formatRate } from '../../utils/tax';
 import { Product, ProductVariant, PaymentSplit } from '../../types';
 import {
@@ -1564,6 +1565,9 @@ export const PosBillingPage: React.FC = () => {
               {/* Vector Barcode & Policy */}
               <div className="pt-2 border-t border-[rgba(0,0,0,0.1)] space-y-1 text-center">
                 <BarcodeSvg value={receiptOrder.orderNumber} width={180} height={28} />
+                <div className="pt-2">
+                  <BillQr bill={{ ...receiptOrder, storeName: settings.storeName, gstin: settings.gstin }} />
+                </div>
                 <div className="text-[9px] text-[#4A4844] uppercase mt-1">
                   ALL SALES FINAL ON CAPSULE RELEASES · DENY TERMINAL #01
                 </div>

@@ -1,5 +1,6 @@
 import JsBarcode from 'jsbarcode';
 import { formatINR } from './formatters';
+import { billQrSvg } from './billQr';
 
 export interface PrintableReceiptData {
   orderNumber: string;
@@ -84,6 +85,26 @@ function getVectorBarcodeSvg(code: string): string {
     <div style="text-align: center; margin: 8px 0 4px;">
       <div style="display: inline-block; width: ${displayWidth}px; max-width: 100%;">${barcodeMarkup}</div>
       <div style="font-family: monospace; font-size: 10px; letter-spacing: 3px; font-weight: 700; color: #000000; margin-top: 3px;">${code}</div>
+    </div>
+  `;
+}
+
+// Full-bill QR for printed receipts/invoices (see utils/billQr.ts).
+function getBillQrHtml(data: PrintableReceiptData, sizePx: number): string {
+  const svg = billQrSvg(
+    {
+      ...data,
+      taxRate: data.storeSettings?.taxRate,
+      storeName: data.storeSettings?.storeName,
+      gstin: data.storeSettings?.gstin,
+    },
+    sizePx
+  );
+  if (!svg) return '';
+  return `
+    <div style="text-align: center; margin: 6px 0 2px;">
+      <div style="display: inline-block;">${svg}</div>
+      <div style="font-family: monospace; font-size: 9px; color: #333333; text-transform: uppercase;">Scan for full bill</div>
     </div>
   `;
 }
@@ -398,6 +419,7 @@ export function printThermalReceipt(data: PrintableReceiptData): Promise<boolean
             <!-- Authentic Vector Barcode -->
             <div class="barcode-wrap">
               ${getVectorBarcodeSvg(data.orderNumber)}
+              ${getBillQrHtml(data, 180)}
               <div class="policy-footer">ALL SALES FINAL ON CAPSULE RELEASES · DENY POS TERMINAL #01</div>
             </div>
           </div>
@@ -756,7 +778,10 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
                 <div style="font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">TERMS & CONDITIONS:</div>
                 <div>1. All sales final on limited capsule garments. Returns accepted within 7 days in unworn condition with tags.</div>
                 <div>2. This is a computer-generated GST tax invoice issued by Studio Deny POS Terminal.</div>
-                <div style="margin-top: 8px;">${getVectorBarcodeSvg(data.orderNumber)}</div>
+                <div style="margin-top: 8px; display: flex; align-items: center; gap: 16px;">
+                  ${getVectorBarcodeSvg(data.orderNumber)}
+                  ${getBillQrHtml(data, 110)}
+                </div>
               </div>
 
               <div style="text-align: right;">

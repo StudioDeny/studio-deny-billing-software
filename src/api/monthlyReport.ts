@@ -45,7 +45,7 @@ export interface MonthlyInvoice {
 export interface MonthlyData {
   offline: MonthlyInvoice[]; // COMPLETED / RETURNED POS bills
   voided: MonthlyInvoice[]; // VOID POS bills - listed, never totalled
-  online: MonthlyInvoice[]; // DELIVERED website orders
+  online: MonthlyInvoice[]; // DELIVERED website orders, by delivery date
 }
 
 export const STORE_STATE = 'Andhra Pradesh';
@@ -77,6 +77,7 @@ interface DbWebsiteOrder {
   payment_method: string;
   notes: string | null;
   created_at: string;
+  delivered_at: string | null;
 }
 
 function num(v: unknown): number {
@@ -167,12 +168,14 @@ async function fetchDeliveredWebsiteOrders(from: string, to: string): Promise<Mo
   const { data, error } = await supabase
     .from('orders')
     .select(
-      'id, order_number, invoice_no, user_email, items, subtotal, shipping, tax_rate, tax, discount, total, status, address, payment_method, notes, created_at'
+      'id, order_number, invoice_no, user_email, items, subtotal, shipping, tax_rate, tax, discount, total, status, address, payment_method, notes, created_at, delivered_at'
     )
     .eq('status', 'DELIVERED')
-    .gte('created_at', from)
-    .lt('created_at', to)
-    .order('created_at', { ascending: true });
+    // The SDW invoice is issued on delivery, so it belongs to the delivery
+    // month; an order with no delivered_at recorded falls back to its order date.
+    .or(
+      `and(delivered_at.gte."${from}",delivered_at.lt."${to}"),and(delivered_at.is.null,created_at.gte."${from}",created_at.lt."${to}")`
+    );
   if (error) throw new Error(error.message);
 
   return ((data || []) as DbWebsiteOrder[]).map((o) => {
@@ -199,7 +202,7 @@ async function fetchDeliveredWebsiteOrders(from: string, to: string): Promise<Mo
       id: o.id,
       channel: 'ONLINE' as const,
       invoiceNumber: o.invoice_no || o.order_number,
-      createdAt: o.created_at,
+      createdAt: o.delivered_at || o.created_at,
       status: o.status,
       customerName: addr.name || o.user_email,
       customerPhone: addr.phone || '',
@@ -228,7 +231,7 @@ export async function fetchMonthlyData(year: number, month: number): Promise<Mon
   return {
     offline: bills.filter((b) => b.status !== 'VOID'),
     voided: bills.filter((b) => b.status === 'VOID'),
-    online,
+    online: online.sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   };
 }
 

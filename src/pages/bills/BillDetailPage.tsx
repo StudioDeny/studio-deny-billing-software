@@ -6,6 +6,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { formatINR } from '../../utils/formatters';
 import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter';
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
+import { BillQr } from '../../components/common/BillQr';
 import { splitCgstSgst, formatRate } from '../../utils/tax';
 import {
   ArrowLeft,
@@ -264,6 +265,9 @@ export const BillDetailPage: React.FC = () => {
           {/* Barcode & Footer */}
           <div className="pt-3 border-t border-[rgba(0,0,0,0.1)] space-y-1 text-center">
             <BarcodeSvg value={bill.orderNumber} width={180} height={28} />
+            <div className="pt-2">
+              <BillQr bill={{ ...bill, storeName: settings.storeName, gstin: settings.gstin }} />
+            </div>
             <div className="text-[9px] text-[#4A4844] uppercase mt-1">
               STUDIO DENY · ALL SALES FINAL ON DROP CAPSULES
             </div>

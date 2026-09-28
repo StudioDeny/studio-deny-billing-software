@@ -157,7 +157,7 @@ function drawSummary(doc: jsPDF, data: MonthlyData, id: InvoiceIdentity, monthLa
   doc.setTextColor(...MUTED);
   doc.setFontSize(7);
   doc.text(
-    'Amounts in INR (Rs.). Offline = POS counter bills (voided bills excluded). Online = website orders with status DELIVERED, placed in this month; tax as recorded by the website.',
+    'Amounts in INR (Rs.). Offline = POS counter bills, SDS series (voided excluded). Online = website orders DELIVERED in this month, SDW series; tax as recorded by the website.',
     MARGIN,
     y,
     { maxWidth: CONTENT_W }
