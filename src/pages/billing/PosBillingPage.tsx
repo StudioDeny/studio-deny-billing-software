@@ -643,42 +643,65 @@ export const PosBillingPage: React.FC = () => {
             LEFT AREA (COL 7): PRODUCT CATALOG & TOUCH SELECTION
         ========================================================================= */}
         <div className="lg:col-span-7 space-y-4">
-          {/* Category Filter - a dropdown since the live catalog has too many
-              categories for a row of tabs to scale */}
-          <div className="flex items-center gap-2 font-mono text-xs pb-1 border-b border-[rgba(0,0,0,0.18)]">
-            <span className="text-[10px] uppercase tracking-widest text-[#4A4844] shrink-0">Category</span>
+          {/* Search + Category on one row: type to narrow, dropdown to scope.
+              Category is a dropdown since the live catalog has too many
+              categories for a row of tabs to scale. */}
+          <div className="flex flex-col sm:flex-row gap-2 font-mono text-xs">
+            <div className="flex-1 flex items-center gap-3 bg-[#D5D5D8] px-3 py-2 border border-[rgba(0,0,0,0.18)] focus-within:border-[#111111]">
+              <Search size={16} className="text-[#4A4844] shrink-0" />
+              <input
+                type="text"
+                placeholder="Search product name or SKU..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
+              />
+              {search && (
+                <button onClick={() => setSearch('')} className="text-[#4A4844] hover:text-[#111111]" title="Clear search">
+                  <X size={15} />
+                </button>
+              )}
+            </div>
             <select
               value={activeCategory}
               onChange={(e) => setActiveCategory(e.target.value)}
-              className="flex-1 sm:flex-none sm:min-w-[220px] bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider focus:outline-none focus:border-[#111111]"
+              aria-label="Category"
+              className="sm:w-[200px] bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider focus:outline-none focus:border-[#111111]"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {cat === 'ALL' ? 'ALL CATEGORIES' : cat}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Fast Search Input */}
-          <div className="flex items-center gap-3 bg-[#D5D5D8] p-3 border border-[rgba(0,0,0,0.18)]">
-            <Search size={16} className="text-[#4A4844]" />
-            <input
-              type="text"
-              placeholder="Search by silhouette, SKU, or category..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="text-[#4A4844] hover:text-[#111111]">
-                <X size={15} />
+          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-[#4A4844] -mt-2">
+            <span>
+              {filteredProducts.length} product{filteredProducts.length === 1 ? '' : 's'}
+              {activeCategory !== 'ALL' && ` in ${activeCategory}`}
+            </span>
+            {(search || activeCategory !== 'ALL') && (
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setActiveCategory('ALL');
+                }}
+                className="underline hover:text-[#111111]"
+              >
+                Clear filters
               </button>
             )}
           </div>
 
+          {filteredProducts.length === 0 && (
+            <div className="py-12 text-center font-mono text-xs text-[#4A4844] border border-dashed border-[rgba(0,0,0,0.18)]">
+              No products match{search ? ` "${search}"` : ''}{activeCategory !== 'ALL' ? ` in ${activeCategory}` : ''}.
+            </div>
+          )}
+
           {/* Touch-First Product Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 max-h-[calc(100vh-250px)] overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 max-h-[calc(100vh-230px)] overflow-y-auto pr-1">
             {filteredProducts.map((prod) => (
               <div
                 key={prod.id}
