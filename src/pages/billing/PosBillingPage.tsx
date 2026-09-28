@@ -736,7 +736,7 @@ export const PosBillingPage: React.FC = () => {
             RIGHT AREA (COL 5): STICKY CART & MULTI-TENDER PAYMENT REGISTER
         ========================================================================= */}
         <div
-          className={`lg:col-span-5 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] flex flex-col shadow-subtle lg:sticky lg:top-20 max-h-[calc(100vh-100px)] overflow-hidden ${
+          className={`lg:col-span-5 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] flex flex-col shadow-subtle lg:sticky lg:top-20 max-h-[calc(100vh-100px)] overflow-y-auto ${
             mobileCartOpen
               ? 'fixed inset-0 z-50 p-4 bg-[#D5D5D8] overflow-y-auto'
               : 'hidden lg:flex'
@@ -848,7 +848,7 @@ export const PosBillingPage: React.FC = () => {
           </div>
 
           {/* 2. CART ITEMS LIST */}
-          <div className="p-3.5 flex-1 overflow-y-auto max-h-[220px] divide-y divide-[rgba(0,0,0,0.1)]">
+          <div className="p-3.5 shrink-0 overflow-y-auto max-h-[min(220px,30vh)] divide-y divide-[rgba(0,0,0,0.1)]">
             {cart.length === 0 ? (
               <div className="py-10 text-center font-mono text-[#4A4844] space-y-1.5">
                 <ShoppingBag size={24} className="mx-auto text-[rgba(0,0,0,0.18)]" />
@@ -1333,8 +1333,9 @@ export const PosBillingPage: React.FC = () => {
               )}
             </div>
 
-            {/* 5. PAY & PRINT BUTTONS (SAVED FIRST) */}
-            <div className="pt-2 space-y-2">
+            {/* 5. PAY & PRINT BUTTONS (SAVED FIRST) - pinned to the bottom of
+                the panel so they stay clickable however tall the bill gets. */}
+            <div className="sticky bottom-0 z-10 -mx-3.5 px-3.5 pt-2 pb-1 bg-[#E2E2E4] border-t border-[rgba(0,0,0,0.18)] space-y-2">
               {/* Dominant PAY & PRINT Button */}
               <button
                 type="button"
