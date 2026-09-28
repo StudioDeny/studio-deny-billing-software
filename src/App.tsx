@@ -27,6 +27,9 @@ import { SettingsPage } from './pages/settings/SettingsPage';
 import { PriceTagGeneratorPage } from './pages/tags/PriceTagGeneratorPage';
 import { SalesAuditPage } from './pages/audit/SalesAuditPage';
 
+// MONTHLY BILLS (invoice + report download)
+import { MonthlyBillsPage } from './pages/monthly/MonthlyBillsPage';
+
 // Redirect helpers for legacy URLs
 const RedirectBillId: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -100,6 +103,7 @@ export const App: React.FC = () => {
           {/* PRICE TAGS & SALES AUDIT */}
           <Route path="tags" element={<RequirePermission permission="TAGS"><PriceTagGeneratorPage /></RequirePermission>} />
           <Route path="audit" element={<RequirePermission permission="AUDIT"><SalesAuditPage /></RequirePermission>} />
+          <Route path="monthly-bills" element={<RequirePermission permission="MONTHLY_BILLS"><MonthlyBillsPage /></RequirePermission>} />
 
           {/* SETTINGS (BUSINESS, BILLING, PRINTER, STAFF) */}
           <Route path="settings" element={<RequirePermission permission="SETTINGS"><SettingsPage /></RequirePermission>} />

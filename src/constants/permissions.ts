@@ -8,6 +8,7 @@ export type PermissionKey =
   | 'BILLS'
   | 'TAGS'
   | 'AUDIT'
+  | 'MONTHLY_BILLS'
   | 'PRODUCTS'
   | 'CUSTOMERS'
   | 'SETTINGS';
@@ -18,6 +19,7 @@ export const ALL_PERMISSIONS: PermissionKey[] = [
   'BILLS',
   'TAGS',
   'AUDIT',
+  'MONTHLY_BILLS',
   'PRODUCTS',
   'CUSTOMERS',
   'SETTINGS',
@@ -29,6 +31,7 @@ export const PERMISSION_LABELS: Record<PermissionKey, string> = {
   BILLS: 'Bills & Transaction History',
   TAGS: 'Price Tag Generator',
   AUDIT: 'Sales Audit & Channel Reconciliation',
+  MONTHLY_BILLS: 'Monthly Bills Download (Invoices + Report)',
   PRODUCTS: 'Products & Inventory',
   CUSTOMERS: 'Customer Directory',
   SETTINGS: 'Terminal Settings & Staff Management',
@@ -36,7 +39,7 @@ export const PERMISSION_LABELS: Record<PermissionKey, string> = {
 
 export const DEFAULT_PERMISSIONS_BY_ROLE: Record<DbStaffRole, PermissionKey[]> = {
   OWNER: [...ALL_PERMISSIONS],
-  MANAGER: ['DASHBOARD', 'BILLING', 'BILLS', 'TAGS', 'AUDIT', 'PRODUCTS', 'CUSTOMERS'],
+  MANAGER: ['DASHBOARD', 'BILLING', 'BILLS', 'TAGS', 'AUDIT', 'MONTHLY_BILLS', 'PRODUCTS', 'CUSTOMERS'],
   BILLING: ['DASHBOARD', 'BILLING', 'BILLS', 'CUSTOMERS'],
   FULFILLMENT: ['DASHBOARD', 'BILLS'],
 };

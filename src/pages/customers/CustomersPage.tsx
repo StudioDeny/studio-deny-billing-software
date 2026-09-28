@@ -32,7 +32,7 @@ export const CustomersPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('Mumbai');
+  const [city, setCity] = useState('Visakhapatnam');
   const [segment, setSegment] = useState<'VIP' | 'HIGH_VALUE' | 'ACTIVE' | 'NEW'>('ACTIVE');
 
   const totalLTV = customers.reduce((sum, c) => sum + c.totalSpend, 0);
@@ -79,8 +79,8 @@ export const CustomersPage: React.FC = () => {
       name,
       email,
       phone: phone || '+91 98000 00000',
-      address: address || 'High Street Studio Ward, Mumbai',
-      city: city || 'Mumbai',
+      address: address || '',
+      city: city || 'Visakhapatnam',
       segment,
     });
 

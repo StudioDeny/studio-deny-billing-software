@@ -341,9 +341,9 @@ function mapBillToOrder(
     customerPhone: customer?.phone || '',
     shippingAddress: {
       street: 'Studio Deny Flagship Store POS Register #01',
-      city: customer?.city || 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400050',
+      city: customer?.city || 'Visakhapatnam',
+      state: 'Andhra Pradesh',
+      pincode: '530017',
       country: 'India',
     },
     items: orderItems,
@@ -352,6 +352,8 @@ function mapBillToOrder(
     discountReason: bill.discount_reason || undefined,
     shippingFee: bill.shipping_fee,
     taxAmount: bill.tax_amount,
+    taxRate: bill.tax_rate,
+    taxIsCustom: bill.tax_is_custom,
     grandTotal: bill.grand_total,
     paymentStatus: bill.payment_status,
     fulfillmentStatus: 'DELIVERED',
@@ -419,9 +421,11 @@ export async function checkout(input: {
   items: CheckoutItemInput[];
   customerId: string | null;
   staffId: string | null;
+  // Bill-level discount only; item discounts travel on each item.
   discount: number;
   discountReason: string | null;
-  taxAmount: number;
+  // null = GST slab computed by the database; a number = OWNER-only override %.
+  customTaxRate: number | null;
   shippingFee: number;
   payments: CheckoutPaymentInput[];
   notes: string | null;
@@ -441,7 +445,7 @@ export async function checkout(input: {
     p_staff_id: input.staffId,
     p_discount: input.discount,
     p_discount_reason: input.discountReason,
-    p_tax_amount: input.taxAmount,
+    p_custom_tax_rate: input.customTaxRate,
     p_shipping_fee: input.shippingFee,
     p_payments: input.payments.map((p) => ({
       method: p.method,
@@ -506,7 +510,7 @@ export async function editBill(input: {
   items: CheckoutItemInput[];
   discount: number;
   discountReason: string | null;
-  taxAmount: number;
+  customTaxRate: number | null;
   shippingFee: number;
   notes: string | null;
   editorStaffId: string | null;
@@ -525,7 +529,7 @@ export async function editBill(input: {
     })),
     p_discount: input.discount,
     p_discount_reason: input.discountReason,
-    p_tax_amount: input.taxAmount,
+    p_custom_tax_rate: input.customTaxRate,
     p_shipping_fee: input.shippingFee,
     p_notes: input.notes,
     p_editor_staff_id: input.editorStaffId,
@@ -599,6 +603,9 @@ export async function fetchSettings(): Promise<CommerceSettings> {
     startingInvoiceNumber: 1000250,
     currency: pos?.currency || 'INR',
     taxRate: pos?.tax_rate || 0,
+    taxThreshold: pos?.tax_threshold ?? 2599,
+    taxRateLow: pos?.tax_rate_low ?? 5,
+    taxRateHigh: pos?.tax_rate_high ?? 18,
     shippingFlatRate: pos?.shipping_flat_rate || 0,
     freeShippingThreshold: pos?.free_shipping_threshold || 0,
     printer: {
@@ -612,6 +619,9 @@ export async function fetchSettings(): Promise<CommerceSettings> {
 
 export async function saveSettings(updates: {
   taxRate?: number;
+  taxThreshold?: number;
+  taxRateLow?: number;
+  taxRateHigh?: number;
   shippingFlatRate?: number;
   freeShippingThreshold?: number;
   currency?: string;
@@ -622,6 +632,9 @@ export async function saveSettings(updates: {
   const { data: existing } = await supabase.from('pos_settings').select('id').limit(1).maybeSingle();
   const payload: Record<string, unknown> = {
     tax_rate: updates.taxRate,
+    tax_threshold: updates.taxThreshold,
+    tax_rate_low: updates.taxRateLow,
+    tax_rate_high: updates.taxRateHigh,
     shipping_flat_rate: updates.shippingFlatRate,
     free_shipping_threshold: updates.freeShippingThreshold,
     currency: updates.currency,

@@ -42,7 +42,7 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
-  const [customerCity, setCustomerCity] = useState('Mumbai');
+  const [customerCity, setCustomerCity] = useState('Visakhapatnam');
   const [segment, setSegment] = useState<CustomerSegment>('NEW');
 
   // Adjust Inventory State

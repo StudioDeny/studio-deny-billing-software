@@ -26,6 +26,9 @@ export const initialCommerceSettings: CommerceSettings = {
   startingInvoiceNumber: 1000248,
   currency: 'INR',
   taxRate: 18,
+  taxThreshold: 2599,
+  taxRateLow: 5,
+  taxRateHigh: 18,
   shippingFlatRate: 250,
   freeShippingThreshold: 5000,
   printer: {

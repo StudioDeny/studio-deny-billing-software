@@ -295,7 +295,7 @@ export const SalesAuditPage: React.FC = () => {
                   OFFLINE IN-STORE POS AUDIT
                 </h2>
                 <div className="text-[10px] font-mono text-[#4A4844]">
-                  Mumbai Flagship Counter · Physical Register #01
+                  Visakhapatnam Flagship Counter · Physical Register #01
                 </div>
               </div>
             </div>
@@ -352,7 +352,7 @@ export const SalesAuditPage: React.FC = () => {
                 <span className="font-semibold text-[#111111]">{formatINR(offlineUpiTotal)}</span>
               </div>
               <div className="py-1.5 flex justify-between text-[#4A4844]">
-                <span>GST Tax Collected (CGST 6% + SGST 6%):</span>
+                <span>GST Tax Collected (CGST + SGST):</span>
                 <span className="font-semibold text-[#111111]">{formatINR(offlineTax)}</span>
               </div>
             </div>
@@ -693,8 +693,8 @@ export const SalesAuditPage: React.FC = () => {
                 <th className="p-2 border-r border-[#111111] text-center">BILLS / ORDERS</th>
                 <th className="p-2 border-r border-[#111111] text-right">GROSS SALES</th>
                 <th className="p-2 border-r border-[#111111] text-right">DISCOUNTS</th>
-                <th className="p-2 border-r border-[#111111] text-right">CGST (6%)</th>
-                <th className="p-2 border-r border-[#111111] text-right">SGST (6%)</th>
+                <th className="p-2 border-r border-[#111111] text-right">CGST</th>
+                <th className="p-2 border-r border-[#111111] text-right">SGST</th>
                 <th className="p-2 text-right">NET REVENUE</th>
               </tr>
             </thead>
@@ -779,7 +779,7 @@ export const SalesAuditPage: React.FC = () => {
           <div>
             <div className="h-12 border-b border-[#111111]" />
             <div className="font-bold mt-1">SHIFT / STORE MANAGER</div>
-            <div className="text-[10px] text-neutral-600">Mumbai Flagship</div>
+            <div className="text-[10px] text-neutral-600">Visakhapatnam Flagship</div>
           </div>
           <div>
             <div className="h-12 border-b border-[#111111]" />

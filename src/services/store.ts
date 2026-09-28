@@ -76,6 +76,9 @@ let currentState: CommerceState = {
     startingInvoiceNumber: 1000250,
     currency: 'INR',
     taxRate: 0,
+    taxThreshold: 2599,
+    taxRateLow: 5,
+    taxRateHigh: 18,
     shippingFlatRate: 0,
     freeShippingThreshold: 0,
     printer: { name: 'Thermal POS-80', status: 'OFFLINE', connection: 'USB' },
@@ -230,14 +233,19 @@ export const store = {
       changeAmount: p.change ?? null,
     }));
 
+    // orderData.discount is the total saving (item + bill); the database nets
+    // item discounts out of each line itself, so only the bill-level part is
+    // sent - sending the total would subtract item discounts twice.
+    const itemDiscountTotal = items.reduce((sum, i) => sum + i.itemDiscount, 0);
+
     const newOrder = await posApi.checkout({
       items,
       customerId:
         orderData.customerId && orderData.customerId !== 'guest' ? orderData.customerId : null,
       staffId: currentStaffId,
-      discount: orderData.discount,
+      discount: Math.max(0, orderData.discount - itemDiscountTotal),
       discountReason: orderData.discountReason || null,
-      taxAmount: orderData.taxAmount,
+      customTaxRate: orderData.taxIsCustom && orderData.taxRate !== undefined ? orderData.taxRate : null,
       shippingFee: orderData.shippingFee,
       payments,
       notes: orderData.notes || null,
@@ -279,7 +287,7 @@ export const store = {
   editBill: async (
     billId: string,
     items: OrderItem[],
-    fields: { discount: number; discountReason?: string; taxAmount: number; shippingFee: number; notes?: string }
+    fields: { discount: number; discountReason?: string; customTaxRate: number | null; shippingFee: number; notes?: string }
   ): Promise<Order> => {
     const checkoutItems = items.map((item) => {
       const product = currentState.products.find((p) => p.id === item.productId);
@@ -301,7 +309,7 @@ export const store = {
       items: checkoutItems,
       discount: fields.discount,
       discountReason: fields.discountReason || null,
-      taxAmount: fields.taxAmount,
+      customTaxRate: fields.customTaxRate,
       shippingFee: fields.shippingFee,
       notes: fields.notes || null,
       editorStaffId: currentStaffId,
@@ -516,6 +524,9 @@ export const store = {
   updateSettings: async (updates: Partial<CommerceSettings>) => {
     await posApi.saveSettings({
       taxRate: updates.taxRate,
+      taxThreshold: updates.taxThreshold,
+      taxRateLow: updates.taxRateLow,
+      taxRateHigh: updates.taxRateHigh,
       shippingFlatRate: updates.shippingFlatRate,
       freeShippingThreshold: updates.freeShippingThreshold,
       currency: updates.currency,

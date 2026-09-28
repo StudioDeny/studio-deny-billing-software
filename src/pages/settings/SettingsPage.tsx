@@ -40,7 +40,9 @@ export const SettingsPage: React.FC = () => {
 
   // Billing Configuration Form
   const [invoicePrefix, setInvoicePrefix] = useState(settings.invoicePrefix || 'SD');
-  const [taxRate, setTaxRate] = useState(String(settings.taxRate ?? 0));
+  const [taxThreshold, setTaxThreshold] = useState(String(settings.taxThreshold));
+  const [taxRateLow, setTaxRateLow] = useState(String(settings.taxRateLow));
+  const [taxRateHigh, setTaxRateHigh] = useState(String(settings.taxRateHigh));
   const [defaultDiscount, setDefaultDiscount] = useState('0');
 
   // Printer Configuration Form
@@ -60,7 +62,9 @@ export const SettingsPage: React.FC = () => {
     setGstin(settings.gstin);
     setPan(settings.pan);
     setInvoicePrefix(settings.invoicePrefix || 'SD');
-    setTaxRate(String(settings.taxRate ?? 0));
+    setTaxThreshold(String(settings.taxThreshold));
+    setTaxRateLow(String(settings.taxRateLow));
+    setTaxRateHigh(String(settings.taxRateHigh));
     setPrinterName(settings.printer?.name || '');
   }, [settings]);
 
@@ -79,6 +83,17 @@ export const SettingsPage: React.FC = () => {
 
   const handleSaveAll = async (e: React.FormEvent) => {
     e.preventDefault();
+    const threshold = Number(taxThreshold);
+    const low = Number(taxRateLow);
+    const high = Number(taxRateHigh);
+    if (
+      !Number.isFinite(threshold) || threshold < 0 ||
+      !Number.isFinite(low) || low < 0 || low > 100 ||
+      !Number.isFinite(high) || high < 0 || high > 100
+    ) {
+      store.addToast('Invalid Tax Slab', 'Threshold must be 0 or more and both rates between 0 and 100.', 'error');
+      return;
+    }
     await store.updateSettings({
       brand,
       tagline,
@@ -89,7 +104,9 @@ export const SettingsPage: React.FC = () => {
       gstin,
       pan,
       invoicePrefix,
-      taxRate: Number.isFinite(Number(taxRate)) ? Number(taxRate) : 0,
+      taxThreshold: threshold,
+      taxRateLow: low,
+      taxRateHigh: high,
       printer: {
         ...settings.printer,
         name: printerName,
@@ -120,7 +137,7 @@ export const SettingsPage: React.FC = () => {
           address: settings.address,
           cityState: settings.cityState,
           gstin: settings.gstin,
-          taxRate: settings.taxRate,
+          taxRate: 0,
         },
       });
 
@@ -330,17 +347,6 @@ export const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
-                  Apparel GST Rate (%)
-                </label>
-                <Input
-                  type="number"
-                  value={taxRate}
-                  onChange={(e) => setTaxRate(e.target.value)}
-                  placeholder="12"
-                />
-              </div>
 
               <div>
                 <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
@@ -355,11 +361,52 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-[rgba(0,0,0,0.1)]">
+              <div>
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
+                  GST Slab Threshold (₹)
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={taxThreshold}
+                  onChange={(e) => setTaxThreshold(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
+                  GST At / Below Threshold (%)
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step="0.01"
+                  value={taxRateLow}
+                  onChange={(e) => setTaxRateLow(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] uppercase tracking-widest text-[#4A4844] mb-1">
+                  GST Above Threshold (%)
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step="0.01"
+                  value={taxRateHigh}
+                  onChange={(e) => setTaxRateHigh(e.target.value)}
+                />
+              </div>
+            </div>
+
             <div className="p-4 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] space-y-1">
               <div className="font-bold text-xs text-[#111111]">TAX CONFIGURATION NOTE</div>
               <p className="text-[11px] text-[#4A4844]">
-                Studio Deny operates under GST Rate schedule for branded streetwear garments.
-                All POS calculations apply {taxRate}% GST on taxable subtotal after discounts.
+                GST is decided on the whole bill's taxable value after all discounts: up to ₹{taxThreshold} is
+                taxed at {taxRateLow}%, above ₹{taxThreshold} at {taxRateHigh}% (split equally as CGST + SGST).
+                The OWNER can override the rate for a single bill with CUSTOM TAX on the billing screen.
               </p>
             </div>
           </div>

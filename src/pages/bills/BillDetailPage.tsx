@@ -6,6 +6,7 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { formatINR } from '../../utils/formatters';
 import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter';
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
+import { splitCgstSgst, formatRate } from '../../utils/tax';
 import {
   ArrowLeft,
   Printer,
@@ -68,7 +69,7 @@ export const BillDetailPage: React.FC = () => {
         cityState: settings.cityState,
         gstin: settings.gstin,
         pan: settings.pan,
-        taxRate: settings.taxRate,
+        taxRate: bill.taxRate ?? 0,
       },
     };
 
@@ -80,6 +81,11 @@ export const BillDetailPage: React.FC = () => {
       printTaxInvoice(receiptData);
     }
   };
+
+  // Always the rate this bill was actually charged, never today's settings.
+  const billTaxRate = bill.taxRate ?? 0;
+  const billTaxLabel = `GST (${formatRate(billTaxRate)}%${bill.taxIsCustom ? ' CUSTOM' : ''})`;
+  const { cgst, sgst } = splitCgstSgst(bill.taxAmount);
 
   const handleVoidBill = async () => {
     const reason = window.prompt(
@@ -222,7 +228,7 @@ export const BillDetailPage: React.FC = () => {
               </div>
             )}
             <div className="flex justify-between text-[#4A4844]">
-              <span>GST ({settings.taxRate ?? 0}%):</span>
+              <span>{billTaxLabel}:</span>
               <span>{formatINR(bill.taxAmount)}</span>
             </div>
             <div className="flex justify-between font-black text-base border-t border-[#111111] pt-1 text-[#111111]">
@@ -349,9 +355,20 @@ export const BillDetailPage: React.FC = () => {
                 </div>
               )}
               <div className="flex justify-between text-[#4A4844]">
-                <span>GST ({settings.taxRate ?? 0}%):</span>
-                <span>{formatINR(bill.taxAmount)}</span>
+                <span>TAXABLE VALUE:</span>
+                <span>{formatINR(bill.subtotal - bill.discount)}</span>
               </div>
+              <div className="flex justify-between text-[#4A4844]">
+                <span>CGST ({formatRate(billTaxRate / 2)}%):</span>
+                <span>{formatINR(cgst)}</span>
+              </div>
+              <div className="flex justify-between text-[#4A4844]">
+                <span>SGST ({formatRate(billTaxRate / 2)}%):</span>
+                <span>{formatINR(sgst)}</span>
+              </div>
+              {bill.taxIsCustom && (
+                <div className="text-[10px] text-[#4A4844]">Custom tax rate applied by owner</div>
+              )}
               <div className="flex justify-between font-black text-base border-t border-[#111111] pt-2 text-[#111111]">
                 <span>TOTAL:</span>
                 <span>{formatINR(bill.grandTotal)}</span>

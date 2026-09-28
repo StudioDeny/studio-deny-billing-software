@@ -681,7 +681,7 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
                 <div class="card-name">${data.customerName}</div>
                 <div class="card-detail">Phone: ${data.customerPhone || 'N/A'}</div>
                 <div class="card-detail">Email: ${data.customerEmail || 'walkin@studiodeny.com'}</div>
-                <div class="card-detail">Place of Supply: Maharashtra (27)</div>
+                <div class="card-detail">Place of Supply: Andhra Pradesh (37)</div>
               </div>
 
               <div class="info-card">

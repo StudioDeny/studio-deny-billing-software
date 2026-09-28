@@ -4,16 +4,18 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { formatINR } from '../../utils/formatters';
 import { OrderItem } from '../../types';
+import { slabTaxRate, taxFor, formatRate } from '../../utils/tax';
 import { Search, Trash2, Plus, Save, AlertTriangle } from 'lucide-react';
 
 export const EditInvoicePanel: React.FC = () => {
-  const { orders, products } = useStore();
+  const { orders, products, settings } = useStore();
   const [search, setSearch] = useState('');
   const [selectedBillId, setSelectedBillId] = useState<string | null>(null);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [discount, setDiscount] = useState('0');
   const [discountReason, setDiscountReason] = useState('');
-  const [taxAmount, setTaxAmount] = useState('0');
+  // '' = GST slab (computed by the database); a number = custom % override.
+  const [customTaxRate, setCustomTaxRate] = useState('');
   const [shippingFee, setShippingFee] = useState('0');
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -32,7 +34,7 @@ export const EditInvoicePanel: React.FC = () => {
     setItems(bill.items.map((i) => ({ ...i })));
     setDiscount(String(bill.discount));
     setDiscountReason(bill.discountReason || '');
-    setTaxAmount(String(bill.taxAmount));
+    setCustomTaxRate(bill.taxIsCustom && bill.taxRate !== undefined ? String(bill.taxRate) : '');
     setShippingFee(String(bill.shippingFee));
     setNotes(bill.notes || '');
     setSearch('');
@@ -76,16 +78,27 @@ export const EditInvoicePanel: React.FC = () => {
   };
 
   const subtotal = items.reduce((s, i) => s + i.unitPrice * i.quantity - (i.itemDiscount || 0), 0);
-  const grandTotal = subtotal - (Number(discount) || 0) + (Number(taxAmount) || 0) + (Number(shippingFee) || 0);
+  const taxable = Math.max(0, subtotal - (Number(discount) || 0));
+  const isCustomTax = customTaxRate.trim() !== '';
+  const previewTaxRate = isCustomTax ? Number(customTaxRate) || 0 : slabTaxRate(taxable, settings);
+  const previewTax = taxFor(taxable, previewTaxRate);
+  const grandTotal = taxable + previewTax + (Number(shippingFee) || 0);
 
   const handleSave = async () => {
     if (!selectedBillId || items.length === 0) return;
+    if (isCustomTax) {
+      const rate = Number(customTaxRate);
+      if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
+        store.addToast('Invalid Tax Rate', 'Custom tax % must be between 0 and 100, or empty for the GST slab.', 'error');
+        return;
+      }
+    }
     setIsSaving(true);
     try {
       await store.editBill(selectedBillId, items, {
         discount: Number(discount) || 0,
         discountReason,
-        taxAmount: Number(taxAmount) || 0,
+        customTaxRate: isCustomTax ? Number(customTaxRate) : null,
         shippingFee: Number(shippingFee) || 0,
         notes,
       });
@@ -213,14 +226,23 @@ export const EditInvoicePanel: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <Input label="DISCOUNT (₹)" type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} />
             <Input label="DISCOUNT REASON" value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} />
-            <Input label="TAX AMOUNT (₹)" type="number" value={taxAmount} onChange={(e) => setTaxAmount(e.target.value)} />
+            <Input
+              label="CUSTOM TAX % (EMPTY = SLAB)"
+              type="number"
+              value={customTaxRate}
+              onChange={(e) => setCustomTaxRate(e.target.value)}
+              placeholder={`${formatRate(slabTaxRate(taxable, settings))} (slab)`}
+            />
             <Input label="SHIPPING (₹)" type="number" value={shippingFee} onChange={(e) => setShippingFee(e.target.value)} />
           </div>
           <Input label="NOTES" value={notes} onChange={(e) => setNotes(e.target.value)} />
 
           <div className="flex items-center justify-between border-t border-[rgba(0,0,0,0.18)] pt-3">
             <div className="text-sm">
-              <span className="text-[#4A4844]">Subtotal: {formatINR(subtotal)} · </span>
+              <span className="text-[#4A4844]">
+                Subtotal: {formatINR(subtotal)} · GST {formatRate(previewTaxRate)}%{isCustomTax ? ' CUSTOM' : ' SLAB'}:{' '}
+                {formatINR(previewTax)} ·{' '}
+              </span>
               <span className="font-black text-[#111111]">New Grand Total: {formatINR(grandTotal)}</span>
             </div>
             <Button type="button" variant="primary" size="sm" onClick={handleSave} disabled={isSaving || items.length === 0}>

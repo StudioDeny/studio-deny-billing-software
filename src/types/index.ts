@@ -118,6 +118,10 @@ export interface Order {
   discountReason?: string;
   shippingFee: number;
   taxAmount: number;
+  // Rate actually charged on this bill (slab or owner override) - invoices
+  // print this, never the current settings rate.
+  taxRate?: number;
+  taxIsCustom?: boolean;
   grandTotal: number;
   paymentStatus: PaymentStatus;
   fulfillmentStatus: FulfillmentStatus;
@@ -252,6 +256,10 @@ export interface CommerceSettings {
   startingInvoiceNumber: number;
   currency: string;
   taxRate: number;
+  // GST slab: taxable value <= taxThreshold -> taxRateLow, above -> taxRateHigh.
+  taxThreshold: number;
+  taxRateLow: number;
+  taxRateHigh: number;
   shippingFlatRate: number;
   freeShippingThreshold: number;
   printer: {

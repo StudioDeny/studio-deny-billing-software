@@ -6,6 +6,7 @@ import { Modal } from '../../components/ui/Modal';
 import { formatINR } from '../../utils/formatters';
 import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter';
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
+import { slabTaxRate, taxFor, splitCgstSgst, formatRate } from '../../utils/tax';
 import { Product, ProductVariant, PaymentSplit } from '../../types';
 import {
   Search,
@@ -51,7 +52,8 @@ export const PosBillingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialCustId = searchParams.get('customerId') || '';
 
-  const { products, customers, settings, categories: dbCategories } = useStore();
+  const { products, customers, settings, currentStaff, categories: dbCategories } = useStore();
+  const isOwner = currentStaff?.role === 'OWNER';
 
   // Search & Filter
   const [search, setSearch] = useState('');
@@ -76,6 +78,11 @@ export const PosBillingPage: React.FC = () => {
   const [discountValue, setDiscountValue] = useState<number>(0);
   const [discountReason, setDiscountReason] = useState<string>('NONE');
   const [customDiscountReason, setCustomDiscountReason] = useState<string>('');
+
+  // OWNER-only per-bill tax override. null = automatic GST slab.
+  const [customTaxRate, setCustomTaxRate] = useState<number | null>(null);
+  const [isEditingTax, setIsEditingTax] = useState(false);
+  const [customTaxInput, setCustomTaxInput] = useState('');
 
   // Item-level Discount Modal State
   const [itemDiscountTarget, setItemDiscountTarget] = useState<CartItem | null>(null);
@@ -151,8 +158,10 @@ export const PosBillingPage: React.FC = () => {
 
   const totalDiscountAmount = itemDiscountsTotal + billDiscountAmount;
   const taxableAmount = Math.max(0, grossSubtotal - totalDiscountAmount);
-  const taxRate = settings.taxRate ?? 0;
-  const taxAmount = Math.round((taxableAmount * taxRate) / 100);
+  // GST slab is decided on the whole bill's taxable value after all discounts.
+  const slabRate = slabTaxRate(taxableAmount, settings);
+  const taxRate = customTaxRate ?? slabRate;
+  const taxAmount = taxFor(taxableAmount, taxRate);
   const grandTotal = taxableAmount + taxAmount;
   const totalItemCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -169,12 +178,29 @@ export const PosBillingPage: React.FC = () => {
   const numCashTendered = Number(cashTendered) || 0;
   const changeToReturn = Math.max(0, numCashTendered - cashAmountExpected);
 
-  // Auto-sync initial split amount to grandTotal if single split
+  // A single tender always covers the whole bill - keep it in step with the
+  // total (discounts, and the tax slab flipping at the threshold, move it).
   React.useEffect(() => {
-    if (paymentSplits.length === 1 && paymentSplits[0].amount === 0 && grandTotal > 0) {
+    if (paymentSplits.length === 1 && paymentSplits[0].amount !== grandTotal) {
       setPaymentSplits([{ ...paymentSplits[0], amount: grandTotal }]);
     }
   }, [grandTotal, paymentSplits]);
+
+  const handleApplyCustomTax = () => {
+    const rate = Number(customTaxInput);
+    if (customTaxInput.trim() === '' || !Number.isFinite(rate) || rate < 0 || rate > 100) {
+      store.addToast('Invalid Tax Rate', 'Enter a tax % between 0 and 100.', 'error');
+      return;
+    }
+    setCustomTaxRate(rate);
+    setIsEditingTax(false);
+  };
+
+  const handleClearCustomTax = () => {
+    setCustomTaxRate(null);
+    setCustomTaxInput('');
+    setIsEditingTax(false);
+  };
 
   // Add Product / Variant to Cart
   const handleAddVariantToCart = (product: Product, variant: ProductVariant) => {
@@ -306,7 +332,7 @@ export const PosBillingPage: React.FC = () => {
       email: `${newCustName.toLowerCase().replace(/\s+/g, '')}@patron.studiodeny.com`,
       phone: newCustPhone.trim(),
       address: 'Studio Deny In-Store Counter',
-      city: 'Mumbai',
+      city: 'Visakhapatnam',
       segment: 'NEW',
     });
 
@@ -370,7 +396,7 @@ export const PosBillingPage: React.FC = () => {
     const customerName = isGuest ? guestName : selectedCustomer?.name || 'Walk-in Patron';
     const customerPhone = isGuest ? guestPhone : selectedCustomer?.phone || '+91 99999 00000';
     const customerEmail = isGuest ? 'walkin@studiodeny.com' : selectedCustomer?.email || 'walkin@studiodeny.com';
-    const customerCity = isGuest ? 'Mumbai' : selectedCustomer?.city || 'Mumbai';
+    const customerCity = isGuest ? 'Visakhapatnam' : selectedCustomer?.city || 'Visakhapatnam';
 
     const effectiveDiscountReason =
       customDiscountReason.trim() ||
@@ -412,8 +438,8 @@ export const PosBillingPage: React.FC = () => {
           shippingAddress: {
             street: 'Studio Deny Flagship Store POS Register #01',
             city: customerCity,
-            state: 'Maharashtra',
-            pincode: '400050',
+            state: 'Andhra Pradesh',
+            pincode: '530017',
             country: 'India',
           },
           items: orderItems,
@@ -429,6 +455,8 @@ export const PosBillingPage: React.FC = () => {
           discountReason: effectiveDiscountReason,
           shippingFee: 0,
           taxAmount,
+          taxRate,
+          taxIsCustom: customTaxRate !== null,
           grandTotal,
           paymentStatus: 'PAID',
           fulfillmentStatus: 'DELIVERED', // Handed over in-store
@@ -449,6 +477,9 @@ export const PosBillingPage: React.FC = () => {
         setDiscountValue(0);
         setDiscountReason('NONE');
         setCustomDiscountReason('');
+        setCustomTaxRate(null);
+        setCustomTaxInput('');
+        setIsEditingTax(false);
         setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
         setCashTendered('');
         setMobileCartOpen(false);
@@ -496,7 +527,7 @@ export const PosBillingPage: React.FC = () => {
         address: settings.address,
         cityState: settings.cityState,
         gstin: settings.gstin,
-        taxRate: settings.taxRate,
+        taxRate: orderToPrint.taxRate ?? 0,
       },
     })
       .then(() => {
@@ -539,7 +570,7 @@ export const PosBillingPage: React.FC = () => {
         cityState: settings.cityState,
         gstin: settings.gstin,
         pan: settings.pan,
-        taxRate: settings.taxRate,
+        taxRate: orderToPrint.taxRate ?? 0,
       },
     })
       .then(() => {
@@ -1101,9 +1132,68 @@ export const PosBillingPage: React.FC = () => {
                 <span>{formatINR(taxableAmount)}</span>
               </div>
 
-              <div className="flex justify-between text-[#4A4844]">
-                <span>GST APPAREL TAX ({taxRate}%):</span>
+              <div className="flex justify-between items-center text-[#4A4844]">
+                <span className="flex items-center gap-1.5">
+                  GST ({formatRate(taxRate)}%{customTaxRate !== null ? ' CUSTOM' : ' SLAB'}):
+                  {isOwner && !isEditingTax && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomTaxInput(customTaxRate !== null ? String(customTaxRate) : '');
+                        setIsEditingTax(true);
+                      }}
+                      className="text-[9px] font-bold uppercase border border-[#111111] px-1 py-0.5 text-[#111111] hover:bg-[#111111] hover:text-[#E2E2E4]"
+                    >
+                      CUSTOM TAX
+                    </button>
+                  )}
+                  {isOwner && customTaxRate !== null && !isEditingTax && (
+                    <button
+                      type="button"
+                      onClick={handleClearCustomTax}
+                      className="text-[9px] font-bold uppercase underline text-[#4A4844] hover:text-[#111111]"
+                    >
+                      USE SLAB
+                    </button>
+                  )}
+                </span>
                 <span>{formatINR(taxAmount)}</span>
+              </div>
+
+              {isEditingTax && (
+                <div className="flex items-center gap-1.5 border border-[#111111] bg-[#D5D5D8] px-1.5 py-1">
+                  <span className="text-[10px] text-[#4A4844] shrink-0">TAX % FOR THIS BILL:</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    autoFocus
+                    value={customTaxInput}
+                    onChange={(e) => setCustomTaxInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleApplyCustomTax()}
+                    className="w-16 bg-transparent text-[10px] font-mono font-bold text-right focus:outline-none"
+                  />
+                  <button type="button" onClick={handleApplyCustomTax} className="text-[#111111]" title="Apply">
+                    <Check size={12} />
+                  </button>
+                  <button type="button" onClick={() => setIsEditingTax(false)} className="text-[#4A4844]" title="Cancel">
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+
+              <div className="flex justify-between text-[10px] text-[#4A4844]">
+                <span>
+                  CGST {formatRate(taxRate / 2)}% + SGST {formatRate(taxRate / 2)}%
+                  {customTaxRate === null &&
+                    (taxableAmount <= settings.taxThreshold
+                      ? ` · BILL UP TO ${formatINR(settings.taxThreshold)}`
+                      : ` · BILL ABOVE ${formatINR(settings.taxThreshold)}`)}
+                </span>
+                <span>
+                  {formatINR(splitCgstSgst(taxAmount).cgst)} + {formatINR(splitCgstSgst(taxAmount).sgst)}
+                </span>
               </div>
 
               {/* DOMINANT GRAND TOTAL */}
@@ -1384,10 +1474,10 @@ export const PosBillingPage: React.FC = () => {
                   HIGH-CLASS STREETWEAR FLAGSHIP
                 </div>
                 <div className="text-[9px] text-[#4A4844] mt-0.5">
-                  {settings.address || 'Flagship Store, Bandra West, Mumbai'}
+                  {settings.address}
                 </div>
                 <div className="text-[9px] text-[#4A4844]">
-                  GSTIN: {settings.gstin || '27AAACS1429B1ZX'}
+                  GSTIN: {settings.gstin}
                 </div>
               </div>
 
@@ -1438,7 +1528,7 @@ export const PosBillingPage: React.FC = () => {
                   </div>
                 )}
                 <div className="flex justify-between text-[#4A4844]">
-                  <span>GST ({settings.taxRate ?? 0}%):</span>
+                  <span>GST ({formatRate(receiptOrder.taxRate ?? 0)}%{receiptOrder.taxIsCustom ? ' CUSTOM' : ''}):</span>
                   <span>{formatINR(receiptOrder.taxAmount)}</span>
                 </div>
                 <div className="flex justify-between font-black text-base border-t border-[#111111] pt-1 text-[#111111]">

@@ -74,6 +74,9 @@ export interface DbPosCustomer {
 export interface DbPosSettings {
   id: string;
   tax_rate: number;
+  tax_threshold: number;
+  tax_rate_low: number;
+  tax_rate_high: number;
   shipping_flat_rate: number;
   free_shipping_threshold: number;
   currency: string;
@@ -114,6 +117,8 @@ export interface DbPosBill {
   discount: number;
   discount_reason: string | null;
   tax_amount: number;
+  tax_rate: number;
+  tax_is_custom: boolean;
   shipping_fee: number;
   grand_total: number;
   payment_status: 'PAID' | 'PENDING' | 'REFUNDED' | 'FAILED';

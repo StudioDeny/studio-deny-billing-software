@@ -12,6 +12,7 @@ import {
   RotateCcw,
   Tag,
   FileCheck,
+  CalendarRange,
 } from 'lucide-react';
 import { store, useStore } from '../../services/store';
 import { PermissionKey } from '../../constants/permissions';
@@ -38,6 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: 'BILLS', path: '/bills', icon: <Receipt size={16} />, permission: 'BILLS' },
     { label: 'PRICE TAGS', path: '/tags', icon: <Tag size={16} />, permission: 'TAGS' },
     { label: 'SALES AUDIT', path: '/audit', icon: <FileCheck size={16} />, permission: 'AUDIT' },
+    { label: 'MONTHLY BILLS', path: '/monthly-bills', icon: <CalendarRange size={16} />, permission: 'MONTHLY_BILLS' },
     { label: 'PRODUCTS', path: '/products', icon: <Shirt size={16} />, permission: 'PRODUCTS' },
     { label: 'CUSTOMERS', path: '/customers', icon: <Users size={16} />, permission: 'CUSTOMERS' },
     { label: 'SETTINGS', path: '/settings', icon: <Settings size={16} />, permission: 'SETTINGS' },
