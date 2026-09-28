@@ -131,7 +131,7 @@ export const EditInvoicePanel: React.FC = () => {
           <div className="flex items-center gap-2 bg-[#D5D5D8] px-3 py-2 border border-[rgba(0,0,0,0.18)]">
             <Search size={14} className="text-[#4A4844]" />
             <input
-              placeholder="Search bill number (e.g. SDS-1000256)..."
+              placeholder="Search bill number (e.g. SDS-2609-0001)..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
