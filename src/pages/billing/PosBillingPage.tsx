@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore, store } from '../../services/store';
 import { Button } from '../../components/ui/Button';
@@ -58,6 +58,7 @@ export const PosBillingPage: React.FC = () => {
 
   // Search & Filter
   const [search, setSearch] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [activeCategory, setActiveCategory] = useState('ALL');
 
   // Customer Management
@@ -370,6 +371,28 @@ export const PosBillingPage: React.FC = () => {
     if (method !== 'CASH') setCashTendered('');
   };
 
+  const resetBill = () => {
+    setCart([]);
+    setDiscountValue(0);
+    setDiscountReason('NONE');
+    setCustomDiscountReason('');
+    setCustomTaxRate(null);
+    setCustomTaxInput('');
+    setIsEditingTax(false);
+    setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
+    setCashTendered('');
+  };
+
+  const handleClearBill = () => {
+    if (cart.length === 0) return;
+    const units = cart.reduce((sum, i) => sum + i.quantity, 0);
+    if (window.confirm(`Clear this bill? ${units} item${units === 1 ? '' : 's'} will be removed. Nothing has been charged yet.`)) {
+      resetBill();
+    }
+  };
+
+  const canSettle = cart.length > 0 && remainingDue <= 0 && !isProcessingPayment;
+
   // EXECUTE SETTLEMENT: SAVE FIRST, THEN PRINT
   const handleCompletePayment = (shouldPrint: boolean) => {
     if (cart.length === 0) {
@@ -474,15 +497,7 @@ export const PosBillingPage: React.FC = () => {
         setReceiptOrder(savedBill);
 
         // Clear register state for next transaction
-        setCart([]);
-        setDiscountValue(0);
-        setDiscountReason('NONE');
-        setCustomDiscountReason('');
-        setCustomTaxRate(null);
-        setCustomTaxInput('');
-        setIsEditingTax(false);
-        setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
-        setCashTendered('');
+        resetBill();
         setMobileCartOpen(false);
 
         // 2. TRIGGER PRINT IF REQUESTED
@@ -499,6 +514,28 @@ export const PosBillingPage: React.FC = () => {
       }
     }, 450);
   };
+
+  // Keyboard shortcuts: '/' search, F2 pay & print, F4 pay without print,
+  // Esc clears search. Re-bound each render so the handlers see current state.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isTyping =
+        !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable);
+
+      if (e.key === '/' && !isTyping) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === 'Escape' && document.activeElement === searchInputRef.current && search) {
+        setSearch('');
+      } else if (e.key === 'F2' || e.key === 'F4') {
+        e.preventDefault(); // F-keys otherwise trigger browser actions
+        if (canSettle && !receiptOrder) handleCompletePayment(e.key === 'F2');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  });
 
   // Printing execution with dedicated isolated thermal print engine
   const triggerThermalPrint = (customOrder?: any) => {
@@ -651,7 +688,8 @@ export const PosBillingPage: React.FC = () => {
               <Search size={16} className="text-[#4A4844] shrink-0" />
               <input
                 type="text"
-                placeholder="Search product name or SKU..."
+                ref={searchInputRef}
+                placeholder="Search product name or SKU...  ( / )"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-transparent font-mono text-xs focus:outline-none placeholder:text-[#4A4844]"
@@ -777,7 +815,7 @@ export const PosBillingPage: React.FC = () => {
           </div>
 
           {/* 1. COMPACT CUSTOMER SELECTOR */}
-          <div className="p-3.5 border-b border-[rgba(0,0,0,0.18)] bg-[#E2E2E4] space-y-2 select-none">
+          <div className="sticky top-0 z-20 p-3.5 border-b border-[rgba(0,0,0,0.18)] bg-[#E2E2E4] space-y-2 select-none">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844] flex items-center gap-1.5">
                 <User size={12} /> PATRON PROFILE
@@ -869,6 +907,21 @@ export const PosBillingPage: React.FC = () => {
               </select>
             )}
           </div>
+
+          {cart.length > 0 && (
+            <div className="px-3.5 pt-2.5 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-[#4A4844]">
+              <span>
+                {totalItemCount} item{totalItemCount === 1 ? '' : 's'} in bill
+              </span>
+              <button
+                type="button"
+                onClick={handleClearBill}
+                className="flex items-center gap-1 font-bold text-[#111111] hover:text-red-700"
+              >
+                <Trash2 size={11} /> CLEAR BILL
+              </button>
+            </div>
+          )}
 
           {/* 2. CART ITEMS LIST */}
           <div className="p-3.5 shrink-0 overflow-y-auto max-h-[min(220px,30vh)] divide-y divide-[rgba(0,0,0,0.1)]">
@@ -1362,7 +1415,7 @@ export const PosBillingPage: React.FC = () => {
               {/* Dominant PAY & PRINT Button */}
               <button
                 type="button"
-                disabled={cart.length === 0 || remainingDue > 0 || isProcessingPayment}
+                disabled={!canSettle}
                 onClick={() => handleCompletePayment(true)}
                 className="w-full py-3.5 bg-[#111111] text-[#E2E2E4] font-mono font-bold text-sm tracking-widest uppercase hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2.5 shadow-md active:scale-[0.99] cursor-pointer"
               >
@@ -1375,6 +1428,7 @@ export const PosBillingPage: React.FC = () => {
                   <>
                     <Printer size={16} />
                     <span>PAY & PRINT [{formatINR(grandTotal)}]</span>
+                    <kbd className="ml-1 px-1 border border-[#E2E2E4]/40 text-[10px] font-mono opacity-70">F2</kbd>
                   </>
                 )}
               </button>
@@ -1382,11 +1436,12 @@ export const PosBillingPage: React.FC = () => {
               {/* PAY WITHOUT PRINT Button */}
               <button
                 type="button"
-                disabled={cart.length === 0 || remainingDue > 0 || isProcessingPayment}
+                disabled={!canSettle}
                 onClick={() => handleCompletePayment(false)}
                 className="w-full py-2 bg-[#D5D5D8] text-[#111111] border border-[rgba(0,0,0,0.18)] hover:border-[#111111] font-mono font-bold text-xs uppercase disabled:opacity-30 transition-colors"
               >
                 PAY WITHOUT PRINT
+                <kbd className="ml-2 px-1 border border-[rgba(0,0,0,0.18)] text-[10px] font-mono opacity-70">F4</kbd>
               </button>
 
               {remainingDue > 0 && cart.length > 0 && (
