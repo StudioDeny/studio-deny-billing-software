@@ -258,7 +258,8 @@ export const PosBillingPage: React.FC = () => {
       );
       return;
     }
-    if (product.variants.length === 1 && product.variants[0].size === 'ONE SIZE' && !product.variants[0].color) {
+    // A single ONE SIZE piece (any colour) has nothing to choose.
+    if (product.variants.length === 1 && product.variants[0].size === 'ONE SIZE') {
       handleAddVariantToCart(product, product.variants[0]);
       return;
     }
