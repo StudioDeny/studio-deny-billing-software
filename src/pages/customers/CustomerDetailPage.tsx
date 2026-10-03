@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { isValidGstin, normalizeGstin } from '../../utils/gstin';
 import { useStore, store } from '../../services/store';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -34,6 +35,7 @@ export const CustomerDetailPage: React.FC = () => {
   const [editEmail, setEditEmail] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editCity, setEditCity] = useState('');
+  const [editGstin, setEditGstin] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const startEditing = () => {
@@ -43,12 +45,17 @@ export const CustomerDetailPage: React.FC = () => {
     setEditEmail(customer.email);
     setEditAddress(customer.address);
     setEditCity(customer.city);
+    setEditGstin(customer.gstin || '');
     setIsEditing(true);
   };
 
   const handleSaveCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customer) return;
+    if (editGstin && !isValidGstin(editGstin)) {
+      store.addToast('Invalid GSTIN', 'Enter the full 15-character GSTIN, or leave it empty.', 'error');
+      return;
+    }
     setIsSaving(true);
     try {
       await store.updateCustomer(customer.id, {
@@ -57,6 +64,7 @@ export const CustomerDetailPage: React.FC = () => {
         email: editEmail,
         address: editAddress,
         city: editCity,
+        gstin: editGstin,
       });
       setIsEditing(false);
     } finally {
@@ -170,6 +178,18 @@ export const CustomerDetailPage: React.FC = () => {
               />
             </div>
             <div className="sm:col-span-2">
+              <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">GSTIN (optional)</label>
+              <input
+                value={editGstin}
+                maxLength={15}
+                onChange={(e) => setEditGstin(normalizeGstin(e.target.value))}
+                placeholder="e.g. 37AABCU9603R1ZM"
+                className={`w-full bg-[#D5D5D8] border p-2 text-xs font-mono uppercase focus:outline-none focus:border-[#111111] ${
+                  editGstin && !isValidGstin(editGstin) ? 'border-red-600' : 'border-[rgba(0,0,0,0.18)]'
+                }`}
+              />
+            </div>
+            <div className="sm:col-span-2">
               <label className="block text-[10px] uppercase tracking-widest text-[#4A4844] mb-1">Address</label>
               <input
                 value={editAddress}
@@ -214,6 +234,9 @@ export const CustomerDetailPage: React.FC = () => {
                   <span className="flex items-center gap-1.5">
                     <MapPin size={13} className="text-[#4A4844]" /> {customer.city}
                   </span>
+                  {customer.gstin && (
+                    <span className="flex items-center gap-1.5 font-bold text-[#111111]">GSTIN: {customer.gstin}</span>
+                  )}
                   <span className="flex items-center gap-1.5 text-[#4A4844]">
                     <Calendar size={13} /> Member Since {customer.createdAt}
                   </span>

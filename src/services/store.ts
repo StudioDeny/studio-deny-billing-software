@@ -247,6 +247,7 @@ export const store = {
       shippingFee: orderData.shippingFee,
       payments,
       notes: orderData.notes || null,
+      customerGstin: orderData.customerGstin || null,
     });
 
     const [products, customers, inventoryLogs] = await Promise.all([
@@ -414,7 +415,7 @@ export const store = {
 
   updateCustomer: async (
     id: string,
-    updates: { name?: string; phone?: string; email?: string; address?: string; city?: string }
+    updates: { name?: string; phone?: string; email?: string; address?: string; city?: string; gstin?: string }
   ): Promise<void> => {
     await posApi.updateCustomer(id, updates);
     const customers = await posApi.fetchCustomers();

@@ -56,6 +56,7 @@ export const BillDetailPage: React.FC = () => {
       customerName: bill.customerName,
       customerPhone: bill.customerPhone,
       customerEmail: bill.customerEmail,
+      customerGstin: bill.customerGstin,
       items: bill.items,
       subtotal: bill.subtotal,
       discount: bill.discount,
@@ -199,6 +200,12 @@ export const BillDetailPage: React.FC = () => {
               <span className="text-[#4A4844]">PHONE:</span>
               <span>{bill.customerPhone}</span>
             </div>
+            {bill.customerGstin && (
+              <div className="flex justify-between">
+                <span className="text-[#4A4844]">CUSTOMER GSTIN:</span>
+                <span className="font-semibold">{bill.customerGstin}</span>
+              </div>
+            )}
           </div>
 
           {/* Line Items */}
@@ -319,6 +326,7 @@ export const BillDetailPage: React.FC = () => {
             <div className="font-bold text-sm text-[#111111]">{bill.customerName}</div>
             <div className="text-[#4A4844]">{bill.customerPhone}</div>
             <div className="text-[#4A4844]">{bill.customerEmail}</div>
+            {bill.customerGstin && <div className="font-bold text-[#111111]">GSTIN: {bill.customerGstin}</div>}
           </div>
 
           {/* Table */}

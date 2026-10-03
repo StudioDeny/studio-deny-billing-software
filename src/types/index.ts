@@ -106,6 +106,8 @@ export interface Order {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
+  // Customer's GSTIN when the bill was raised with "ADD CUSTOMER GST".
+  customerGstin?: string;
   shippingAddress: {
     street: string;
     city: string;
@@ -193,6 +195,7 @@ export interface Customer {
   phone: string;
   address: string;
   city: string;
+  gstin?: string;
   ordersCount: number;
   totalSpend: number;
   averageOrderValue: number;

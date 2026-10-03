@@ -8,6 +8,7 @@ import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
 import { BillQr } from '../../components/common/BillQr';
 import { slabTaxRate, taxFor, splitCgstSgst, formatRate } from '../../utils/tax';
+import { isValidGstin, normalizeGstin } from '../../utils/gstin';
 import { Product, ProductVariant, PaymentSplit } from '../../types';
 import {
   Search,
@@ -126,6 +127,18 @@ export const PosBillingPage: React.FC = () => {
   }, [products, dbCategories]);
 
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
+
+  // Customer GST: off by default. Pre-fills (and turns on) when the selected
+  // registered customer already has a saved GSTIN.
+  const [gstEnabled, setGstEnabled] = useState(false);
+  const [customerGstin, setCustomerGstin] = useState('');
+  useEffect(() => {
+    const saved = !isGuest ? selectedCustomer?.gstin || '' : '';
+    setCustomerGstin(saved);
+    setGstEnabled(!!saved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCustomerId, isGuest]);
+  const gstinInvalid = gstEnabled && !isValidGstin(customerGstin);
 
   // Filtered Products Catalog
   const filteredProducts = useMemo(() => {
@@ -398,6 +411,8 @@ export const PosBillingPage: React.FC = () => {
     setIsEditingTax(false);
     setPaymentSplits([{ id: 'split-1', method: 'UPI', amount: 0 }]);
     setCashTendered('');
+    setGstEnabled(!isGuest && !!selectedCustomer?.gstin);
+    setCustomerGstin(!isGuest ? selectedCustomer?.gstin || '' : '');
   };
 
   const handleClearBill = () => {
@@ -427,6 +442,15 @@ export const PosBillingPage: React.FC = () => {
         'Select a Patron',
         'Choose a registered customer, or tap "WALK-IN GUEST" to bill without one.',
         'warning'
+      );
+      return;
+    }
+
+    if (gstinInvalid) {
+      store.addToast(
+        'Invalid Customer GSTIN',
+        'Enter the full 15-character GSTIN (e.g. 37AABCU9603R1ZM), or turn off ADD CUSTOMER GST.',
+        'error'
       );
       return;
     }
@@ -475,6 +499,7 @@ export const PosBillingPage: React.FC = () => {
           customerName,
           customerEmail,
           customerPhone,
+          customerGstin: gstEnabled ? normalizeGstin(customerGstin) : undefined,
           channel: 'OFFLINE',
           shippingAddress: {
             street: 'Studio Deny Flagship Store POS Register #01',
@@ -567,6 +592,7 @@ export const PosBillingPage: React.FC = () => {
       createdAt: orderToPrint.createdAt,
       customerName: orderToPrint.customerName,
       customerPhone: orderToPrint.customerPhone,
+      customerGstin: orderToPrint.customerGstin,
       items: orderToPrint.items,
       subtotal: orderToPrint.subtotal,
       discount: orderToPrint.discount,
@@ -608,6 +634,7 @@ export const PosBillingPage: React.FC = () => {
       createdAt: orderToPrint.createdAt,
       customerName: orderToPrint.customerName,
       customerPhone: orderToPrint.customerPhone,
+      customerGstin: orderToPrint.customerGstin,
       customerEmail: orderToPrint.customerEmail,
       items: orderToPrint.items,
       subtotal: orderToPrint.subtotal,
@@ -925,6 +952,48 @@ export const PosBillingPage: React.FC = () => {
                 ))}
               </select>
             )}
+
+            {/* Customer GST (B2B) - off by default */}
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={gstEnabled}
+                  onClick={() => setGstEnabled(!gstEnabled)}
+                  className={`relative w-8 h-4 border border-[#111111] transition-colors ${gstEnabled ? 'bg-[#111111]' : 'bg-[#D5D5D8]'}`}
+                >
+                  <span
+                    className={`absolute top-[1px] w-3 h-3 transition-all ${gstEnabled ? 'left-[17px] bg-[#E2E2E4]' : 'left-[1px] bg-[#111111]'}`}
+                  />
+                </button>
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#4A4844]">ADD CUSTOMER GST</span>
+              </label>
+              {gstEnabled && (
+                <div>
+                  <input
+                    type="text"
+                    maxLength={15}
+                    autoFocus={!customerGstin}
+                    placeholder="Customer GSTIN (15 characters)"
+                    value={customerGstin}
+                    onChange={(e) => setCustomerGstin(normalizeGstin(e.target.value))}
+                    className={`w-full p-2 bg-[#D5D5D8] border text-xs font-mono uppercase tracking-wider focus:outline-none ${
+                      customerGstin && gstinInvalid ? 'border-red-600' : 'border-[rgba(0,0,0,0.18)] focus:border-[#111111]'
+                    }`}
+                  />
+                  <div className={`text-[9px] font-mono mt-0.5 ${gstinInvalid ? 'text-red-700' : 'text-[#4A4844]'}`}>
+                    {!customerGstin
+                      ? 'Enter the customer\'s GSTIN to show it on the invoice.'
+                      : gstinInvalid
+                      ? `${customerGstin.length}/15 — not a valid GSTIN yet`
+                      : isGuest
+                      ? 'Valid. Printed on this bill only (walk-in guest).'
+                      : 'Valid. Printed on the bill and saved to this customer.'}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {cart.length > 0 && (
@@ -1632,6 +1701,12 @@ export const PosBillingPage: React.FC = () => {
                   <span className="text-[#4A4844]">PHONE:</span>
                   <span>{receiptOrder.customerPhone}</span>
                 </div>
+                {receiptOrder.customerGstin && (
+                  <div className="flex justify-between">
+                    <span className="text-[#4A4844]">CUSTOMER GSTIN:</span>
+                    <span className="font-semibold">{receiptOrder.customerGstin}</span>
+                  </div>
+                )}
               </div>
 
               {/* Items List */}

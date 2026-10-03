@@ -14,6 +14,7 @@ import {
   ReturnRequest,
   ReturnStatus,
 } from '../types';
+import { normalizeGstin } from '../utils/gstin';
 import {
   DbProduct,
   DbProductVariant,
@@ -139,6 +140,7 @@ function mapCustomer(c: DbPosCustomer): Customer {
     phone: c.phone,
     address: c.address || '',
     city: c.city || '',
+    gstin: c.gstin || undefined,
     ordersCount: c.orders_count,
     totalSpend: c.total_spend,
     averageOrderValue: avgOrder,
@@ -177,7 +179,7 @@ export async function createCustomer(input: {
 
 export async function updateCustomer(
   id: string,
-  updates: { name?: string; phone?: string; email?: string; address?: string; city?: string }
+  updates: { name?: string; phone?: string; email?: string; address?: string; city?: string; gstin?: string }
 ): Promise<void> {
   const payload: Record<string, unknown> = {
     name: updates.name,
@@ -185,6 +187,8 @@ export async function updateCustomer(
     email: updates.email,
     address: updates.address,
     city: updates.city,
+    // '' clears a saved GSTIN; undefined leaves it alone.
+    gstin: updates.gstin === undefined ? undefined : updates.gstin ? normalizeGstin(updates.gstin) : null,
   };
   Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
 
@@ -301,6 +305,7 @@ function mapBillToOrder(
     customerName: customer?.name || 'Walk-in Customer',
     customerEmail: customer?.email || '',
     customerPhone: customer?.phone || '',
+    customerGstin: bill.customer_gstin || undefined,
     shippingAddress: {
       street: 'Studio Deny Flagship Store POS Register #01',
       city: customer?.city || 'Visakhapatnam',
@@ -391,6 +396,9 @@ export async function checkout(input: {
   shippingFee: number;
   payments: CheckoutPaymentInput[];
   notes: string | null;
+  // Only sent when "ADD CUSTOMER GST" is on; the database also saves it on
+  // the registered customer.
+  customerGstin: string | null;
 }): Promise<Order> {
   const { data, error } = await supabase.rpc('pos_checkout', {
     p_items: input.items.map((i) => ({
@@ -416,6 +424,9 @@ export async function checkout(input: {
       change_amount: p.changeAmount,
     })),
     p_notes: input.notes,
+    // Omitted (not null) when off, so terminals keep working against a
+    // database that has not had migration 0009 applied yet.
+    ...(input.customerGstin ? { p_customer_gstin: normalizeGstin(input.customerGstin) } : {}),
   });
   if (error) throw new Error(error.message);
 

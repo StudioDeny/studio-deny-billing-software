@@ -8,6 +8,7 @@ export interface PrintableReceiptData {
   customerName: string;
   customerPhone?: string;
   customerEmail?: string;
+  customerGstin?: string;
   shippingAddress?: {
     street?: string;
     city?: string;
@@ -371,6 +372,16 @@ export function printThermalReceipt(data: PrintableReceiptData): Promise<boolean
             `
                 : ''
             }
+            ${
+              data.customerGstin
+                ? `
+            <div class="meta-line flex justify-between">
+              <span class="label">CUST GSTIN:</span>
+              <span class="font-bold">${data.customerGstin}</span>
+            </div>
+            `
+                : ''
+            }
 
             <div class="divider-dashed"></div>
 
@@ -703,6 +714,7 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
                 <div class="card-name">${data.customerName}</div>
                 <div class="card-detail">Phone: ${data.customerPhone || 'N/A'}</div>
                 <div class="card-detail">Email: ${data.customerEmail || 'walkin@studiodeny.com'}</div>
+                ${data.customerGstin ? `<div class="card-detail"><b>GSTIN: ${data.customerGstin}</b></div>` : ''}
                 <div class="card-detail">Place of Supply: Andhra Pradesh (37)</div>
               </div>
 

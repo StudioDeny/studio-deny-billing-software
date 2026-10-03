@@ -66,6 +66,7 @@ export interface DbPosCustomer {
   address: string | null;
   city: string | null;
   linked_profile_id: string | null;
+  gstin: string | null;
   orders_count: number;
   total_spend: number;
   created_at: string;
@@ -124,6 +125,7 @@ export interface DbPosBill {
   payment_status: 'PAID' | 'PENDING' | 'REFUNDED' | 'FAILED';
   status: 'COMPLETED' | 'VOID' | 'RETURNED';
   notes: string | null;
+  customer_gstin: string | null;
   created_at: string;
 }
 
