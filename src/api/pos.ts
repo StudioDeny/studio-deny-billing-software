@@ -15,6 +15,7 @@ import {
   ReturnStatus,
 } from '../types';
 import { normalizeGstin } from '../utils/gstin';
+import { variantLabel } from '../utils/singleItem';
 import {
   DbProduct,
   DbProductVariant,
@@ -289,7 +290,7 @@ function mapBillToOrder(
       productId: i.product_slug,
       variantId: i.variant_id || i.product_slug,
       name: i.product_name,
-      variantName: [i.color, i.size].filter(Boolean).join(' / '),
+      variantName: variantLabel(i.size, i.color),
       size: i.size || '',
       color: i.color || '',
       quantity: i.qty,
@@ -720,7 +721,7 @@ function mapReturn(
     customerId: bill?.pos_customer_id || 'guest',
     customerName,
     productTitle: item?.product_name || '',
-    variantName: item ? [item.color, item.size].filter(Boolean).join(' / ') : '',
+    variantName: item ? variantLabel(item.size, item.color) : '',
     reason: r.reason,
     condition: r.condition || '',
     refundAmount: r.refund_amount,

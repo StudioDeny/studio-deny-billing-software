@@ -1,4 +1,5 @@
 import JsBarcode from 'jsbarcode';
+import { variantLabel } from './singleItem';
 import { formatINR } from './formatters';
 import { billQrSvg } from './billQr';
 
@@ -140,7 +141,7 @@ export function printThermalReceipt(data: PrintableReceiptData): Promise<boolean
         <div class="item-row">
           <div class="item-info">
             <div class="item-name">${item.name}</div>
-            <div class="item-meta">${item.size ? item.size : ''} ${item.color ? '· ' + item.color : ''} × ${item.quantity} @ ${formatINR(item.unitPrice)}</div>
+            <div class="item-meta">${variantLabel(item.size, item.color) ? variantLabel(item.size, item.color) + ' ' : ''}× ${item.quantity} @ ${formatINR(item.unitPrice)}</div>
           </div>
           <div class="item-total">${formatINR(item.total)}</div>
         </div>
@@ -493,7 +494,7 @@ export function printTaxInvoice(data: PrintableReceiptData): Promise<boolean> {
             ${index + 1}. ${item.name}
           </td>
           <td style="padding: 10px 8px; font-size: 11px; color: #555555;">
-            ${item.size || 'STD'} / ${item.color || 'BLACK'}
+            ${variantLabel(item.size, item.color) || '—'}
           </td>
           <td style="padding: 10px 8px; font-size: 11px; color: #777777;">
             6109.10

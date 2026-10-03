@@ -8,6 +8,7 @@ import { printThermalReceipt, printTaxInvoice } from '../../utils/receiptPrinter
 import { BarcodeSvg } from '../../components/common/BarcodeSvg';
 import { BillQr } from '../../components/common/BillQr';
 import { splitCgstSgst, formatRate } from '../../utils/tax';
+import { variantLabel } from '../../utils/singleItem';
 import {
   ArrowLeft,
   Printer,
@@ -215,7 +216,7 @@ export const BillDetailPage: React.FC = () => {
                 <div>
                   <div className="font-bold">{i.name}</div>
                   <div className="text-[10px] text-[#4A4844]">
-                    {i.size} · {i.color} × {i.quantity} @ {formatINR(i.unitPrice)}
+                    {variantLabel(i.size, i.color) ? `${variantLabel(i.size, i.color)} ` : ''}× {i.quantity} @ {formatINR(i.unitPrice)}
                   </div>
                 </div>
                 <span className="font-bold">{formatINR(i.total)}</span>
@@ -344,7 +345,7 @@ export const BillDetailPage: React.FC = () => {
               {bill.items.map((item, idx) => (
                 <tr key={idx}>
                   <td className="py-3 px-3 font-bold">{item.name}</td>
-                  <td className="py-3 px-3 text-[#4A4844]">{item.size} · {item.color}</td>
+                  <td className="py-3 px-3 text-[#4A4844]">{variantLabel(item.size, item.color) || '—'}</td>
                   <td className="py-3 px-3 text-center font-bold">{item.quantity}</td>
                   <td className="py-3 px-3 text-right">{formatINR(item.unitPrice)}</td>
                   <td className="py-3 px-3 text-right font-bold">{formatINR(item.total)}</td>

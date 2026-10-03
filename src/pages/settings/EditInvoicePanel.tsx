@@ -5,6 +5,7 @@ import { Input } from '../../components/ui/Input';
 import { formatINR } from '../../utils/formatters';
 import { OrderItem } from '../../types';
 import { slabTaxRate, taxFor, formatRate } from '../../utils/tax';
+import { variantLabel } from '../../utils/singleItem';
 import { Search, Trash2, Plus, Save, AlertTriangle } from 'lucide-react';
 
 export const EditInvoicePanel: React.FC = () => {
@@ -67,7 +68,7 @@ export const EditInvoicePanel: React.FC = () => {
         productId: product.id,
         variantId: variant.id,
         name: product.name,
-        variantName: [variant.color, variant.size].filter(Boolean).join(' / '),
+        variantName: variantLabel(variant.size, variant.color),
         size: variant.size,
         color: variant.color,
         quantity: 1,

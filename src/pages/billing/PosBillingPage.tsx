@@ -9,6 +9,7 @@ import { BarcodeSvg } from '../../components/common/BarcodeSvg';
 import { BillQr } from '../../components/common/BillQr';
 import { slabTaxRate, taxFor, splitCgstSgst, formatRate } from '../../utils/tax';
 import { isValidGstin, normalizeGstin } from '../../utils/gstin';
+import { singleItemVariant, variantLabel } from '../../utils/singleItem';
 import { Product, ProductVariant, PaymentSplit } from '../../types';
 import {
   Search,
@@ -258,7 +259,13 @@ export const PosBillingPage: React.FC = () => {
       );
       return;
     }
-    // A single ONE SIZE piece (any colour) has nothing to choose.
+    // Single item (no colours or sizes), or a lone ONE SIZE piece: nothing
+    // to choose, add it straight away.
+    const single = singleItemVariant(product.variants);
+    if (single) {
+      handleAddVariantToCart(product, single);
+      return;
+    }
     if (product.variants.length === 1 && product.variants[0].size === 'ONE SIZE') {
       handleAddVariantToCart(product, product.variants[0]);
       return;
@@ -476,7 +483,7 @@ export const PosBillingPage: React.FC = () => {
       productId: item.product.id,
       variantId: item.variant.id,
       name: item.product.name,
-      variantName: `${item.variant.color} / ${item.variant.size}`,
+      variantName: variantLabel(item.variant.size, item.variant.color),
       size: item.variant.size,
       color: item.variant.color,
       quantity: item.quantity,
@@ -812,14 +819,16 @@ export const PosBillingPage: React.FC = () => {
                   <div className="flex items-center justify-between font-mono text-xs pt-0.5">
                     <span className="font-black text-[#111111]">{formatINR(prod.price)}</span>
                     <span className="text-[10px] text-[#4A4844] bg-[#D5D5D8] px-1.5 py-0.5 border border-[rgba(0,0,0,0.1)]">
-                      {productColors(prod).length > 1
+                      {singleItemVariant(prod.variants)
+                        ? 'single item'
+                        : productColors(prod).length > 1
                         ? `${productColors(prod).length} colours`
                         : `${prod.variants.length} ${prod.variants.length === 1 ? 'size' : 'sizes'}`}
                     </span>
                   </div>
 
                   {/* Inline quick-tap size chips for rapid 1-tap addition */}
-                  {prod.variants.length > 1 && productColors(prod).length === 1 && (
+                  {prod.variants.length > 1 && productColors(prod).length === 1 && !singleItemVariant(prod.variants) && (
                     <div className="pt-1.5 flex flex-wrap gap-1" onClick={(e) => e.stopPropagation()}>
                       {prod.variants.map((v) => (
                         <button
@@ -1027,11 +1036,14 @@ export const PosBillingPage: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-[#111111] truncate">{item.product.name}</div>
                       <div className="text-[10px] text-[#4A4844] flex items-center gap-1.5 mt-0.5">
-                        <span className="font-bold bg-[#111111] text-[#E2E2E4] px-1">
-                          {item.variant.size}
-                        </span>
-                        <span>{item.variant.color}</span>
-                        <span>·</span>
+                        {variantLabel(item.variant.size, item.variant.color) && (
+                          <>
+                            <span className="font-bold bg-[#111111] text-[#E2E2E4] px-1">
+                              {variantLabel(item.variant.size, item.variant.color)}
+                            </span>
+                            <span>·</span>
+                          </>
+                        )}
                         <span>{formatINR(item.variant.price)}</span>
                       </div>
                     </div>
@@ -1717,7 +1729,7 @@ export const PosBillingPage: React.FC = () => {
                     <div>
                       <div className="font-bold">{i.name}</div>
                       <div className="text-[10px] text-[#4A4844]">
-                        {i.variantName} × {i.quantity} @ {formatINR(i.unitPrice)}
+                        {i.variantName ? `${i.variantName} ` : ''}× {i.quantity} @ {formatINR(i.unitPrice)}
                       </div>
                     </div>
                     <span className="font-bold">{formatINR(i.total)}</span>
