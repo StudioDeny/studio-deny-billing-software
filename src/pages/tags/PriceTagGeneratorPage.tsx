@@ -674,9 +674,9 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 /* -------------------------------------------------------------
                    PREVIEW 1: LUXURY APPAREL HANG TAG (50x105mm)
                 ------------------------------------------------------------- */
-                <div className="w-[230px] bg-[#D5D5D8] border-2 border-[#111111] p-4 text-center font-mono text-xs shadow-xl relative select-none">
+                <div className="w-[230px] bg-[#FFFFFF] border-2 border-[#111111] p-4 text-center font-mono text-xs shadow-xl relative select-none">
                   {/* Punch Hole Cutout Guide */}
-                  <div className="w-3.5 h-3.5 rounded-full border-2 border-[#111111] mx-auto mb-2 bg-[#E2E2E4]" />
+                  <div className="w-3.5 h-3.5 rounded-full border-2 border-[#111111] mx-auto mb-2 bg-[#FFFFFF]" />
 
                   {/* Brand Header */}
                   <div className="border-b-2 border-[#111111] pb-2">
@@ -698,7 +698,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     </div>
 
                     {/* Dominant Size Badge */}
-                    <div className="my-2 py-1 bg-[#111111] text-[#E2E2E4] font-display font-black text-base uppercase tracking-wider">
+                    <div className="my-2 py-1 bg-[#111111] text-[#FFFFFF] font-display font-black text-base uppercase tracking-wider">
                       SIZE: {activePreviewVariant.size}
                     </div>
 
@@ -739,7 +739,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 /* -------------------------------------------------------------
                    PREVIEW 2: RETAIL ADHESIVE STICKER (50x30mm)
                 ------------------------------------------------------------- */
-                <div className="w-[240px] bg-[#D5D5D8] border border-[#111111] p-2.5 font-mono text-xs shadow-md select-none">
+                <div className="w-[240px] bg-[#FFFFFF] border border-[#111111] p-2.5 font-mono text-xs shadow-md select-none">
                   <div className="flex justify-between items-start border-b border-[#111111] pb-1">
                     <div>
                       <div className="font-display font-black text-xs text-[#111111] tracking-tight">
@@ -749,7 +749,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                         {productName}
                       </div>
                     </div>
-                    <div className="bg-[#111111] text-[#E2E2E4] text-[10px] font-black px-1.5 py-0.5">
+                    <div className="bg-[#111111] text-[#FFFFFF] text-[10px] font-black px-1.5 py-0.5">
                       {activePreviewVariant.size}
                     </div>
                   </div>
@@ -778,7 +778,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                 /* -------------------------------------------------------------
                    PREVIEW 3: FOOTWEAR SHOEBOX SPECIFICATION LABEL (95x60mm)
                 ------------------------------------------------------------- */
-                <div className="w-[280px] bg-[#D5D5D8] border-2 border-[#111111] p-3 font-mono text-xs shadow-lg select-none">
+                <div className="w-[280px] bg-[#FFFFFF] border-2 border-[#111111] p-3 font-mono text-xs shadow-lg select-none">
                   <div className="flex items-center justify-between border-b-2 border-[#111111] pb-1.5">
                     <div>
                       <div className="font-display font-black text-sm text-[#111111]">
@@ -793,19 +793,19 @@ export const PriceTagGeneratorPage: React.FC = () => {
 
                   {/* Multi-Region Size Matrix */}
                   <div className="grid grid-cols-4 gap-1 border-b border-[#111111] py-1.5 text-center">
-                    <div className="bg-[#111111] text-[#E2E2E4] p-1">
+                    <div className="bg-[#111111] text-[#FFFFFF] p-1">
                       <div className="text-[7px] text-neutral-300">SIZE</div>
                       <div className="font-black text-xs">{activePreviewVariant.size}</div>
                     </div>
-                    <div className="bg-[#D5D5D8] p-1 border border-[rgba(0,0,0,0.18)]">
+                    <div className="bg-[#FFFFFF] p-1 border border-[rgba(0,0,0,0.18)]">
                       <div className="text-[7px] text-[#4A4844]">COLOR</div>
                       <div className="font-bold text-[9px] truncate">{activePreviewVariant.color}</div>
                     </div>
-                    <div className="bg-[#D5D5D8] p-1 border border-[rgba(0,0,0,0.18)]">
+                    <div className="bg-[#FFFFFF] p-1 border border-[rgba(0,0,0,0.18)]">
                       <div className="text-[7px] text-[#4A4844]">ORIGIN</div>
                       <div className="font-bold text-[9px]">IND</div>
                     </div>
-                    <div className="bg-[#D5D5D8] p-1 border border-[rgba(0,0,0,0.18)]">
+                    <div className="bg-[#FFFFFF] p-1 border border-[rgba(0,0,0,0.18)]">
                       <div className="text-[7px] text-[#4A4844]">YEAR</div>
                       <div className="font-bold text-[9px]">2026</div>
                     </div>
@@ -893,7 +893,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     padding: '3mm',
                     boxSizing: 'border-box',
                     textAlign: 'center',
-                    background: '#E2E2E4',
+                    background: '#FFFFFF',
                     color: '#111111',
                     display: 'flex',
                     flexDirection: 'column',
@@ -934,7 +934,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     <div
                       style={{
                         background: '#111111',
-                        color: '#E2E2E4',
+                        color: '#FFFFFF',
                         fontWeight: 900,
                         fontSize: '13px',
                         padding: '1.5mm 0',
@@ -986,7 +986,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     border: '1px solid #111111',
                     padding: '2mm',
                     boxSizing: 'border-box',
-                    background: '#E2E2E4',
+                    background: '#FFFFFF',
                     color: '#111111',
                     display: 'flex',
                     flexDirection: 'column',
@@ -1000,7 +1000,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                         {productName}
                       </div>
                     </div>
-                    <div style={{ background: '#111111', color: '#E2E2E4', fontSize: '9px', fontWeight: 900, padding: '0.5mm 1.5mm' }}>
+                    <div style={{ background: '#111111', color: '#FFFFFF', fontSize: '9px', fontWeight: 900, padding: '0.5mm 1.5mm' }}>
                       {tagItem.size}
                     </div>
                   </div>
@@ -1022,7 +1022,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                     border: '1.5px solid #111111',
                     padding: '3mm',
                     boxSizing: 'border-box',
-                    background: '#E2E2E4',
+                    background: '#FFFFFF',
                     color: '#111111',
                     display: 'flex',
                     flexDirection: 'column',
@@ -1038,7 +1038,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'flex', gap: '2mm', margin: '1mm 0' }}>
-                    <div style={{ background: '#111111', color: '#E2E2E4', padding: '1mm 2mm', textAlign: 'center' }}>
+                    <div style={{ background: '#111111', color: '#FFFFFF', padding: '1mm 2mm', textAlign: 'center' }}>
                       <div style={{ fontSize: '6px' }}>SIZE</div>
                       <div style={{ fontSize: '11px', fontWeight: 900 }}>{tagItem.size}</div>
                     </div>
