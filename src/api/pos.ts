@@ -44,21 +44,10 @@ function mapVariant(v: DbProductVariant): ProductVariant {
 }
 
 function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: string | undefined): Product {
+  // Only real colour x size rows are sellable; a product without any is
+  // flagged instead of being sold against one overall stock number.
   const ownVariants = variants.filter((v) => v.product_id === p.slug);
-  const hasRealVariants = ownVariants.length > 0;
-  const mappedVariants: ProductVariant[] = hasRealVariants
-    ? ownVariants.map(mapVariant)
-    : [
-        {
-          id: p.slug,
-          sku: p.slug,
-          color: '',
-          size: '',
-          price: p.price,
-          compareAtPrice: p.compare_at ?? undefined,
-          stock: p.stock,
-        },
-      ];
+  const mappedVariants: ProductVariant[] = ownVariants.map(mapVariant);
 
   // The real category taxonomy lives in categories/product_categories (what
   // the website admin manages); products.category is a legacy flat field
@@ -76,7 +65,8 @@ function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: st
     sizes: p.sizes || [],
     colors: (p.colors || []).map((c) => c.name),
     variants: mappedVariants,
-    totalStock: hasRealVariants ? ownVariants.reduce((s, v) => s + v.stock, 0) : p.stock,
+    totalStock: ownVariants.reduce((s, v) => s + v.stock, 0),
+    needsSizeCounts: ownVariants.length === 0,
     status: p.is_active ? 'ACTIVE' : 'ARCHIVED',
     image: p.image,
     description: p.description,
@@ -138,34 +128,6 @@ export async function fetchCategories(): Promise<{ id: string; name: string; slu
     .order('name', { ascending: true });
   if (error) throw new Error(error.message);
   return ((data || []) as DbCategory[]).map((c) => ({ id: c.id, name: c.name, slug: c.slug, parentId: c.parent_id }));
-}
-
-export async function createProduct(input: {
-  slug: string;
-  name: string;
-  category: string;
-  price: number;
-  image: string;
-  description: string;
-  sizes: string[];
-  stock: number;
-}): Promise<Product> {
-  const { data, error } = await supabase
-    .from('products')
-    .insert({
-      slug: input.slug,
-      name: input.name,
-      category: input.category,
-      price: input.price,
-      image: input.image,
-      description: input.description,
-      sizes: input.sizes,
-      stock: input.stock,
-    })
-    .select('*')
-    .single();
-  if (error) throw new Error(error.message);
-  return mapProduct(data as DbProduct, [], undefined);
 }
 
 function mapCustomer(c: DbPosCustomer): Customer {

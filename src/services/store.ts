@@ -195,20 +195,18 @@ export const store = {
 
   // ORDERS & COMMERCE ENGINE
   createOrder: async (orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'timeline'>): Promise<Order> => {
-    const items = orderData.items.map((item) => {
-      const product = currentState.products.find((p) => p.id === item.productId);
-      const hasRealVariant = !!product?.variants.find((v) => v.id === item.variantId && v.id !== product.id);
-      return {
-        variantId: hasRealVariant ? item.variantId : null,
-        productSlug: item.productId,
-        productName: item.name,
-        size: item.size || null,
-        color: item.color || null,
-        qty: item.quantity,
-        unitPrice: item.unitPrice,
-        itemDiscount: item.itemDiscount || 0,
-      };
-    });
+    // Every cart line is a real colour x size row, so stock always moves on
+    // that exact row.
+    const items = orderData.items.map((item) => ({
+      variantId: item.variantId,
+      productSlug: item.productId,
+      productName: item.name,
+      size: item.size || null,
+      color: item.color || null,
+      qty: item.quantity,
+      unitPrice: item.unitPrice,
+      itemDiscount: item.itemDiscount || 0,
+    }));
 
     const rawPayments: PaymentSplitLike[] =
       orderData.paymentSplits && orderData.paymentSplits.length > 0
@@ -385,29 +383,6 @@ export const store = {
   },
 
   // PRODUCTS
-  addProduct: async (productData: Omit<Product, 'id' | 'totalStock'>): Promise<Product> => {
-    const slug = productData.sku
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    const newProduct = await posApi.createProduct({
-      slug,
-      name: productData.name,
-      category: productData.category,
-      price: productData.price,
-      image: productData.image,
-      description: productData.description,
-      sizes: productData.sizes,
-      stock: productData.variants.reduce((sum, v) => sum + v.stock, 0),
-    });
-
-    const products = await posApi.fetchProducts();
-    saveState({ ...currentState, products });
-    store.addToast('Product Created', `${newProduct.name} (${newProduct.sku}) added to catalog.`, 'success');
-    return newProduct;
-  },
-
   updateProduct: async (id: string, updates: Partial<Product>) => {
     await posApi.updateProduct(id, {
       name: updates.name,

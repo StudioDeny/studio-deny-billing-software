@@ -9,6 +9,7 @@ import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Tabs } from '../../components/ui/Tabs';
 import { formatINR } from '../../utils/formatters';
+import { WEBSITE_ADMIN_NEW_PRODUCT_URL } from '../../constants/website';
 import { Plus, Search, ArrowRight, Shirt, Layers, Tag } from 'lucide-react';
 
 export const ProductsPage: React.FC = () => {
@@ -16,17 +17,6 @@ export const ProductsPage: React.FC = () => {
   const { products, collections } = useStore();
   const [search, setSearch] = useState('');
   const [collectionFilter, setCollectionFilter] = useState('ALL');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Form State
-  const [name, setName] = useState('');
-  const [sku, setSku] = useState('');
-  const [collection, setCollection] = useState(collections[0]?.name || 'CORE');
-  const [category, setCategory] = useState('T-Shirts');
-  const [price, setPrice] = useState('2490');
-  const [stock, setStock] = useState('30');
-  const [description, setDescription] = useState('');
-
   const totalUnits = products.reduce((sum, p) => sum + p.totalStock, 0);
   const totalCatalogValue = products.reduce((sum, p) => sum + p.price * p.totalStock, 0);
   const lowStockCount = products.filter((p) => p.totalStock < 20).length;
@@ -48,38 +38,6 @@ export const ProductsPage: React.FC = () => {
     const matchesColl = collectionFilter === 'ALL' || p.collection === collectionFilter;
     return matchesSearch && matchesColl;
   });
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !sku) return;
-
-    const numPrice = Number(price) || 2490;
-    const numStock = Number(stock) || 20;
-
-    const newProd = await store.addProduct({
-      name,
-      sku: sku.toUpperCase(),
-      collection,
-      category,
-      price: numPrice,
-      compareAtPrice: Math.round(numPrice * 1.2),
-      sizes: ['S', 'M', 'L', 'XL'],
-      colors: ['Black'],
-      status: 'ACTIVE',
-      image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
-      description: description || `Studio Deny ${collection} release.`,
-      tags: [collection, category],
-      variants: [
-        { id: `var-${Date.now()}-s`, sku: `${sku.toUpperCase()}-S`, color: 'Black', size: 'S', price: numPrice, stock: Math.round(numStock * 0.2) },
-        { id: `var-${Date.now()}-m`, sku: `${sku.toUpperCase()}-M`, color: 'Black', size: 'M', price: numPrice, stock: Math.round(numStock * 0.4) },
-        { id: `var-${Date.now()}-l`, sku: `${sku.toUpperCase()}-L`, color: 'Black', size: 'L', price: numPrice, stock: Math.round(numStock * 0.3) },
-        { id: `var-${Date.now()}-xl`, sku: `${sku.toUpperCase()}-XL`, color: 'Black', size: 'XL', price: numPrice, stock: Math.round(numStock * 0.1) },
-      ],
-    });
-
-    setIsModalOpen(false);
-    navigate(`/products/${newProd.id}`);
-  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -111,7 +69,7 @@ export const ProductsPage: React.FC = () => {
             variant="primary"
             size="md"
             icon={<Plus size={14} />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => window.open(WEBSITE_ADMIN_NEW_PRODUCT_URL, '_blank', 'noopener')}
           >
             [ NEW PRODUCT RELEASE ]
           </Button>
@@ -252,92 +210,6 @@ export const ProductsPage: React.FC = () => {
         </table>
       </div>
 
-      {/* CREATE PRODUCT MODAL */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="CREATE STREETWEAR PRODUCT"
-        subtitle="ESTABLISH NEW MASTER SKU WITH VARIANTS"
-        maxWidth="lg"
-      >
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="PRODUCT NAME"
-              required
-              placeholder="e.g. ARCHIVE NYLON WINDBREAKER"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <Input
-              label="MASTER SKU"
-              required
-              placeholder="e.g. DNY-JKT-008"
-              value={sku}
-              onChange={(e) => setSku(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Select
-              label="COLLECTION"
-              value={collection}
-              onChange={(e) => setCollection(e.target.value)}
-              options={collections.map((c) => ({ value: c.name, label: c.name }))}
-            />
-            <Select
-              label="CATEGORY"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              options={[
-                { value: 'T-Shirts', label: 'T-Shirts' },
-                { value: 'Hoodies', label: 'Hoodies' },
-                { value: 'Pants', label: 'Pants & Cargos' },
-                { value: 'Jackets', label: 'Jackets & Outerwear' },
-                { value: 'Headwear', label: 'Headwear' },
-                { value: 'Jewelry', label: 'Jewelry' },
-              ]}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="RETAIL PRICE (INR ₹)"
-              type="number"
-              required
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-            <Input
-              label="INITIAL BATCH TOTAL PIECES"
-              type="number"
-              required
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-            />
-          </div>
-
-          <Input
-            label="EDITORIAL PRODUCT DESCRIPTION"
-            placeholder="Fabric specifications (e.g. 500 GSM French Terry), hardware details..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          <div className="pt-3 flex justify-end gap-3 border-t border-[rgba(0,0,0,0.18)]">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              [ SAVE PRODUCT ]
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 };

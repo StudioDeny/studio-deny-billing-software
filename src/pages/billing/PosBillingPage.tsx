@@ -48,6 +48,9 @@ const DISCOUNT_REASONS = [
   'CUSTOM',
 ];
 
+// Distinct colours of a product in variant order ('' = no colour).
+const productColors = (product: Product): string[] => [...new Set(product.variants.map((v) => v.color))];
+
 export const PosBillingPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -94,6 +97,8 @@ export const PosBillingPage: React.FC = () => {
 
   // Variant selector drawer / popover state
   const [activeVariantProduct, setActiveVariantProduct] = useState<Product | null>(null);
+  // Colour chosen in the picker; null = not chosen yet (multi-colour products).
+  const [pickerColor, setPickerColor] = useState<string | null>(null);
 
   // Multi-Tender / Split Payment State
   const [paymentSplits, setPaymentSplits] = useState<PaymentSplit[]>([
@@ -226,15 +231,27 @@ export const PosBillingPage: React.FC = () => {
     });
 
     setActiveVariantProduct(null);
+    setPickerColor(null);
   };
 
-  // Direct Product Tap: If 1 variant, add immediately; if multiple, open variant selection
+  // Product tap always asks for colour and size so stock moves on the exact
+  // row - except a product sold as a single ONE SIZE piece.
   const handleProductTap = (product: Product) => {
-    if (product.variants.length === 1) {
-      handleAddVariantToCart(product, product.variants[0]);
-    } else {
-      setActiveVariantProduct(product);
+    if (product.needsSizeCounts || product.variants.length === 0) {
+      store.addToast(
+        'Size Counts Missing',
+        `${product.name} has no stock per colour/size yet. Enter it in the website admin (Products → click the product) before billing.`,
+        'warning'
+      );
+      return;
     }
+    if (product.variants.length === 1 && product.variants[0].size === 'ONE SIZE' && !product.variants[0].color) {
+      handleAddVariantToCart(product, product.variants[0]);
+      return;
+    }
+    const colors = productColors(product);
+    setPickerColor(colors.length === 1 ? colors[0] : null);
+    setActiveVariantProduct(product);
   };
 
   // Stepper adjustments
@@ -753,7 +770,7 @@ export const PosBillingPage: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute bottom-1.5 right-1.5 bg-[#111111]/90 text-[#E2E2E4] text-[9px] font-mono px-1.5 py-0.5">
-                    {prod.totalStock} in stock
+                    {prod.needsSizeCounts ? 'NEEDS SIZE COUNTS' : `${prod.totalStock} in stock`}
                   </div>
                 </div>
 
@@ -767,12 +784,14 @@ export const PosBillingPage: React.FC = () => {
                   <div className="flex items-center justify-between font-mono text-xs pt-0.5">
                     <span className="font-black text-[#111111]">{formatINR(prod.price)}</span>
                     <span className="text-[10px] text-[#4A4844] bg-[#D5D5D8] px-1.5 py-0.5 border border-[rgba(0,0,0,0.1)]">
-                      {prod.variants.length} {prod.variants.length === 1 ? 'size' : 'sizes'}
+                      {productColors(prod).length > 1
+                        ? `${productColors(prod).length} colours`
+                        : `${prod.variants.length} ${prod.variants.length === 1 ? 'size' : 'sizes'}`}
                     </span>
                   </div>
 
                   {/* Inline quick-tap size chips for rapid 1-tap addition */}
-                  {prod.variants.length > 1 && (
+                  {prod.variants.length > 1 && productColors(prod).length === 1 && (
                     <div className="pt-1.5 flex flex-wrap gap-1" onClick={(e) => e.stopPropagation()}>
                       {prod.variants.map((v) => (
                         <button
@@ -1460,8 +1479,8 @@ export const PosBillingPage: React.FC = () => {
       {activeVariantProduct && (
         <Modal
           isOpen={!!activeVariantProduct}
-          onClose={() => setActiveVariantProduct(null)}
-          title={`CHOOSE SIZE — ${activeVariantProduct.name}`}
+          onClose={() => { setActiveVariantProduct(null); setPickerColor(null); }}
+          title={`CHOOSE ${productColors(activeVariantProduct).length > 1 ? 'COLOUR & SIZE' : 'SIZE'} — ${activeVariantProduct.name}`}
         >
           <div className="space-y-4 font-mono text-xs">
             <div className="flex items-center gap-3 p-3 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)]">
@@ -1481,12 +1500,46 @@ export const PosBillingPage: React.FC = () => {
               </div>
             </div>
 
+            {productColors(activeVariantProduct).length > 1 && (
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-[#4A4844] block mb-2 font-bold">
+                  1. SELECT COLOUR:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {productColors(activeVariantProduct).map((c) => {
+                    const colourStock = activeVariantProduct.variants
+                      .filter((v) => v.color === c)
+                      .reduce((sum, v) => sum + v.stock, 0);
+                    return (
+                      <button
+                        key={c || 'none'}
+                        onClick={() => setPickerColor(c)}
+                        className={`px-3 py-2 border text-xs font-bold flex flex-col items-start ${
+                          pickerColor === c
+                            ? 'bg-[#111111] text-[#E2E2E4] border-[#111111]'
+                            : 'border-[rgba(0,0,0,0.18)] hover:border-[#111111]'
+                        } ${colourStock <= 0 ? 'opacity-50' : ''}`}
+                      >
+                        <span>{c || 'NO COLOUR'}</span>
+                        <span className="text-[9px] font-normal">{colourStock <= 0 ? 'SOLD OUT' : `${colourStock} in stock`}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div>
               <span className="text-[10px] uppercase tracking-widest text-[#4A4844] block mb-2 font-bold">
-                SELECT SIZE TO ADD TO CURRENT BILL:
+                {productColors(activeVariantProduct).length > 1 ? '2. SELECT SIZE:' : 'SELECT SIZE TO ADD TO CURRENT BILL:'}
               </span>
+              {productColors(activeVariantProduct).length > 1 && pickerColor === null ? (
+                <div className="p-3 border border-dashed border-[rgba(0,0,0,0.18)] text-[#4A4844]">Pick a colour first.</div>
+              ) : (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {activeVariantProduct.variants.map((v) => (
+                {activeVariantProduct.variants
+                  .filter((v) => productColors(activeVariantProduct).length <= 1 || v.color === pickerColor)
+                  .map((v) => (
                   <button
                     key={v.id}
                     disabled={v.stock <= 0}
@@ -1511,6 +1564,7 @@ export const PosBillingPage: React.FC = () => {
                   </button>
                 ))}
               </div>
+              )}
             </div>
           </div>
         </Modal>

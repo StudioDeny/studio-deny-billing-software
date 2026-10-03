@@ -19,7 +19,8 @@ export const EditInvoicePanel: React.FC = () => {
   const [shippingFee, setShippingFee] = useState('0');
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [addProductId, setAddProductId] = useState('');
+  // Selected colour x size row to add (never just a product - stock moves per size).
+  const [addVariantId, setAddVariantId] = useState('');
 
   const selectedBill = orders.find((o) => o.id === selectedBillId);
 
@@ -56,9 +57,9 @@ export const EditInvoicePanel: React.FC = () => {
   };
 
   const addItem = () => {
-    const product = products.find((p) => p.id === addProductId);
-    if (!product) return;
-    const variant = product.variants[0];
+    const product = products.find((p) => p.variants.some((v) => v.id === addVariantId));
+    const variant = product?.variants.find((v) => v.id === addVariantId);
+    if (!product || !variant) return;
     setItems((prev) => [
       ...prev,
       {
@@ -74,7 +75,7 @@ export const EditInvoicePanel: React.FC = () => {
         total: variant.price,
       },
     ]);
-    setAddProductId('');
+    setAddVariantId('');
   };
 
   const subtotal = items.reduce((s, i) => s + i.unitPrice * i.quantity - (i.itemDiscount || 0), 0);
@@ -209,16 +210,24 @@ export const EditInvoicePanel: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <select
-              value={addProductId}
-              onChange={(e) => setAddProductId(e.target.value)}
+              value={addVariantId}
+              onChange={(e) => setAddVariantId(e.target.value)}
               className="flex-1 bg-[#D5D5D8] border border-[rgba(0,0,0,0.18)] p-2 text-xs font-mono focus:outline-none"
             >
-              <option value="">Add a product to this bill...</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>{p.name} ({formatINR(p.price)})</option>
-              ))}
+              <option value="">Add a product (pick colour / size) to this bill...</option>
+              {products
+                .filter((p) => p.variants.length > 0)
+                .map((p) => (
+                  <optgroup key={p.id} label={p.name}>
+                    {p.variants.map((v) => (
+                      <option key={v.id} value={v.id} disabled={v.stock <= 0}>
+                        {[v.color, v.size].filter(Boolean).join(' / ') || 'ONE SIZE'} · {formatINR(v.price)} · {v.stock <= 0 ? 'SOLD OUT' : `${v.stock} in stock`}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
             </select>
-            <Button type="button" variant="secondary" size="sm" onClick={addItem} disabled={!addProductId}>
+            <Button type="button" variant="secondary" size="sm" onClick={addItem} disabled={!addVariantId}>
               <Plus size={14} className="mr-1" /> ADD
             </Button>
           </div>

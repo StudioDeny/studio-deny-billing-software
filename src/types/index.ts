@@ -56,6 +56,9 @@ export interface Product {
   colors: string[];
   variants: ProductVariant[];
   totalStock: number;
+  // No per-colour/size stock rows yet - can't be billed until the website
+  // admin enters size counts.
+  needsSizeCounts?: boolean;
   status: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
   image: string;
   description: string;

@@ -16,26 +16,19 @@ import {
   Receipt,
 } from 'lucide-react';
 import { CustomerSegment } from '../../types';
+import { WEBSITE_ADMIN_NEW_PRODUCT_URL } from '../../constants/website';
 
 interface QuickNewModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type ActiveAction = 'MENU' | 'NEW_PRODUCT' | 'NEW_CUSTOMER' | 'ADJUST_STOCK';
+type ActiveAction = 'MENU' | 'NEW_CUSTOMER' | 'ADJUST_STOCK';
 
 export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { products, collections } = useStore();
   const [activeAction, setActiveAction] = useState<ActiveAction>('MENU');
-
-  // New Product Form State
-  const [productName, setProductName] = useState('');
-  const [sku, setSku] = useState('');
-  const [collection, setCollection] = useState(collections[0]?.name || 'CORE');
-  const [category, setCategory] = useState('T-Shirts');
-  const [price, setPrice] = useState('2990');
-  const [stock, setStock] = useState('25');
 
   // New Customer Form State
   const [customerName, setCustomerName] = useState('');
@@ -57,38 +50,6 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
   const handleClose = () => {
     setActiveAction('MENU');
     onClose();
-  };
-
-  const handleProductSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!productName || !sku) return;
-
-    const numPrice = Number(price) || 2490;
-    const numStock = Number(stock) || 10;
-
-    const newProd = await store.addProduct({
-      name: productName,
-      sku: sku.toUpperCase(),
-      collection,
-      category,
-      price: numPrice,
-      compareAtPrice: Math.round(numPrice * 1.2),
-      sizes: ['S', 'M', 'L', 'XL'],
-      colors: ['Black'],
-      status: 'ACTIVE',
-      image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
-      description: `Studio Deny ${collection} release. Premium heavyweight construction.`,
-      tags: [collection, category],
-      variants: [
-        { id: `var-${Date.now()}-s`, sku: `${sku.toUpperCase()}-S`, color: 'Black', size: 'S', price: numPrice, stock: Math.round(numStock * 0.2) },
-        { id: `var-${Date.now()}-m`, sku: `${sku.toUpperCase()}-M`, color: 'Black', size: 'M', price: numPrice, stock: Math.round(numStock * 0.4) },
-        { id: `var-${Date.now()}-l`, sku: `${sku.toUpperCase()}-L`, color: 'Black', size: 'L', price: numPrice, stock: Math.round(numStock * 0.3) },
-        { id: `var-${Date.now()}-xl`, sku: `${sku.toUpperCase()}-XL`, color: 'Black', size: 'XL', price: numPrice, stock: Math.round(numStock * 0.1) },
-      ],
-    });
-
-    handleClose();
-    navigate(`/products/${newProd.id}`);
   };
 
   const handleCustomerSubmit = async (e: React.FormEvent) => {
@@ -132,8 +93,6 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
       title={
         activeAction === 'MENU'
           ? 'DENY OS COMMAND CENTER'
-          : activeAction === 'NEW_PRODUCT'
-          ? 'NEW PRODUCT RELEASE'
           : activeAction === 'NEW_CUSTOMER'
           ? 'ONBOARD CUSTOMER'
           : 'ADJUST INVENTORY STOCK'
@@ -183,7 +142,7 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
           </div>
 
           <div
-            onClick={() => setActiveAction('NEW_PRODUCT')}
+            onClick={() => { window.open(WEBSITE_ADMIN_NEW_PRODUCT_URL, '_blank', 'noopener'); handleClose(); }}
             className="p-3.5 border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#D5D5D8] cursor-pointer flex items-center justify-between transition-colors group"
           >
             <div className="flex items-center gap-3">
@@ -192,7 +151,7 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
               </span>
               <div>
                 <div className="font-display font-bold text-sm text-[#111111]">ADD NEW PRODUCT</div>
-                <div className="text-xs text-[#4A4844]">Create streetwear SKU with size variants and price</div>
+                <div className="text-xs text-[#4A4844]">Opens the website admin — add colours, sizes and stock per size there</div>
               </div>
             </div>
             <ArrowRight size={14} className="text-[#4A4844] group-hover:text-[#111111]" />
@@ -214,76 +173,6 @@ export const QuickNewModal: React.FC<QuickNewModalProps> = ({ isOpen, onClose })
             <ArrowRight size={14} className="text-[#4A4844] group-hover:text-[#111111]" />
           </div>
         </div>
-      )}
-
-      {/* NEW PRODUCT FORM */}
-      {activeAction === 'NEW_PRODUCT' && (
-        <form onSubmit={handleProductSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="PRODUCT NAME"
-              required
-              placeholder="e.g. ARCHIVE TRACK JACKET"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-            />
-            <Input
-              label="BASE SKU"
-              required
-              placeholder="e.g. DNY-JKT-008"
-              value={sku}
-              onChange={(e) => setSku(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Select
-              label="COLLECTION"
-              value={collection}
-              onChange={(e) => setCollection(e.target.value)}
-              options={collections.map((c) => ({ value: c.name, label: c.name }))}
-            />
-            <Select
-              label="CATEGORY"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              options={[
-                { value: 'T-Shirts', label: 'T-Shirts' },
-                { value: 'Hoodies', label: 'Hoodies' },
-                { value: 'Pants', label: 'Pants & Cargos' },
-                { value: 'Jackets', label: 'Jackets & Outerwear' },
-                { value: 'Headwear', label: 'Headwear' },
-                { value: 'Jewelry', label: 'Jewelry' },
-              ]}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="RETAIL PRICE (INR ₹)"
-              type="number"
-              required
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-            <Input
-              label="INITIAL BATCH TOTAL UNITS"
-              type="number"
-              required
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-            />
-          </div>
-
-          <div className="pt-3 flex justify-between border-t border-[rgba(0,0,0,0.18)]">
-            <Button type="button" variant="outline" onClick={() => setActiveAction('MENU')}>
-              Back
-            </Button>
-            <Button type="submit" variant="primary">
-              [ CREATE PRODUCT ]
-            </Button>
-          </div>
-        </form>
       )}
 
       {/* NEW CUSTOMER FORM */}
