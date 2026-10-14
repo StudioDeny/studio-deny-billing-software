@@ -67,8 +67,11 @@ export const Login: React.FC = () => {
           )}
 
           <Input
-            label="OPERATOR IDENTIFIER (EMAIL)"
-            type="email"
+            label="USERNAME"
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
@@ -76,8 +79,9 @@ export const Login: React.FC = () => {
           />
 
           <Input
-            label="PASSPHRASE"
+            label="PASSWORD"
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}

@@ -16,8 +16,17 @@ export async function getCurrentStaff(): Promise<DbPosStaff | null> {
   return data as DbPosStaff | null;
 }
 
-export async function signIn(email: string, password: string): Promise<{ staff: DbPosStaff }> {
-  const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+// Billing logins are usernames (e.g. Studiodeny2025). Supabase signs in by
+// email, so a username maps to <username>@pos.studiodeny.com; a full email
+// still works as before.
+export const POS_LOGIN_DOMAIN = 'pos.studiodeny.com';
+export const loginEmail = (identifier: string) => {
+  const id = identifier.trim();
+  return id.includes('@') ? id : `${id.toLowerCase()}@${POS_LOGIN_DOMAIN}`;
+};
+
+export async function signIn(identifier: string, password: string): Promise<{ staff: DbPosStaff }> {
+  const { error: authError } = await supabase.auth.signInWithPassword({ email: loginEmail(identifier), password });
   if (authError) throw new Error(authError.message);
 
   const staff = await getCurrentStaff();
