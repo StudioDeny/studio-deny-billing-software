@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
+import { fetchAllRows } from './fetchAll';
 import {
   Product,
   ProductVariant,
@@ -84,10 +85,14 @@ export async function fetchProducts(): Promise<Product[]> {
     { data: productCategories, error: pcErr },
     { data: categories, error: catErr },
   ] = await Promise.all([
-    supabase.from('products').select('*').order('created_at', { ascending: false }),
-    supabase.from('product_variants').select('*'),
-    supabase.from('product_categories').select('*'),
-    supabase.from('categories').select('*'),
+    fetchAllRows((from, to) =>
+      supabase.from('products').select('*').order('created_at', { ascending: false }).order('slug').range(from, to)
+    ),
+    fetchAllRows((from, to) => supabase.from('product_variants').select('*').order('id').range(from, to)),
+    fetchAllRows((from, to) =>
+      supabase.from('product_categories').select('*').order('product_slug').order('category_id').range(from, to)
+    ),
+    fetchAllRows((from, to) => supabase.from('categories').select('*').order('id').range(from, to)),
   ]);
   if (pErr) throw new Error(pErr.message);
   if (vErr) throw new Error(vErr.message);
@@ -152,7 +157,9 @@ function mapCustomer(c: DbPosCustomer): Customer {
 }
 
 export async function fetchCustomers(): Promise<Customer[]> {
-  const { data, error } = await supabase.from('pos_customers').select('*').order('created_at', { ascending: false });
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase.from('pos_customers').select('*').order('created_at', { ascending: false }).order('id').range(from, to)
+  );
   if (error) throw new Error(error.message);
   return ((data || []) as DbPosCustomer[]).map(mapCustomer);
 }
@@ -210,7 +217,9 @@ function mapStaff(s: DbPosStaff): StaffMember {
 }
 
 export async function fetchStaff(): Promise<StaffMember[]> {
-  const { data, error } = await supabase.from('pos_staff').select('*').order('created_at', { ascending: true });
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase.from('pos_staff').select('*').order('created_at', { ascending: true }).order('id').range(from, to)
+  );
   if (error) throw new Error(error.message);
   return ((data || []) as DbPosStaff[]).map(mapStaff);
 }
@@ -346,10 +355,12 @@ export async function fetchBills(): Promise<Order[]> {
     { data: customers, error: cErr },
     { data: staffRows, error: sErr },
   ] = await Promise.all([
-    supabase.from('pos_bills').select('*').order('created_at', { ascending: false }),
-    supabase.from('pos_bill_items').select('*'),
-    supabase.from('pos_customers').select('*'),
-    supabase.from('pos_staff').select('*'),
+    fetchAllRows((from, to) =>
+      supabase.from('pos_bills').select('*').order('created_at', { ascending: false }).order('id').range(from, to)
+    ),
+    fetchAllRows((from, to) => supabase.from('pos_bill_items').select('*').order('id').range(from, to)),
+    fetchAllRows((from, to) => supabase.from('pos_customers').select('*').order('id').range(from, to)),
+    fetchAllRows((from, to) => supabase.from('pos_staff').select('*').order('id').range(from, to)),
   ]);
   if (bErr) throw new Error(bErr.message);
   if (iErr) throw new Error(iErr.message);
@@ -358,10 +369,17 @@ export async function fetchBills(): Promise<Order[]> {
 
   const customerById = new Map(((customers || []) as DbPosCustomer[]).map((c) => [c.id, c]));
   const staffNameById = new Map(((staffRows || []) as DbPosStaff[]).map((s) => [s.id, s.display_name]));
+  // Group items by bill once — filtering every item for every bill gets slow with thousands of bills.
+  const itemsByBill = new Map<string, DbPosBillItem[]>();
+  for (const i of (items || []) as DbPosBillItem[]) {
+    const list = itemsByBill.get(i.bill_id);
+    if (list) list.push(i);
+    else itemsByBill.set(i.bill_id, [i]);
+  }
   return ((bills || []) as DbPosBill[]).map((b) =>
     mapBillToOrder(
       b,
-      (items || []) as DbPosBillItem[],
+      itemsByBill.get(b.id) ?? [],
       b.pos_customer_id ? customerById.get(b.pos_customer_id) : undefined,
       b.staff_id ? staffNameById.get(b.staff_id) : undefined
     )
@@ -691,8 +709,8 @@ export async function fetchPaymentTransactions(): Promise<PaymentTransaction[]> 
   const [{ data: payments, error: payErr }, { data: bills, error: billErr }, { data: customers, error: custErr }] =
     await Promise.all([
       supabase.from('pos_payment_transactions').select('*').order('created_at', { ascending: false }).limit(500),
-      supabase.from('pos_bills').select('*'),
-      supabase.from('pos_customers').select('*'),
+      fetchAllRows((from, to) => supabase.from('pos_bills').select('*').order('id').range(from, to)),
+      fetchAllRows((from, to) => supabase.from('pos_customers').select('*').order('id').range(from, to)),
     ]);
   if (payErr) throw new Error(payErr.message);
   if (billErr) throw new Error(billErr.message);
@@ -738,10 +756,12 @@ function mapReturn(
 export async function fetchReturns(): Promise<ReturnRequest[]> {
   const [{ data: returns, error: retErr }, { data: bills, error: billErr }, { data: items, error: itemErr }, { data: customers, error: custErr }] =
     await Promise.all([
-      supabase.from('pos_returns').select('*').order('created_at', { ascending: false }),
-      supabase.from('pos_bills').select('*'),
-      supabase.from('pos_bill_items').select('*'),
-      supabase.from('pos_customers').select('*'),
+      fetchAllRows((from, to) =>
+        supabase.from('pos_returns').select('*').order('created_at', { ascending: false }).order('id').range(from, to)
+      ),
+      fetchAllRows((from, to) => supabase.from('pos_bills').select('*').order('id').range(from, to)),
+      fetchAllRows((from, to) => supabase.from('pos_bill_items').select('*').order('id').range(from, to)),
+      fetchAllRows((from, to) => supabase.from('pos_customers').select('*').order('id').range(from, to)),
     ]);
   if (retErr) throw new Error(retErr.message);
   if (billErr) throw new Error(billErr.message);

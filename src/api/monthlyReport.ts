@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { fetchAllRows, fetchAllByIds } from './fetchAll';
 import { DbPosBill, DbPosBillItem, DbPosCustomer } from '../types/supabase';
 
 // One invoice as it goes into the monthly PDF - POS bills and website
@@ -90,12 +91,16 @@ function round2(n: number): number {
 }
 
 async function fetchOfflineBills(from: string, to: string): Promise<MonthlyInvoice[]> {
-  const { data: bills, error } = await supabase
-    .from('pos_bills')
-    .select('*')
-    .gte('created_at', from)
-    .lt('created_at', to)
-    .order('created_at', { ascending: true });
+  const { data: bills, error } = await fetchAllRows((start, end) =>
+    supabase
+      .from('pos_bills')
+      .select('*')
+      .gte('created_at', from)
+      .lt('created_at', to)
+      .order('created_at', { ascending: true })
+      .order('id')
+      .range(start, end)
+  );
   if (error) throw new Error(error.message);
   const billRows = (bills || []) as DbPosBill[];
   if (billRows.length === 0) return [];
@@ -105,11 +110,15 @@ async function fetchOfflineBills(from: string, to: string): Promise<MonthlyInvoi
 
   const [{ data: items, error: iErr }, { data: payments, error: pErr }, { data: customers, error: cErr }] =
     await Promise.all([
-      supabase.from('pos_bill_items').select('*').in('bill_id', billIds),
-      supabase.from('pos_payment_transactions').select('bill_id, method, amount').in('bill_id', billIds),
-      customerIds.length > 0
-        ? supabase.from('pos_customers').select('*').in('id', customerIds)
-        : Promise.resolve({ data: [], error: null }),
+      fetchAllByIds(billIds, (ids, start, end) =>
+        supabase.from('pos_bill_items').select('*').in('bill_id', ids).order('id').range(start, end)
+      ),
+      fetchAllByIds(billIds, (ids, start, end) =>
+        supabase.from('pos_payment_transactions').select('id, bill_id, method, amount').in('bill_id', ids).order('id').range(start, end)
+      ),
+      fetchAllByIds(customerIds, (ids, start, end) =>
+        supabase.from('pos_customers').select('*').in('id', ids).order('id').range(start, end)
+      ),
     ]);
   if (iErr) throw new Error(iErr.message);
   if (pErr) throw new Error(pErr.message);
@@ -165,17 +174,21 @@ async function fetchOfflineBills(from: string, to: string): Promise<MonthlyInvoi
 }
 
 async function fetchDeliveredWebsiteOrders(from: string, to: string): Promise<MonthlyInvoice[]> {
-  const { data, error } = await supabase
-    .from('orders')
-    .select(
-      'id, order_number, invoice_no, user_email, items, subtotal, shipping, tax_rate, tax, discount, total, status, address, payment_method, notes, created_at, delivered_at'
-    )
-    .eq('status', 'DELIVERED')
-    // The SDW invoice is issued on delivery, so it belongs to the delivery
-    // month; an order with no delivered_at recorded falls back to its order date.
-    .or(
-      `and(delivered_at.gte."${from}",delivered_at.lt."${to}"),and(delivered_at.is.null,created_at.gte."${from}",created_at.lt."${to}")`
-    );
+  const { data, error } = await fetchAllRows((start, end) =>
+    supabase
+      .from('orders')
+      .select(
+        'id, order_number, invoice_no, user_email, items, subtotal, shipping, tax_rate, tax, discount, total, status, address, payment_method, notes, created_at, delivered_at'
+      )
+      .eq('status', 'DELIVERED')
+      // The SDW invoice is issued on delivery, so it belongs to the delivery
+      // month; an order with no delivered_at recorded falls back to its order date.
+      .or(
+        `and(delivered_at.gte."${from}",delivered_at.lt."${to}"),and(delivered_at.is.null,created_at.gte."${from}",created_at.lt."${to}")`
+      )
+      .order('id')
+      .range(start, end)
+  );
   if (error) throw new Error(error.message);
 
   return ((data || []) as DbWebsiteOrder[]).map((o) => {
