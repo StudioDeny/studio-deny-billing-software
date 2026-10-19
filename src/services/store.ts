@@ -18,6 +18,7 @@ import * as posApi from '../api/pos';
 import { getCurrentStaff } from '../api/auth';
 import { dbRoleForStaffRole } from '../constants/permissions';
 import { supabase } from '../lib/supabaseClient';
+import { toIstDateTime } from '../utils/formatters';
 
 interface PaymentSplitLike {
   method: string;
@@ -335,7 +336,7 @@ export const store = {
     const order = currentState.orders.find((o) => o.id === orderId);
     if (!order) return;
 
-    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const now = toIstDateTime(new Date());
     const timelineEvent = {
       status,
       time: now,

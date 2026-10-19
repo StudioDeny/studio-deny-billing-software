@@ -113,7 +113,7 @@ export const Login: React.FC = () => {
       {/* Footer Note */}
       <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[rgba(0,0,0,0.18)] pt-6 text-[11px] font-mono text-[#4A4844] gap-2">
         <div>© 2026 STUDIO DENY CREATIVE LABS PVT LTD</div>
-        <div>MUMBAI • NEW DELHI • BENGALURU</div>
+        <div>VISAKHAPATNAM</div>
       </div>
     </div>
   );

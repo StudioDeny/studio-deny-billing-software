@@ -74,10 +74,18 @@ export const InvoiceDetailPage: React.FC = () => {
               HIGH-CLASS STREETWEAR COMMERCE
             </div>
             <div className="text-xs text-[#111111] mt-2 space-y-0.5">
-              <div>{settings.address || 'Studio Deny Flagship, 44 Fashion St'}</div>
-              <div>{settings.cityState || 'Bandra West, Mumbai 400050, India'}</div>
-              <div>GSTIN: {settings.gstin || '27AABCD1234E1Z5'} · PAN: {settings.pan || 'AABCD1234E'}</div>
-              <div>support@studiodeny.com · +91 98200 88888</div>
+              {settings.address && <div>{settings.address}</div>}
+              {settings.cityState && <div>{settings.cityState}</div>}
+              {(settings.gstin || settings.pan) && (
+                <div>
+                  {[settings.gstin && `GSTIN: ${settings.gstin}`, settings.pan && `PAN: ${settings.pan}`]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </div>
+              )}
+              {(settings.email || settings.phone) && (
+                <div>{[settings.email, settings.phone].filter(Boolean).join(' · ')}</div>
+              )}
             </div>
           </div>
 

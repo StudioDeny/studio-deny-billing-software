@@ -16,6 +16,7 @@ import {
 } from '../types';
 import { normalizeGstin } from '../utils/gstin';
 import { variantLabel } from '../utils/singleItem';
+import { toIstDateTime } from '../utils/formatters';
 import {
   DbProduct,
   DbProductVariant,
@@ -146,7 +147,7 @@ function mapCustomer(c: DbPosCustomer): Customer {
     totalSpend: c.total_spend,
     averageOrderValue: avgOrder,
     segment: c.total_spend > 40000 ? 'VIP' : c.orders_count > 0 ? 'ACTIVE' : 'NEW',
-    createdAt: c.created_at.substring(0, 10),
+    createdAt: toIstDateTime(c.created_at).substring(0, 10),
   };
 }
 
@@ -327,9 +328,9 @@ function mapBillToOrder(
     fulfillmentStatus: 'DELIVERED',
     paymentMethod: 'CASH',
     channel: 'OFFLINE',
-    createdAt: bill.created_at.replace('T', ' ').substring(0, 19),
+    createdAt: toIstDateTime(bill.created_at),
     timeline: [
-      { status: 'ORDER PLACED', time: bill.created_at.replace('T', ' ').substring(0, 19), note: 'Bill settled in Deny OS' },
+      { status: 'ORDER PLACED', time: toIstDateTime(bill.created_at), note: 'Bill settled in Deny OS' },
     ],
     notes: bill.notes || undefined,
     billStatus: bill.status,
@@ -539,7 +540,7 @@ export async function fetchInventoryLogs(): Promise<InventoryLog[]> {
   if (error) throw new Error(error.message);
   return ((data || []) as DbPosInventoryLog[]).map((l) => ({
     id: l.id,
-    date: l.created_at.replace('T', ' ').substring(0, 19),
+    date: toIstDateTime(l.created_at),
     productId: l.product_slug,
     productName: l.product_slug,
     variantSku: l.variant_id || l.product_slug,
@@ -682,7 +683,7 @@ function mapPaymentTransaction(
     amount: t.amount,
     method: t.method as PaymentTransaction['method'],
     status: t.status as PaymentTransaction['status'],
-    date: t.created_at.replace('T', ' ').substring(0, 19),
+    date: toIstDateTime(t.created_at),
   };
 }
 
@@ -726,7 +727,7 @@ function mapReturn(
     condition: r.condition || '',
     refundAmount: r.refund_amount,
     status: r.status as ReturnStatus,
-    createdAt: r.created_at.replace('T', ' ').substring(0, 19),
+    createdAt: toIstDateTime(r.created_at),
     billItemId: r.bill_item_id,
     variantId: item?.variant_id || undefined,
     productSlug: item?.product_slug,

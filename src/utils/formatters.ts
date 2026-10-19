@@ -7,12 +7,50 @@ export function formatINR(amount: number): string {
   }).format(amount);
 }
 
+const IST = 'Asia/Kolkata';
+
+// Bill times are kept as "YYYY-MM-DD HH:mm:ss" in IST (see toIstDateTime). A
+// time with no zone on it is read as IST, never as UTC or the device's zone.
+function parseTimestamp(value: string): Date {
+  const v = value.trim();
+  const naive = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2})(:\d{2})?)?$/.exec(v);
+  if (naive) return new Date(`${naive[1]}T${naive[2] ?? '00:00'}${naive[3] ?? ':00'}+05:30`);
+  return new Date(v);
+}
+
+/** A timestamp as "YYYY-MM-DD HH:mm:ss" in IST — how every bill time is shown and compared. */
+export function toIstDateTime(value: string | Date): string {
+  const d = typeof value === 'string' ? parseTimestamp(value) : value;
+  if (isNaN(d.getTime())) return typeof value === 'string' ? value : '';
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: IST,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(d)
+      .map((part) => [part.type, part.value]),
+  );
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+}
+
+/** Today's date in IST, "YYYY-MM-DD" — the shop's day starts at midnight IST. */
+export function istToday(): string {
+  return toIstDateTime(new Date()).substring(0, 10);
+}
+
 export function formatDate(dateString?: string): string {
   if (!dateString) return '—';
   try {
-    const d = new Date(dateString);
+    const d = parseTimestamp(dateString);
     if (isNaN(d.getTime())) return dateString;
     return d.toLocaleDateString('en-GB', {
+      timeZone: IST,
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -25,9 +63,10 @@ export function formatDate(dateString?: string): string {
 export function formatDateTime(dateTimeString?: string): string {
   if (!dateTimeString) return '—';
   try {
-    const d = new Date(dateTimeString);
+    const d = parseTimestamp(dateTimeString);
     if (isNaN(d.getTime())) return dateTimeString;
     return d.toLocaleDateString('en-GB', {
+      timeZone: IST,
       day: '2-digit',
       month: 'short',
       year: 'numeric',

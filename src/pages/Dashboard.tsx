@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../services/store';
 import { MetricBlock } from '../components/ui/MetricBlock';
 import { Button } from '../components/ui/Button';
-import { formatINR } from '../utils/formatters';
+import { formatINR, istToday } from '../utils/formatters';
 import {
   PlusCircle,
   Receipt,
@@ -24,14 +24,12 @@ export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { orders, settings } = useStore();
 
-  // Compute today's billing metrics dynamically from orders/bills
-  const todayDateStr = new Date().toISOString().substring(0, 10);
+  // Today's billing: only bills settled since midnight IST (createdAt is IST).
+  const todayDateStr = istToday();
   const todayBills = orders.filter((o) => o.createdAt.startsWith(todayDateStr));
   
-  // If no bills yet today, fall back gracefully to recent orders for demonstrative overview
-  const activeBillsList = todayBills.length > 0 ? todayBills : orders;
-  const todaySales = activeBillsList.reduce((sum, o) => sum + o.grandTotal, 0);
-  const billsCount = activeBillsList.length;
+  const todaySales = todayBills.reduce((sum, o) => sum + o.grandTotal, 0);
+  const billsCount = todayBills.length;
   const averageBill = billsCount > 0 ? Math.round(todaySales / billsCount) : 0;
 
   // Channel breakdown metrics
@@ -69,7 +67,7 @@ export const Dashboard: React.FC = () => {
               BILLING TERMINAL #01
             </span>
             <span className="text-xs font-mono text-neutral-400">
-              {settings.storeName || 'STUDIO DENY'} · MUMBAI FLAGSHIP
+              {settings.storeName || 'STUDIO DENY'} · VISAKHAPATNAM
             </span>
           </div>
           <h1 className="font-display text-2xl sm:text-4xl font-extrabold tracking-tight">

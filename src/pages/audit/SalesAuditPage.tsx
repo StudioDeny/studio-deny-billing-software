@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../services/store';
 import { MetricBlock } from '../../components/ui/MetricBlock';
 import { Button } from '../../components/ui/Button';
-import { formatINR, formatDate } from '../../utils/formatters';
+import { formatINR, formatDate, istToday, toIstDateTime } from '../../utils/formatters';
 import {
   FileCheck,
   Store,
@@ -34,8 +34,8 @@ export const SalesAuditPage: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'ALL' | 'TODAY' | 'WEEK' | 'MONTH'>('ALL');
   const [methodFilter, setMethodFilter] = useState('ALL');
 
-  // Today string YYYY-MM-DD
-  const todayStr = new Date().toISOString().substring(0, 10);
+  // Today string YYYY-MM-DD, in IST like every createdAt
+  const todayStr = istToday();
 
   // Time-filtered orders
   const timeFilteredOrders = useMemo(() => {
@@ -44,10 +44,9 @@ export const SalesAuditPage: React.FC = () => {
         return o.createdAt.startsWith(todayStr);
       }
       if (timeRange === 'WEEK') {
-        const orderDate = new Date(o.createdAt);
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        return orderDate >= weekAgo;
+        return o.createdAt >= toIstDateTime(weekAgo);
       }
       if (timeRange === 'MONTH') {
         const currentMonth = todayStr.substring(0, 7);

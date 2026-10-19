@@ -299,7 +299,7 @@ export const CustomersPage: React.FC = () => {
                 City / Region
               </label>
               <Input
-                placeholder="e.g. Mumbai, Delhi, Bengaluru"
+                placeholder="e.g. Visakhapatnam, Hyderabad"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
               />

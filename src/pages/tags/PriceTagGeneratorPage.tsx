@@ -730,7 +730,7 @@ export const PriceTagGeneratorPage: React.FC = () => {
                   {/* Legal Metrology Footer */}
                   <div className="border-t border-[rgba(0,0,0,0.1)] pt-2 mt-2 text-[7px] text-[#4A4844] uppercase leading-tight">
                     <div>MFD: {mfdDate} · {countryOfOrigin}</div>
-                    <div>STUDIO DENY APPAREL CO., MUMBAI</div>
+                    <div>STUDIO DENY APPAREL CO., VISAKHAPATNAM</div>
                   </div>
                 </div>
               )}

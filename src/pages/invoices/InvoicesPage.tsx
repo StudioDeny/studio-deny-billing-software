@@ -74,7 +74,7 @@ export const InvoicesPage: React.FC = () => {
             TAX INVOICES & REGISTER
           </h1>
           <div className="text-xs font-mono text-[#4A4844] mt-2">
-            GSTIN: {settings.gstin || '27AABCD1234E1Z5'} · Registered Streetwear Sales Ledger
+            {settings.gstin && `GSTIN: ${settings.gstin} · `}Registered Streetwear Sales Ledger
           </div>
         </div>
 

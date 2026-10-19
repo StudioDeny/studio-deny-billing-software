@@ -687,7 +687,7 @@ export const PosBillingPage: React.FC = () => {
                 POS BILLING TERMINAL
               </span>
               <span className="text-[9px] font-mono px-1.5 py-0.5 bg-neutral-800 text-neutral-300">
-                MUMBAI FLAGSHIP
+                VISAKHAPATNAM
               </span>
             </div>
             <div className="text-[10px] font-mono text-neutral-400">

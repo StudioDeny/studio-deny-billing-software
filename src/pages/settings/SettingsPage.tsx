@@ -21,6 +21,7 @@ import {
 import { ALL_PERMISSIONS, DEFAULT_PERMISSIONS_BY_ROLE, PERMISSION_LABELS, PermissionKey, DbStaffRole } from '../../constants/permissions';
 import { printThermalReceipt } from '../../utils/receiptPrinter';
 import { EditInvoicePanel } from './EditInvoicePanel';
+import { toIstDateTime } from '../../utils/formatters';
 
 export const SettingsPage: React.FC = () => {
   const { settings, staff, currentStaff } = useStore();
@@ -124,7 +125,7 @@ export const SettingsPage: React.FC = () => {
       // plugged in and picks it up is then between the browser and the OS.
       const sentToPrintDialog = await printThermalReceipt({
         orderNumber: 'TEST-PRINT',
-        createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        createdAt: toIstDateTime(new Date()),
         customerName: 'Test Customer',
         items: [{ name: 'Sample Item', size: 'M', color: 'Black', quantity: 1, unitPrice: 999, total: 999 }],
         subtotal: 999,
