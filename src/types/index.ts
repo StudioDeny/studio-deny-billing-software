@@ -1,4 +1,4 @@
-export type PaymentMethod = 'UPI' | 'CARD' | 'CASH' | 'OTHER' | 'SPLIT' | 'COD' | 'BANK';
+export type PaymentMethod = 'UPI' | 'CARD' | 'CASH' | 'OTHER' | 'SPLIT' | 'COD' | 'BANK' | 'RAZORPAY';
 
 export interface PaymentSplit {
   id: string;
@@ -137,6 +137,8 @@ export interface Order {
   courierName?: string;
   trackingNumber?: string;
   channel?: SalesChannel;
+  // Website order collected at the store instead of delivered.
+  storePickup?: boolean;
   createdAt: string;
   timeline: OrderTimelineEvent[];
   notes?: string;

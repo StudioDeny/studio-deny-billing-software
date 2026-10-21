@@ -27,7 +27,12 @@ import {
 
 export const SalesAuditPage: React.FC = () => {
   const navigate = useNavigate();
-  const { orders, returns, payments, settings } = useStore();
+  const { orders: posBills, onlineOrders: webOrders, returns, payments, settings } = useStore();
+  // POS bills + website orders, newest first.
+  const orders = useMemo(
+    () => [...posBills, ...webOrders].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [posBills, webOrders]
+  );
 
   const [channelFilter, setChannelFilter] = useState<'ALL' | 'OFFLINE' | 'ONLINE'>('ALL');
   const [search, setSearch] = useState('');
@@ -143,8 +148,10 @@ export const SalesAuditPage: React.FC = () => {
 
   // Online Gateway Reconciliations
   const onlineUpiSettled = onlineOrders.filter((o) => o.paymentMethod === 'UPI').reduce((s, o) => s + o.grandTotal, 0);
-  const onlineCardSettled = onlineOrders.filter((o) => o.paymentMethod === 'CARD').reduce((s, o) => s + o.grandTotal, 0);
-  const onlineDeliveredCount = onlineOrders.filter((o) => o.fulfillmentStatus === 'DELIVERED').length;
+  const onlineCardSettled = onlineOrders
+    .filter((o) => o.paymentMethod === 'CARD' || o.paymentMethod === 'RAZORPAY')
+    .reduce((s, o) => s + o.grandTotal, 0);
+  const onlineDeliveredCount = onlineOrders.filter((o) => o.fulfillmentStatus === 'DELIVERED' && !o.storePickup).length;
   const onlineInTransitCount = onlineOrders.filter((o) => o.fulfillmentStatus === 'SHIPPED' || o.fulfillmentStatus === 'PACKED').length;
 
   // Filtered Table Items
@@ -575,8 +582,8 @@ export const SalesAuditPage: React.FC = () => {
                   return (
                     <tr
                       key={order.id}
-                      onClick={() => navigate(`/bills/${order.id}`)}
-                      className="hover:bg-[#E2E2E4] transition-colors cursor-pointer group"
+                      onClick={() => isOffline && navigate(`/bills/${order.id}`)}
+                      className={`hover:bg-[#E2E2E4] transition-colors group ${isOffline ? 'cursor-pointer' : ''}`}
                     >
                       <td className="py-3 px-4 font-bold text-[#111111]">{order.orderNumber}</td>
                       <td className="py-3 px-4">
@@ -587,6 +594,11 @@ export const SalesAuditPage: React.FC = () => {
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-100 text-indigo-800 border border-indigo-200 text-[9px] font-bold">
                             <Globe size={10} /> ONLINE STORE
+                          </span>
+                        )}
+                        {order.storePickup && (
+                          <span className="ml-1 inline-flex items-center px-2 py-0.5 bg-[#111111] text-[#E2E2E4] text-[9px] font-bold">
+                            STORE PICKUP
                           </span>
                         )}
                       </td>
@@ -619,16 +631,20 @@ export const SalesAuditPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/bills/${order.id}`);
-                          }}
-                        >
-                          View Bill <ArrowRight size={11} className="ml-1" />
-                        </Button>
+                        {isOffline ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/bills/${order.id}`);
+                            }}
+                          >
+                            View Bill <ArrowRight size={11} className="ml-1" />
+                          </Button>
+                        ) : (
+                          <span className="text-[10px] text-[#4A4844]">{order.storePickup ? 'PICKUP' : 'WEBSITE'}</span>
+                        )}
                       </td>
                     </tr>
                   );

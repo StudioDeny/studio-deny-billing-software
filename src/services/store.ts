@@ -39,6 +39,8 @@ export interface CommerceState {
   collections: Collection[];
   categories: StoreCategory[];
   orders: Order[];
+  // Website orders (ONLINE channel) - read-only, never mixed into `orders`.
+  onlineOrders: Order[];
   customers: Customer[];
   returns: ReturnRequest[];
   payments: PaymentTransaction[];
@@ -55,6 +57,7 @@ let currentState: CommerceState = {
   collections: [],
   categories: [],
   orders: [],
+  onlineOrders: [],
   customers: [],
   returns: [],
   payments: [],
@@ -104,11 +107,16 @@ export async function initStore(): Promise<void> {
     posApi.fetchSettings(),
     posApi.fetchCategories(),
   ]);
-  const [orders, inventoryLogs, payments, returns] = await Promise.all([
+  const [orders, inventoryLogs, payments, returns, onlineOrders] = await Promise.all([
     posApi.fetchBills(),
     posApi.fetchInventoryLogs(),
     posApi.fetchPaymentTransactions(),
     posApi.fetchReturns(),
+    // A website-orders failure must not stop the POS from loading.
+    posApi.fetchOnlineOrders().catch((err) => {
+      console.warn('fetchOnlineOrders:', err);
+      return [] as Order[];
+    }),
   ]);
   const collections = posApi.deriveCollections(products, orders);
 
@@ -124,6 +132,7 @@ export async function initStore(): Promise<void> {
     currentStaff,
     settings,
     orders,
+    onlineOrders,
     inventoryLogs,
     payments,
     returns,

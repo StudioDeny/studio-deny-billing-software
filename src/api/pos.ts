@@ -386,6 +386,101 @@ export async function fetchBills(): Promise<Order[]> {
   );
 }
 
+interface DbWebsiteOrder {
+  id: string;
+  order_number: string;
+  user_email: string;
+  items: { name?: string; slug?: string; size?: string; color?: string; qty?: number; price?: number }[];
+  subtotal: number;
+  shipping: number;
+  tax_rate: number;
+  tax: number;
+  discount: number;
+  coupon_discount: number | null;
+  coupon_code: string | null;
+  total: number;
+  status: string;
+  address: { name?: string; phone?: string; line1?: string; line2?: string; city?: string; state?: string; pincode?: string } | null;
+  payment_method: string;
+  notes: string | null;
+  created_at: string;
+  delivered_at: string | null;
+  fulfillment?: 'delivery' | 'pickup';
+  collected_at?: string | null;
+}
+
+// Website orders shown as the ONLINE channel - the same set the monthly
+// report counts: delivered orders, plus store pickups (paid in full online,
+// they stay PLACED and never reach DELIVERED). Read-only here: these are not
+// POS bills, so they are kept out of `orders` and never voided or edited.
+export async function fetchOnlineOrders(): Promise<Order[]> {
+  const { data, error } = await fetchAllRows((from, to) =>
+    supabase
+      .from('orders')
+      .select(
+        'id, order_number, user_email, items, subtotal, shipping, tax_rate, tax, discount, coupon_discount, coupon_code, total, status, address, payment_method, notes, created_at, delivered_at, fulfillment, collected_at'
+      )
+      .or('status.eq.DELIVERED,and(fulfillment.eq.pickup,status.not.in.(CANCELLED,REFUNDED))')
+      .order('created_at', { ascending: false })
+      .order('id')
+      .range(from, to)
+  );
+  if (error) throw new Error(error.message);
+
+  return ((data || []) as DbWebsiteOrder[]).map((o) => {
+    const storePickup = o.fulfillment === 'pickup';
+    const addr = o.address || {};
+    const handedOver = (storePickup ? o.collected_at : o.delivered_at) || o.created_at;
+    const items: OrderItem[] = (Array.isArray(o.items) ? o.items : []).map((i, idx) => {
+      const qty = Number(i.qty) || 0;
+      const price = Number(i.price) || 0;
+      return {
+        id: `${o.id}-${idx}`,
+        productId: i.slug || '',
+        variantId: i.slug || '',
+        name: i.name || i.slug || 'Item',
+        variantName: variantLabel(i.size || null, i.color || null),
+        size: i.size || '',
+        color: i.color || '',
+        quantity: qty,
+        unitPrice: price,
+        total: qty * price,
+      };
+    });
+    return {
+      id: o.id,
+      orderNumber: o.order_number,
+      customerId: 'web',
+      customerName: addr.name || o.user_email,
+      customerEmail: o.user_email,
+      customerPhone: addr.phone || '',
+      shippingAddress: {
+        street: [addr.line1, addr.line2].filter(Boolean).join(', '),
+        city: addr.city || '',
+        state: addr.state || '',
+        pincode: addr.pincode || '',
+        country: 'India',
+      },
+      items,
+      subtotal: Number(o.subtotal) || 0,
+      discount: (Number(o.discount) || 0) + (Number(o.coupon_discount) || 0),
+      discountReason: o.coupon_code || undefined,
+      shippingFee: Number(o.shipping) || 0,
+      taxAmount: Number(o.tax) || 0,
+      taxRate: Number(o.tax_rate) || 0,
+      grandTotal: Number(o.total) || 0,
+      paymentStatus: 'PAID',
+      fulfillmentStatus: storePickup && !o.collected_at ? 'UNFULFILLED' : 'DELIVERED',
+      paymentMethod: o.payment_method === 'cod' ? 'COD' : 'RAZORPAY',
+      channel: 'ONLINE',
+      storePickup,
+      createdAt: toIstDateTime(handedOver),
+      timeline: [{ status: 'ORDER PLACED', time: toIstDateTime(o.created_at), note: 'Website order' }],
+      notes: o.notes || undefined,
+    };
+  });
+}
+
 export interface CheckoutItemInput {
   variantId: string | null;
   productSlug: string;

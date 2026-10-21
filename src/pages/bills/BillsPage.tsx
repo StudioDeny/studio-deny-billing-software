@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useStore, store } from '../../services/store';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -23,10 +23,19 @@ import {
 
 export const BillsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { orders } = useStore();
+  const [searchParams] = useSearchParams();
+  const { orders: posBills, onlineOrders } = useStore();
+  // POS bills + website orders, newest first.
+  const orders = useMemo(
+    () => [...posBills, ...onlineOrders].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [posBills, onlineOrders]
+  );
   const [search, setSearch] = useState('');
   const [methodFilter, setMethodFilter] = useState('ALL');
-  const [channelFilter, setChannelFilter] = useState<'ALL' | 'OFFLINE' | 'ONLINE'>('ALL');
+  const [channelFilter, setChannelFilter] = useState<'ALL' | 'OFFLINE' | 'ONLINE'>(() => {
+    const ch = searchParams.get('channel');
+    return ch === 'ONLINE' || ch === 'OFFLINE' ? ch : 'ALL';
+  });
 
   // Filtered bills list
   const filteredBills = useMemo(() => {
@@ -210,8 +219,8 @@ export const BillsPage: React.FC = () => {
                   return (
                     <tr
                       key={b.id}
-                      onClick={() => navigate(`/bills/${b.id}`)}
-                      className="hover:bg-[#E2E2E4] transition-colors cursor-pointer group"
+                      onClick={() => isOffline && navigate(`/bills/${b.id}`)}
+                      className={`hover:bg-[#E2E2E4] transition-colors group ${isOffline ? 'cursor-pointer' : ''}`}
                     >
                       <td className="py-3.5 px-4 font-bold text-[#111111] group-hover:underline">
                         {b.orderNumber}
@@ -224,6 +233,11 @@ export const BillsPage: React.FC = () => {
                         ) : (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-indigo-100 text-indigo-800 border border-indigo-200 text-[9px] font-bold">
                             <Globe size={9} /> WEB
+                          </span>
+                        )}
+                        {b.storePickup && (
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 bg-[#111111] text-[#E2E2E4] text-[9px] font-bold">
+                            STORE PICKUP
                           </span>
                         )}
                       </td>
@@ -247,20 +261,26 @@ export const BillsPage: React.FC = () => {
                         <StatusBadge status={b.paymentStatus} />
                       </td>
                       <td className="py-3 px-4 text-right space-x-1.5" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => navigate(`/bills/${b.id}`)}
-                          className="px-2.5 py-1 text-[11px] font-mono border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#D5D5D8] text-[#111111]"
-                          title="View Tax Invoice & Slip"
-                        >
-                          VIEW
-                        </button>
-                        <button
-                          onClick={(e) => handleReprint(b, e)}
-                          className="px-2.5 py-1 text-[11px] font-mono bg-[#111111] text-[#E2E2E4] hover:bg-neutral-800"
-                          title="Instant Thermal Print"
-                        >
-                          PRINT
-                        </button>
+                        {isOffline ? (
+                          <>
+                            <button
+                              onClick={() => navigate(`/bills/${b.id}`)}
+                              className="px-2.5 py-1 text-[11px] font-mono border border-[rgba(0,0,0,0.18)] hover:border-[#111111] hover:bg-[#D5D5D8] text-[#111111]"
+                              title="View Tax Invoice & Slip"
+                            >
+                              VIEW
+                            </button>
+                            <button
+                              onClick={(e) => handleReprint(b, e)}
+                              className="px-2.5 py-1 text-[11px] font-mono bg-[#111111] text-[#E2E2E4] hover:bg-neutral-800"
+                              title="Instant Thermal Print"
+                            >
+                              PRINT
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-[10px] text-[#4A4844]">{b.storePickup ? 'PICKUP' : 'WEBSITE'}</span>
+                        )}
                       </td>
                     </tr>
                   );

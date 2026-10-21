@@ -22,7 +22,7 @@ import {
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { orders, settings } = useStore();
+  const { orders, onlineOrders, settings } = useStore();
 
   // Today's billing: only bills settled since midnight IST (createdAt is IST).
   const todayDateStr = istToday();
@@ -34,7 +34,6 @@ export const Dashboard: React.FC = () => {
 
   // Channel breakdown metrics
   const offlineOrders = orders.filter((o) => o.channel === 'OFFLINE');
-  const onlineOrders = orders.filter((o) => o.channel === 'ONLINE');
   const offlineTotal = offlineOrders.reduce((sum, o) => sum + o.grandTotal, 0);
   const onlineTotal = onlineOrders.reduce((sum, o) => sum + o.grandTotal, 0);
 
@@ -178,7 +177,7 @@ export const Dashboard: React.FC = () => {
                 {formatINR(onlineTotal)}
               </div>
               <div className="text-[11px] font-mono text-[#4A4844]">
-                {onlineOrders.length} web/courier orders dispatched
+                {onlineOrders.length} website orders (delivered + store pickup)
               </div>
             </div>
             <button
