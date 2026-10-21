@@ -41,12 +41,14 @@ export interface MonthlyInvoice {
   grandTotal: number;
   payments: { method: string; amount: number }[];
   notes: string;
+  // Website order collected at the store instead of delivered.
+  storePickup?: boolean;
 }
 
 export interface MonthlyData {
   offline: MonthlyInvoice[]; // COMPLETED / RETURNED POS bills
   voided: MonthlyInvoice[]; // VOID POS bills - listed, never totalled
-  online: MonthlyInvoice[]; // DELIVERED website orders, by delivery date
+  online: MonthlyInvoice[]; // DELIVERED website orders + store pickups, by handover date
 }
 
 export const STORE_STATE = 'Andhra Pradesh';
@@ -79,6 +81,8 @@ interface DbWebsiteOrder {
   notes: string | null;
   created_at: string;
   delivered_at: string | null;
+  fulfillment?: 'delivery' | 'pickup';
+  collected_at?: string | null;
 }
 
 function num(v: unknown): number {
@@ -173,25 +177,49 @@ async function fetchOfflineBills(from: string, to: string): Promise<MonthlyInvoi
   });
 }
 
-async function fetchDeliveredWebsiteOrders(from: string, to: string): Promise<MonthlyInvoice[]> {
-  const { data, error } = await fetchAllRows((start, end) =>
-    supabase
-      .from('orders')
-      .select(
-        'id, order_number, invoice_no, user_email, items, subtotal, shipping, tax_rate, tax, discount, total, status, address, payment_method, notes, created_at, delivered_at'
-      )
-      .eq('status', 'DELIVERED')
-      // The SDW invoice is issued on delivery, so it belongs to the delivery
-      // month; an order with no delivered_at recorded falls back to its order date.
-      .or(
-        `and(delivered_at.gte."${from}",delivered_at.lt."${to}"),and(delivered_at.is.null,created_at.gte."${from}",created_at.lt."${to}")`
-      )
-      .order('id')
-      .range(start, end)
-  );
-  if (error) throw new Error(error.message);
+const WEBSITE_ORDER_COLUMNS =
+  'id, order_number, invoice_no, user_email, items, subtotal, shipping, tax_rate, tax, discount, total, status, address, payment_method, notes, created_at, delivered_at, fulfillment, collected_at';
 
-  return ((data || []) as DbWebsiteOrder[]).map((o) => {
+async function fetchWebsiteOrders(from: string, to: string): Promise<MonthlyInvoice[]> {
+  const [delivered, pickups] = await Promise.all([
+    fetchAllRows((start, end) =>
+      supabase
+        .from('orders')
+        .select(WEBSITE_ORDER_COLUMNS)
+        .eq('status', 'DELIVERED')
+        // The SDW invoice is issued on delivery, so it belongs to the delivery
+        // month; an order with no delivered_at recorded falls back to its order date.
+        .or(
+          `and(delivered_at.gte."${from}",delivered_at.lt."${to}"),and(delivered_at.is.null,created_at.gte."${from}",created_at.lt."${to}")`
+        )
+        .order('id')
+        .range(start, end)
+    ),
+    // Store pickups never reach DELIVERED (they stay PLACED) and are paid in
+    // full online, so they are listed from the order date; once collected
+    // they belong to the collection month.
+    fetchAllRows((start, end) =>
+      supabase
+        .from('orders')
+        .select(WEBSITE_ORDER_COLUMNS)
+        .eq('fulfillment', 'pickup')
+        .not('status', 'in', '(CANCELLED,REFUNDED)')
+        .or(
+          `and(collected_at.gte."${from}",collected_at.lt."${to}"),and(collected_at.is.null,created_at.gte."${from}",created_at.lt."${to}")`
+        )
+        .order('id')
+        .range(start, end)
+    ),
+  ]);
+  if (delivered.error) throw new Error(delivered.error.message);
+  if (pickups.error) throw new Error(pickups.error.message);
+
+  const deliveredRows = (delivered.data || []) as DbWebsiteOrder[];
+  const deliveredIds = new Set(deliveredRows.map((o) => o.id));
+  const rows = [...deliveredRows, ...((pickups.data || []) as DbWebsiteOrder[]).filter((o) => !deliveredIds.has(o.id))];
+
+  return rows.map((o) => {
+    const storePickup = o.fulfillment === 'pickup';
     const addr = o.address || {};
     const lines = (Array.isArray(o.items) ? o.items : []).map((i) => {
       const qty = num(i.qty);
@@ -215,7 +243,7 @@ async function fetchDeliveredWebsiteOrders(from: string, to: string): Promise<Mo
       id: o.id,
       channel: 'ONLINE' as const,
       invoiceNumber: o.invoice_no || o.order_number,
-      createdAt: o.delivered_at || o.created_at,
+      createdAt: (storePickup && o.collected_at) || o.delivered_at || o.created_at,
       status: o.status,
       customerName: addr.name || o.user_email,
       customerPhone: addr.phone || '',
@@ -234,13 +262,14 @@ async function fetchDeliveredWebsiteOrders(from: string, to: string): Promise<Mo
       grandTotal,
       payments: [{ method: o.payment_method.toUpperCase(), amount: grandTotal }],
       notes: o.notes || '',
+      storePickup,
     };
   });
 }
 
 export async function fetchMonthlyData(year: number, month: number): Promise<MonthlyData> {
   const { from, to } = monthRangeIst(year, month);
-  const [bills, online] = await Promise.all([fetchOfflineBills(from, to), fetchDeliveredWebsiteOrders(from, to)]);
+  const [bills, online] = await Promise.all([fetchOfflineBills(from, to), fetchWebsiteOrders(from, to)]);
   return {
     offline: bills.filter((b) => b.status !== 'VOID'),
     voided: bills.filter((b) => b.status === 'VOID'),

@@ -91,7 +91,7 @@ export const MonthlyBillsPage: React.FC = () => {
           MONTHLY BILLS
         </h1>
         <div className="text-xs font-mono text-[#4A4844] mt-1">
-          Download every invoice for a month (offline POS + delivered website orders) with the month's sales & GST report
+          Download every invoice for a month (offline POS + delivered website orders + store pickups) with the month's sales & GST report
           in one PDF
         </div>
       </div>
@@ -150,7 +150,7 @@ export const MonthlyBillsPage: React.FC = () => {
               value={offline.count}
               subtext={`${formatINR(offline.total)}${data.voided.length > 0 ? ` · ${data.voided.length} voided` : ''}`}
             />
-            <MetricBlock label="ONLINE INVOICES" value={online.count} subtext={`${formatINR(online.total)} · delivered`} />
+            <MetricBlock label="ONLINE INVOICES" value={online.count} subtext={`${formatINR(online.total)} · delivered / pickup`} />
             <MetricBlock label="TOTAL SALES" value={formatINR(offline.total + online.total)} subtext={monthLabel} />
             <MetricBlock
               label="GST COLLECTED"
@@ -186,7 +186,14 @@ export const MonthlyBillsPage: React.FC = () => {
                       <td className="py-2.5 px-4 text-[#4A4844]">
                         {new Date(inv.createdAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
                       </td>
-                      <td className="py-2.5 px-4">{inv.channel}</td>
+                      <td className="py-2.5 px-4">
+                        {inv.channel}
+                        {inv.storePickup && (
+                          <span className="ml-2 px-1.5 py-0.5 bg-[#111111] text-[#E2E2E4] text-[10px] font-bold">
+                            STORE PICKUP
+                          </span>
+                        )}
+                      </td>
                       <td className="py-2.5 px-4">{inv.customerName}</td>
                       <td className="py-2.5 px-4 text-right">
                         {formatRate(inv.taxRate)}%{inv.taxIsCustom ? ' CUSTOM' : ''}

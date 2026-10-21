@@ -301,7 +301,7 @@ function drawSummary(doc: jsPDF, data: MonthlyData, id: InvoiceIdentity, monthLa
             String(i + 1),
             inv.invoiceNumber,
             istDate(inv.createdAt),
-            inv.channel === 'OFFLINE' ? 'Offline' : 'Online',
+            inv.channel === 'OFFLINE' ? 'Offline' : inv.storePickup ? 'Online · Store Pickup' : 'Online',
             inv.customerName,
             `${formatRate(inv.taxRate)}%${inv.taxIsCustom ? '*' : ''}`,
             money(inv.taxable),
@@ -339,7 +339,13 @@ function drawInvoice(doc: jsPDF, inv: MonthlyInvoice, id: InvoiceIdentity) {
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
   doc.text(`Date: ${istDateTime(inv.createdAt)}`, rightX, 31.5, { align: 'right' });
-  doc.text(inv.channel === 'OFFLINE' ? 'Channel: OFFLINE (In-store POS)' : 'Channel: ONLINE (Website)', rightX, 35.5, {
+  const channelLabel =
+    inv.channel === 'OFFLINE'
+      ? 'Channel: OFFLINE (In-store POS)'
+      : inv.storePickup
+        ? 'Channel: ONLINE (Website · Store Pickup)'
+        : 'Channel: ONLINE (Website)';
+  doc.text(channelLabel, rightX, 35.5, {
     align: 'right',
   });
   if (inv.status === 'RETURNED') doc.text('Status: RETURNED', rightX, 39.5, { align: 'right' });
@@ -493,7 +499,7 @@ export function buildMonthlyReportPdf(data: MonthlyData, id: InvoiceIdentity, mo
   drawSectionCover(
     doc,
     'ONLINE INVOICES',
-    `${data.online.length} delivered website order${data.online.length === 1 ? '' : 's'} · ${monthLabel}`
+    `${data.online.length} delivered / store pickup website order${data.online.length === 1 ? '' : 's'} · ${monthLabel}`
   );
   data.online.forEach((inv) => {
     doc.addPage();
