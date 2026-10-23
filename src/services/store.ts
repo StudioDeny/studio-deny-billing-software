@@ -152,9 +152,10 @@ function scheduleInventoryRefresh() {
   // the website) into a single refetch instead of one per row.
   if (refreshTimer) clearTimeout(refreshTimer);
   refreshTimer = setTimeout(async () => {
-    const products = await posApi.fetchProducts();
+    // Categories too: ones added in the website admin while this POS is open.
+    const [products, categories] = await Promise.all([posApi.fetchProducts(), posApi.fetchCategories()]);
     const collections = posApi.deriveCollections(products, currentState.orders);
-    saveState({ ...currentState, products, collections });
+    saveState({ ...currentState, products, collections, categories });
   }, 400);
 }
 

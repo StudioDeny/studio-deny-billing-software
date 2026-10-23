@@ -50,6 +50,9 @@ export interface Product {
   sku: string;
   collection: string;
   category: string;
+  // Every category the product belongs to on the website (main + extra,
+  // plus their parent categories) - what the billing category filter matches.
+  categories?: string[];
   price: number;
   compareAtPrice?: number;
   sizes: string[];

@@ -123,7 +123,7 @@ export const PosBillingPage: React.FC = () => {
   const categories = useMemo(() => {
     const cats = new Set<string>();
     dbCategories.forEach((c) => cats.add(c.name.toUpperCase()));
-    products.forEach((p) => cats.add(p.category.toUpperCase()));
+    products.forEach((p) => (p.categories || [p.category]).forEach((name) => cats.add(name.toUpperCase())));
     return ['ALL', ...Array.from(cats).sort()];
   }, [products, dbCategories]);
 
@@ -152,8 +152,11 @@ export const PosBillingPage: React.FC = () => {
         p.category.toLowerCase().includes(q) ||
         p.variants.some((v) => v.sku.toLowerCase().includes(q));
 
+      // A product shows under every category it's in (a hoodie in men,
+      // Hoodies and women appears under all three), not just its main one.
       const matchesCat =
-        activeCategory === 'ALL' || p.category.toUpperCase() === activeCategory;
+        activeCategory === 'ALL' ||
+        (p.categories || [p.category]).some((name) => name.toUpperCase() === activeCategory);
 
       return matchesSearch && matchesCat;
     });

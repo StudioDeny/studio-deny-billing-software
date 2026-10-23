@@ -50,7 +50,12 @@ function mapVariant(v: DbProductVariant): ProductVariant {
 // Website categories that say who a product is for, not what it is.
 const AUDIENCE_CATEGORY_SLUGS = new Set(['men', 'women', 'plus-sizes']);
 
-function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: string | undefined): Product {
+function mapProduct(
+  p: DbProduct,
+  variants: DbProductVariant[],
+  categoryName: string | undefined,
+  categoryNames: string[]
+): Product {
   // Only real colour x size rows are sellable; a product without any is
   // flagged instead of being sold against one overall stock number.
   const ownVariants = variants.filter((v) => v.product_id === p.slug);
@@ -67,6 +72,7 @@ function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: st
     sku: p.slug,
     collection: realCategory,
     category: realCategory,
+    categories: Array.from(new Set([realCategory, ...categoryNames].filter(Boolean))),
     price: p.price,
     compareAtPrice: p.compare_at ?? undefined,
     sizes: p.sizes || [],
@@ -103,30 +109,43 @@ export async function fetchProducts(): Promise<Product[]> {
   if (catErr) throw new Error(catErr.message);
 
   const categoryById = new Map(((categories || []) as DbCategory[]).map((c) => [c.id, c]));
-  const linkedIdsBySlug = new Map<string, string[]>();
+  // product_categories is the product's full membership list (e.g. men,
+  // Hoodies, women); products.category_id is the one it's shown under.
+  const memberIdsBySlug = new Map<string, string[]>();
   ((productCategories || []) as DbProductCategory[]).forEach((pc) => {
-    const ids = linkedIdsBySlug.get(pc.product_slug) || [];
+    const ids = memberIdsBySlug.get(pc.product_slug) || [];
     ids.push(pc.category_id);
-    linkedIdsBySlug.set(pc.product_slug, ids);
+    memberIdsBySlug.set(pc.product_slug, ids);
   });
 
-  // A product is linked to its type (Hoodies) and usually to audience
-  // groups too (men, women). Billing groups by type, so the website's
-  // primary category wins unless it is an audience group, then any linked
-  // type, and an audience group only when nothing else is linked.
+  // A category plus its parents, so picking a parent (Jeans) also lists
+  // products filed under its subcategories (Baggy Fit), as on the website.
+  const withParents = (id: string): string[] => {
+    const names: string[] = [];
+    const seen = new Set<string>();
+    for (let c = categoryById.get(id); c && !seen.has(c.id); c = c.parent_id ? categoryById.get(c.parent_id) : undefined) {
+      seen.add(c.id);
+      names.push(c.name);
+    }
+    return names;
+  };
+
+  // The main category is what the product is (Hoodies), not who it's for:
+  // the website's primary one unless it is an audience group (men, women),
+  // then any linked type, and an audience group only when nothing else is.
   const isType = (id: string) => {
     const c = categoryById.get(id);
     return !!c && !AUDIENCE_CATEGORY_SLUGS.has(c.slug.toLowerCase());
   };
-  const categoryNameFor = (p: DbProduct): string | undefined => {
-    const ids = [...(p.category_id ? [p.category_id] : []), ...(linkedIdsBySlug.get(p.slug) || [])];
-    const id = ids.find(isType) ?? ids.find((i) => categoryById.has(i));
-    return id ? categoryById.get(id)!.name : undefined;
-  };
 
-  return ((products || []) as DbProduct[]).map((p) =>
-    mapProduct(p, (variants || []) as DbProductVariant[], categoryNameFor(p))
-  );
+  return ((products || []) as DbProduct[]).map((p) => {
+    const memberIds = memberIdsBySlug.get(p.slug) || [];
+    const candidateIds = [...(p.category_id ? [p.category_id] : []), ...memberIds];
+    const mainId = candidateIds.find(isType) ?? candidateIds.find((id) => categoryById.has(id));
+    const mainName = mainId ? categoryById.get(mainId)!.name : undefined;
+    const allNames = candidateIds.flatMap(withParents);
+    return mapProduct(p, (variants || []) as DbProductVariant[], mainName, allNames);
+  });
 }
 
 export async function updateProduct(
