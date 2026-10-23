@@ -47,7 +47,12 @@ function mapVariant(v: DbProductVariant): ProductVariant {
   };
 }
 
-function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: string | undefined): Product {
+function mapProduct(
+  p: DbProduct,
+  variants: DbProductVariant[],
+  categoryName: string | undefined,
+  categoryNames: string[]
+): Product {
   // Only real colour x size rows are sellable; a product without any is
   // flagged instead of being sold against one overall stock number.
   const ownVariants = variants.filter((v) => v.product_id === p.slug);
@@ -64,6 +69,7 @@ function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: st
     sku: p.slug,
     collection: realCategory,
     category: realCategory,
+    categories: Array.from(new Set([realCategory, ...categoryNames].filter(Boolean))),
     price: p.price,
     compareAtPrice: p.compare_at ?? undefined,
     sizes: p.sizes || [],
@@ -99,18 +105,35 @@ export async function fetchProducts(): Promise<Product[]> {
   if (pcErr) throw new Error(pcErr.message);
   if (catErr) throw new Error(catErr.message);
 
-  const categoryNameById = new Map(((categories || []) as DbCategory[]).map((c) => [c.id, c.name]));
-  const categoryNameBySlug = new Map<string, string>();
+  const categoryById = new Map(((categories || []) as DbCategory[]).map((c) => [c.id, c]));
+  // product_categories is the product's full membership list (e.g. men,
+  // Hoodies, women); products.category_id is the one it's shown under.
+  const memberIdsBySlug = new Map<string, string[]>();
   ((productCategories || []) as DbProductCategory[]).forEach((pc) => {
-    const name = categoryNameById.get(pc.category_id);
-    if (name && !categoryNameBySlug.has(pc.product_slug)) {
-      categoryNameBySlug.set(pc.product_slug, name);
-    }
+    const ids = memberIdsBySlug.get(pc.product_slug) || [];
+    ids.push(pc.category_id);
+    memberIdsBySlug.set(pc.product_slug, ids);
   });
 
-  return ((products || []) as DbProduct[]).map((p) =>
-    mapProduct(p, (variants || []) as DbProductVariant[], categoryNameBySlug.get(p.slug))
-  );
+  // A category plus its parents, so picking a parent (Jeans) also lists
+  // products filed under its subcategories (Baggy Fit), as on the website.
+  const withParents = (id: string): string[] => {
+    const names: string[] = [];
+    const seen = new Set<string>();
+    for (let c = categoryById.get(id); c && !seen.has(c.id); c = c.parent_id ? categoryById.get(c.parent_id) : undefined) {
+      seen.add(c.id);
+      names.push(c.name);
+    }
+    return names;
+  };
+
+  return ((products || []) as DbProduct[]).map((p) => {
+    const memberIds = memberIdsBySlug.get(p.slug) || [];
+    const mainId = p.category_id && categoryById.has(p.category_id) ? p.category_id : memberIds.find((id) => categoryById.has(id));
+    const mainName = mainId ? categoryById.get(mainId)!.name : undefined;
+    const allNames = [mainId, ...memberIds].filter((id): id is string => !!id).flatMap(withParents);
+    return mapProduct(p, (variants || []) as DbProductVariant[], mainName, allNames);
+  });
 }
 
 export async function updateProduct(
