@@ -47,6 +47,9 @@ function mapVariant(v: DbProductVariant): ProductVariant {
   };
 }
 
+// Website categories that say who a product is for, not what it is.
+const AUDIENCE_CATEGORY_SLUGS = new Set(['men', 'women', 'plus-sizes']);
+
 function mapProduct(p: DbProduct, variants: DbProductVariant[], categoryName: string | undefined): Product {
   // Only real colour x size rows are sellable; a product without any is
   // flagged instead of being sold against one overall stock number.
@@ -99,17 +102,30 @@ export async function fetchProducts(): Promise<Product[]> {
   if (pcErr) throw new Error(pcErr.message);
   if (catErr) throw new Error(catErr.message);
 
-  const categoryNameById = new Map(((categories || []) as DbCategory[]).map((c) => [c.id, c.name]));
-  const categoryNameBySlug = new Map<string, string>();
+  const categoryById = new Map(((categories || []) as DbCategory[]).map((c) => [c.id, c]));
+  const linkedIdsBySlug = new Map<string, string[]>();
   ((productCategories || []) as DbProductCategory[]).forEach((pc) => {
-    const name = categoryNameById.get(pc.category_id);
-    if (name && !categoryNameBySlug.has(pc.product_slug)) {
-      categoryNameBySlug.set(pc.product_slug, name);
-    }
+    const ids = linkedIdsBySlug.get(pc.product_slug) || [];
+    ids.push(pc.category_id);
+    linkedIdsBySlug.set(pc.product_slug, ids);
   });
 
+  // A product is linked to its type (Hoodies) and usually to audience
+  // groups too (men, women). Billing groups by type, so the website's
+  // primary category wins unless it is an audience group, then any linked
+  // type, and an audience group only when nothing else is linked.
+  const isType = (id: string) => {
+    const c = categoryById.get(id);
+    return !!c && !AUDIENCE_CATEGORY_SLUGS.has(c.slug.toLowerCase());
+  };
+  const categoryNameFor = (p: DbProduct): string | undefined => {
+    const ids = [...(p.category_id ? [p.category_id] : []), ...(linkedIdsBySlug.get(p.slug) || [])];
+    const id = ids.find(isType) ?? ids.find((i) => categoryById.has(i));
+    return id ? categoryById.get(id)!.name : undefined;
+  };
+
   return ((products || []) as DbProduct[]).map((p) =>
-    mapProduct(p, (variants || []) as DbProductVariant[], categoryNameBySlug.get(p.slug))
+    mapProduct(p, (variants || []) as DbProductVariant[], categoryNameFor(p))
   );
 }
 
