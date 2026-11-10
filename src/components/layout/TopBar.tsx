@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Search, Printer, PlusCircle } from 'lucide-react';
+import { Menu, Search, Printer, PlusCircle, LogOut } from 'lucide-react';
 import { useStore } from '../../services/store';
+import { signOut } from '../../api/auth';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -15,6 +16,12 @@ export const TopBar: React.FC<TopBarProps> = ({
 }) => {
   const { settings } = useStore();
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    if (!window.confirm('Log out of the billing terminal?')) return;
+    await signOut();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-[#D5D5D8]/95 backdrop-blur-md border-b border-[rgba(0,0,0,0.18)] h-16 flex items-center justify-between px-4 sm:px-6 md:px-8 no-print select-none">
@@ -79,6 +86,17 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Log out */}
+        <button
+          onClick={handleLogout}
+          title="Log out"
+          aria-label="Log out"
+          className="flex items-center gap-1.5 px-3 py-2 border border-[rgba(0,0,0,0.18)] text-xs font-mono font-bold uppercase text-[#111111] hover:bg-[#111111] hover:text-[#E2E2E4] transition-colors"
+        >
+          <LogOut size={14} />
+          <span className="hidden sm:inline">LOG OUT</span>
+        </button>
       </div>
     </header>
   );
