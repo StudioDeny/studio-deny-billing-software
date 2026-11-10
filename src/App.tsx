@@ -5,6 +5,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { supabase } from './lib/supabaseClient';
 import { initStore, useStore } from './services/store';
+import { dropSessionIfRevoked } from './api/auth';
 import { PermissionKey } from './constants/permissions';
 
 // POS BILLING
@@ -47,6 +48,20 @@ const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       setStatus(session ? 'authed' : 'anon');
     });
     return () => sub.subscription.unsubscribe();
+  }, []);
+
+  // Kick this device out promptly if its session was revoked elsewhere:
+  // on load, whenever the tab comes back into view, and once a minute.
+  useEffect(() => {
+    const check = () => { dropSessionIfRevoked().catch(() => {}); };
+    const onVisible = () => { if (document.visibilityState === 'visible') check(); };
+    check();
+    const timer = setInterval(check, 60_000);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
   useEffect(() => {

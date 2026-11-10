@@ -38,8 +38,24 @@ export async function signIn(identifier: string, password: string): Promise<{ st
   return { staff };
 }
 
+// Every terminal shares one login, so the LOG OUT button signs out this device
+// only (Supabase's default 'global' scope would kick every terminal).
 export async function signOut(): Promise<void> {
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: 'local' });
+}
+
+// The access token stays valid for up to an hour after its session is revoked
+// (password change, "log out everywhere"). getUser() asks the auth server; for
+// a revoked session supabase-js clears it and fires SIGNED_OUT itself, which
+// sends the app back to login. The signOut below is only a fallback for a
+// 401/403 it doesn't clear. Network errors (offline) never sign anyone out.
+export async function dropSessionIfRevoked(): Promise<void> {
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) return;
+  const { error } = await supabase.auth.getUser();
+  if (error && (error.name === 'AuthSessionMissingError' || error.status === 401 || error.status === 403)) {
+    await supabase.auth.signOut({ scope: 'local' });
+  }
 }
 
 export function onAuthChange(callback: (signedIn: boolean) => void) {
