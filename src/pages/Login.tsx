@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input';
 import { store } from '../services/store';
 import { signIn } from '../api/auth';
 import { Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { MadeBy } from '../components/common/MadeBy';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -111,9 +112,12 @@ export const Login: React.FC = () => {
       </div>
 
       {/* Footer Note */}
-      <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[rgba(0,0,0,0.18)] pt-6 text-[11px] font-mono text-[#4A4844] gap-2">
-        <div>© 2026 STUDIO DENY CREATIVE LABS PVT LTD</div>
-        <div>VISAKHAPATNAM</div>
+      <div>
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[rgba(0,0,0,0.18)] pt-6 text-[11px] font-mono text-[#4A4844] gap-2">
+          <div>© 2026 STUDIO DENY CREATIVE LABS PVT LTD</div>
+          <div>VISAKHAPATNAM</div>
+        </div>
+        <MadeBy />
       </div>
     </div>
   );
